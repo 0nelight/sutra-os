@@ -1,0 +1,3 @@
+{:schema
+ {:links
+  [[:partner-intern :partner :intern :many-to-one {:project :verkauf}]]}}

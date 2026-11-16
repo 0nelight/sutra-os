@@ -1,0 +1,3 @@
+{:modules [sutra.store.pg.coord/module sutra.store.pg.blobs/module sutra.store.pg.streams/module
+           sutra.store.pg.datasets/module sutra.store.pg.bus/module
+           sutra.store.pg.telemetry/module]}

@@ -1,0 +1,13 @@
+.aev-muted { color: var(--c-muted); }
+.aev-mono { font-family: var(--font-mono); }
+.aev-ok { color: var(--c-success-strong); }
+.aev-bad { color: var(--c-danger-strong); }
+td.aev-ok { background: var(--c-success-bg); }
+td.aev-bad { background: var(--c-danger-bg); }
+.aev-changed { box-shadow: inset 3px 0 0 var(--c-warning-accent); background: var(--c-warning-bg); }
+.aev-big { font-size: var(--fs-3xl); font-weight: 700; font-variant-numeric: tabular-nums; }
+.aev-param { font-variant-numeric: tabular-nums; }
+.aev-pre { background: var(--c-surface-soft); border: 1px solid var(--c-border-line); border-radius: var(--radius); padding: var(--sp-2) var(--sp-3); font-family: var(--font-mono); font-size: var(--fs-sm); white-space: pre-wrap; word-break: break-word; }
+.aev-columns-menu { padding: var(--sp-2) var(--sp-3); max-height: 320px; overflow: auto; white-space: nowrap; }
+.aev-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--sp-4); }
+.aev-cols { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(260px, 1fr); gap: var(--sp-4); overflow-x: auto; }

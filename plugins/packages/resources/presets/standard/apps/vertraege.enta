@@ -1,0 +1,75 @@
+;; Vertraege — "Ich sehe rechtzeitig, welcher Vertrag bald endet oder kuendbar ist."
+;;
+{:name         :vertraege
+ :display-name "Verträge und Versicherungen"
+ :description  "Vertraege und Versicherungen mit Laufzeit und Kuendigung."
+ :icon         "📑"
+ :promoted     true
+ :collection   :alltag
+ :project      :anwendungen
+ :repository   :startanwendungen
+ :object-types [:dauervertrag :versicherung :organisation]
+ :actions      [{:action :vertrag-kuendigen}
+                {:action :dauervertrag-anlegen}
+                {:action :versicherung-anlegen}
+                {:action :organisation-anlegen}]
+ :layout
+ {:kind  :rows
+  :title "Vertraege"
+  :vars  {:ansicht       {:type :keyword :default :vertraege}
+          :vertraege     {:source :dauervertrag}
+          :versicherungen {:source :versicherung}
+          :n-vertraege   {:agg [:count :dauervertrag-id] :of :vertraege}
+          :n-versicherungen {:agg [:count :versicherung-id] :of :versicherungen}
+          :vertrag       {:default nil}
+          :vertrag-id    {:object-property :id :of :vertrag :type :string}
+          :police        {:default nil}}
+  :items
+  [{:widget :kpi-row
+    :items  [{:label "Dauervertraege" :value {:val :n-vertraege} :fmt :int}
+             {:label "Versicherungen" :value {:val :n-versicherungen} :fmt :int}]}
+   {:kind   :columns
+    :detail {:var :vertrag}
+    :items
+    [{:kind   :tabs
+      :select {:var :ansicht}
+      :tabs   [{:id    :vertraege
+                :label "Dauervertraege"
+                :body  {:widget :object-table
+                        :rows   {:val :vertraege}
+                        :cols   [{:prop :bezeichnung} {:prop :betrag} {:prop :takt}
+                                 {:prop :gueltig-bis} {:prop :gekuendigt-am}]
+                        :sort   [[:gueltig-bis :asc]]
+                        :active {:var :vertrag}}}
+               {:id    :versicherungen
+                :label "Versicherungen"
+                :body  {:widget :object-table
+                        :rows   {:val :versicherungen}
+                        :cols   [{:prop :bezeichnung} {:prop :sparte} {:prop :betrag}
+                                 {:prop :naechste-faelligkeit}]
+                        :sort   [[:naechste-faelligkeit :asc]]
+                        :active {:var :police}}}]}
+     {:kind :rows
+      :items
+      [{:widget         :property-list
+        :object         {:val :vertrag}
+        :props          [{:prop :bezeichnung :label "Vertrag"} {:prop :gueltig-bis :label "Laeuft bis"}
+                         {:prop :betrag :label "Betrag" :fmt :eur} {:prop :gekuendigt-am :label "Gekuendigt am"}]
+        :label-position :below
+        :columns        2
+        :hide-null?     true}
+       {:kind  :section
+        :title "Gekuendigt?"
+        :body  {:widget   :action-form
+                :action   :vertrag-kuendigen
+                :label    "Kuendigung vermerken"
+                :defaults {:vertrag {:val :vertrag-id}}}}]}]}
+   {:kind  :section
+    :title "Vertrag anlegen"
+    :body  {:widget :action-form :action :dauervertrag-anlegen :label "Anlegen"}}
+   {:kind  :section
+    :title "Versicherung anlegen"
+    :body  {:widget :action-form :action :versicherung-anlegen :label "Anlegen"}}
+   {:kind  :section
+    :title "Vertragspartner fehlt in der Liste?"
+    :body  {:widget :action-form :action :organisation-anlegen :label "Anlegen"}}]}}

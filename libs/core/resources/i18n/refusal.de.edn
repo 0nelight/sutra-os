@@ -1,0 +1,2113 @@
+{
+ :refusal.authoring/branch-degraded
+   "Zweig {branch} startete eingeschränkt (sein Schema ließ sich nicht laden: {why}) — keine Änderung wird installiert, bis es wieder lädt"
+ :refusal.authoring/bundle-not-taken
+   "das Bündel lässt sich nicht übernehmen"
+ :refusal.authoring/name-in-use
+   "Name schon vergeben: {name}"
+ :refusal.authoring/output-not-a-dataset
+   "den Ausgabe-Datensatz im Output angeben (\"{dataset}\" ist kein Datensatzname)"
+ :refusal.authoring/plan-problems
+   "{headline}"
+ :refusal.authoring/product-not-installable
+   "{product} {version} lässt sich hier nicht installieren{hint}"
+ :refusal.authoring/product-version-differs
+   "{product} {version} liegt hier mit anderem Inhalt — eine Version ändert sich nie"
+ :refusal.authoring/product-version-published
+   "{product} {version} ist veröffentlicht — eine Version ändert sich nie; veröffentliche die nächste"
+ :refusal.authoring/release-breaks-line
+   "Function {function} veröffentlicht {version} in die Linie {major}.x, aber die Signatur der Linie bricht: {breaks}. Ein Nutzer, der mit :auto-upgrade auf das ältere Release festgelegt ist, würde ungefragt auf das neuere gehoben. Veröffentliche es als {next}.0.0, oder behalte die alten Eingänge."
+ :refusal.authoring/release-libraries-changed
+   "{noun} {function}: Version {version} ist schon veröffentlicht, und ein Release ist unveränderlich — eine Bibliothek, die es per :uses nutzt, hat sich seither geändert, und ein Release behält seine Bibliotheken. Veröffentliche die Änderung als neue Version (ihre Nutzer sind auf das festgelegt, was {version} schon bedeutet).{advice}"
+ :refusal.authoring/release-republished
+   "{section-name} {name}: Version {version} wurde schon mit anderem Inhalt veröffentlicht, und ein Release ist unveränderlich — auch nachdem die Definition gelöscht wurde. Veröffentliche die Änderung als neue Version."
+ :refusal.authoring/release-source-changed
+   "{noun} {function}: Version {version} ist schon veröffentlicht, und ein Release ist unveränderlich — der Quelltext unter dieser Version unterscheidet sich von dem, was installiert wird. Veröffentliche die Änderung als neue Version (ihre Nutzer sind auf das festgelegt, was {version} schon bedeutet).{advice}"
+ :refusal.authoring/settings-not-kept
+   "diese Einstellungen lassen sich nicht speichern"
+ :refusal.builds/admission-busy
+   "die Build-Zulassung ist belegt"
+ :refusal.builds/between-needs-from
+   "Strategie :between braucht eine `:from`-Grenze stromaufwärts — sie baut nur die Transforms ZWISCHEN :from und :only"
+ :refusal.builds/changelog-retention-passed
+   "das Änderungsprotokoll von {table} reicht nicht mehr bis {lsn} zurück — Änderungen gingen an seine Aufbewahrungsgrenze verloren; `stream reset` liest die Tabelle neu, und eine inzwischen gelöschte Zeile bleibt bis dahin stehen"
+ :refusal.builds/claim-held-elsewhere
+   "der Build-Claim wird anderswo gehalten"
+ :refusal.builds/datasource-input-external
+   "Quelle \"{source}\" ist ein :{type-name}-Connector mit :external-transform (vom Code gelesen) und kann keinen :datasource-Eingang tragen — lass diesen Transform den Objekttyp lesen, den der Connector anlandet (Option-A-Ingest)"
+ :refusal.builds/datasource-input-unknown-type
+   "unbekannter Datenquellen-Typ :{type-name} für Quelle \"{source}\" — resolve-compute-inputs kennt :csv und die angelandeten Connector-Typen"
+ :refusal.builds/empty-build-scope
+   "Build-Umfang {scope} wählt keinen Build-Knoten — kein Transform erzeugt {produced} und nichts wird hinein importiert, der Build liefe mit 0 Jobs. Nenne einen Objekttyp mit Erzeuger, einen Transform oder ein Dataset (`lineage <name>` zeigt produced-by)"
+ :refusal.builds/export-no-table
+   "Export {export} nennt keine Zieltabelle"
+ :refusal.builds/export-source-missing
+   "Export {export} nennt eine Quelle, die es nicht gibt"
+ :refusal.builds/export-transaction-unsupported
+   "Export {name} läuft im Modus {mode}, der keine {transaction}-Transaktion auf {dataset} unterstützt — die Export-Modi schreiben Zeilen nur per INSERT HINAUS; eine Rücknahme erreicht ein fremdes System über einen Webhook, nicht über einen Export."
+ :refusal.builds/export-unknown-mode
+   "unbekannter Export-Modus {mode:pr} — bekannt: {modes:pr}"
+ :refusal.builds/fk-link-not-a-job
+   "{fk-link-transform} ist ein Fremdschlüssel-Link, kein Build-Job — seine Kanten sind der Join von {fk-type}.{fk-attribute} gegen den Schlüssel von {pk-type}, ausgewertet beim Lesen. Baue die Seite, die den Schlüssel trägt: --only {fk-type}"
+ :refusal.builds/from-needs-between
+   "`:from` hat nur mit :strategy :between eine Bedeutung"
+ :refusal.builds/inputs-missing
+   "Build-Auflösung gescheitert: Eingang/Eingänge existieren nicht — {list}"
+ :refusal.builds/link-only-scope
+   "--only kann nicht auf den Link-Typ-Transform {link} eingegrenzt werden — ein Link-Typ hat kein Objekttyp-Ziel, der Build liefe mit 0 Jobs und hinge. Grenze stattdessen auf seine Endpunkt-Objekttypen ein: --only {endpoints}"
+ :refusal.builds/resolution-failed
+   "Build-Auflösung gescheitert: {why}"
+ :refusal.builds/retry-run-not-failed
+   "retry-run!: der Lauf ist nicht gescheitert — nichts zu wiederholen"
+ :refusal.builds/rollback-restricted-view
+   "{dataset} ist eine eingeschränkte Sicht: sie hält keine Daten, setze ihr zugrunde liegendes Dataset zurück"
+ :refusal.builds/rollback-stream
+   "Dataset {dataset} ist ein Stream: nur transaktionale Datasets lassen sich zurücksetzen"
+ :refusal.builds/rollback-virtual
+   "Dataset {dataset} ist virtuell: seine Quelle hält keine Versionen"
+ :refusal.builds/unknown-from
+   "unbekannte `:from`-Grenze: {names}"
+ :refusal.builds/unknown-strategy
+   "unbekannte Build-:strategy {strategy} — eine von {strategies} (weglassen für die Vorgabe: Ziele + ihre Zwischenstufen)"
+ :refusal.builds/unknown-targets
+   "unbekannte(s) Build-Ziel(e): {names} — nenne einen Objekttyp, einen Transform oder ein Dataset (`describe`/`lineage` listen sie){hint}"
+ :refusal.builds/unrunnable-jobs
+   "Build-Auflösung: der Rückfall auf den Elternzweig passt nicht zu {branch} — {detail}. Den Zweig auf seinen Elternzweig rebasen (`changeset rebase`), den Code des Transforms auf dem Zweig pushen (das veröffentlicht ihn) oder ohne ihn bauen (`--only`)."
+ :refusal.catalog/bad-attributes
+   "Ungültige Attribute an {name}: {listed} — deklariert: {declared}"
+ :refusal.catalog/bad-attributes-no-type
+   "Ungültige Attribute an {name}: {listed} — dieses Schema hat keinen Objekttyp dieses Namens (falsches Schema? falscher Zweig?)"
+ :refusal.catalog/bad-value-types
+   "Ungültige Werttypen an {name}: {listed}"
+ :refusal.catalog/branch-closed
+   "Zweig '{branch}' ist {state}: er nimmt keine Schreibvorgänge mehr an"
+ :refusal.catalog/branch-protected
+   "Zweig '{branch}' ist geschützt: Änderungen müssen als Vorschlag von einem anderen Zweig kommen"
+ :refusal.catalog/instance-wide
+   "instanzweit auf {branch}: Quellen, LLM-Modelle, Organisationen, Spaces, Projekte, Rollen und Markings werden nicht verzweigt — nur der Admin ändert sie auf einem geschützten {branch}"
+ :refusal.catalog/introspection-without-inputs
+   "Python-Transform {transform:pr}: die Introspektion schlug fehl, und seine Spezifikation nennt keine :inputs als Rückfall"
+ :refusal.catalog/invalid-schema
+   "Ungültige Schema-Map: {reasons:pr}"
+ :refusal.catalog/link-unbacked
+   "Link-Typ {link-type} hat keinen speisenden Transform-Output. Jeder Link-Typ muss Ziel eines :output-Eintrags sein {:kind :link-type :link-type {link-type}}."
+ :refusal.catalog/plan-problems
+   "Ungültige Schema-Map: {detail}"
+ :refusal.catalog/project-change-denied
+   "Du darfst in diesem Projekt nichts ändern — dafür brauchst du dort mindestens die Rolle {role}."
+ :refusal.catalog/project-change-denied-named
+   "Du darfst im Projekt „{project-name}“ nichts ändern — dafür brauchst du dort mindestens die Rolle {role}."
+ :refusal.catalog/project-locked
+   "{what} liegt im Projekt „{project-name}“, das eine gesperrte Produktinstallation hält — Änderungen kommen dort nur über ein Upgrade; zum Bearbeiten erst entsperren: sutra product unlock <installation>"
+ :refusal.catalog/project-read-denied
+   "{what} liegt in einem Projekt, das du nicht lesen darfst. Um Zugriff bitten kannst du die Verantwortlichen des Projekts."
+ :refusal.catalog/resource-protected
+   "geschützt auf {branch}: {names} — eine geschützte Ressource ändert sich nur über einen Vorschlag"
+ :refusal.catalog/sql-gate
+   "{detail}"
+ :refusal.catalog/transform-exists
+   "Transform {name:pr} lässt sich nicht anlegen — der bestehende Transform dieses Namens {origin}. Einen eindeutigen Namen wählen oder :update-transform nehmen."
+ :refusal.catalog/unknown-step-op
+   "Unbekannte Schritt-Operation: {op}"
+ :refusal.documents/document-changed
+   "Dieses Dokument wurde inzwischen geändert (Version {version}, geladen {loaded})"
+ :refusal.documents/document-gone
+   "Dieses Dokument gibt es nicht mehr"
+ :refusal.documents/graphviz-timeout
+   "graphviz brauchte länger als {seconds} s"
+ :refusal.documents/use-case-grammar
+   "{first}"
+ :refusal.documents/use-case-on-trunk
+   "Der Use-Case-Assistent legt nur auf einem Zweig an — erst `branch <name>`"
+ :refusal.evals/suite-cannot-run
+   "Eval-Suite {suite:pr} kann nicht laufen:
+  - {lines}"
+ :refusal.actions/acl-markings-denied
+   "ACL: Schreiben verweigert — der Principal ist für die Markings des Ziels nicht freigegeben"
+ :refusal.actions/acl-write-hidden-type
+   "ACL: Schreiben verweigert — die Aktion ändert einen Objekttyp, den der Principal nicht sehen kann"
+ :refusal.actions/branch-not-at-edge
+   "kein Zweig {branch:pr} am Rand dieser Anfrage gelesen"
+ :refusal.actions/calculator-characters
+   "Rechner: nur Zahlen, + - * / und Klammern"
+ :refusal.actions/calculator-parentheses
+   "Rechner: Klammern nicht ausgeglichen"
+ :refusal.actions/calculator-trailing
+   "Rechner: überzählige Eingabe am Ende"
+ :refusal.actions/calculator-unexpected
+   "Rechner: unerwartet {token:pr}"
+ :refusal.actions/commit-raced
+   "vorgemerkt, aber der Commit wurde abgewiesen: der Zweig hat sich unter diesem Schreiben geändert"
+ :refusal.actions/commit-staged-no-branch
+   "commit-staged!: kein aktiver Zweig"
+ :refusal.actions/criterion-not-met
+   "{why}"
+ :refusal.actions/edit-function-batched-no-inputs
+   ":apply-edit-function — {fn} ist für BATCH-Ausführung eingestellt, aber die Regel deklariert keine :inputs. Die FELDER des Structs sind, was :inputs nennt (Feld → Aktionsparameter); ohne sie wäre jeder Eintrag im Batch leer."
+ :refusal.actions/edit-function-batched-params
+   ":apply-edit-function — {fn} ist für BATCH-Ausführung eingestellt, deklariert aber {count} Parameter {params:pr}. Eine Batch-Funktion nimmt EINEN Parameter: die Liste der Structs, ein Eintrag je Aktionsaufruf. Die bisherigen Parameter in die Felder des Structs verschieben (:inputs ordnet sie zu) oder :batched weglassen, damit sie je Aufruf einmal läuft."
+ :refusal.actions/edit-function-entry-unknown
+   ":apply-edit-function — Feld {field} eines Batch-Eintrags nennt kein {type}: {id:pr}"
+ :refusal.actions/edit-function-library
+   ":apply-edit-function — {fn} ist eine BIBLIOTHEK: Code, den andere Funktionen ihres Repositorys mit :uses einbinden, nie selbst aufgerufen. Eine Funktion aufrufen, die sie per :uses nutzt."
+ :refusal.actions/edit-function-param-unknown
+   ":apply-edit-function — Parameter {param} nennt kein {type}: {id:pr}"
+ :refusal.actions/edit-function-query
+   ":apply-edit-function — {fn} ist eine QUERY-Funktion: sie LIEFERT ZEILEN und ändert nichts, kann also keine Aktion tragen. Ihre Zeilen mit :invoke-function binden und die folgenden Regeln ändern lassen, oder eine EDIT-Funktion schreiben (ein :source-Programm über einen :target-type)."
+ :refusal.actions/edit-function-unknown
+   ":apply-edit-function — unbekannte Edit-Funktion {function} (unter :functions mit :source und :target-type deklarieren)"
+ :refusal.actions/function-returns
+   "Funktion {fn}: {problem}"
+ :refusal.actions/function-source-unusable
+   "Funktion {fn} deklariert die Quelle {source} in :external-systems, {words}"
+ :refusal.actions/function-unknown-entities
+   "Die Funktion verweist auf unbekannte Schema-Elemente: {refs}"
+ :refusal.actions/instance-scoped-section
+   "{section} gehört der Instanz, nicht dem Zweig {branch} — der Zweig liest es von {home} und ändert es nie; hier gestaged würde ein Schreiben gemeldet, das die Instanzebene nie sieht. Ändere es auf {home} oder sende es mit `projection push`, das den instanzweiten Teil abtrennt und dort ablegt."
+ :refusal.actions/invoke-build-transform
+   ":invoke-function — {fn} ist ein BUILD-Transform, keine Funktion. Ein Transform wird von einem Build in seine Ausgabetabelle geschrieben; eine Funktion wird beim Anwenden aufgerufen und liefert ihre Zeilen dem Aufrufer. Unter den :functions des Presets anlegen, um sie hier aufzurufen (das kennzeichnet sie auch als Funktion, sodass `transform list` sie nicht mehr beansprucht)."
+ :refusal.actions/invoke-edit-function
+   ":invoke-function — {fn} ist eine EDIT-Funktion: sie schreibt ihre eigenen Ontologie-Änderungen und TRÄGT damit eine Aktion, statt ein Ergebnis zu liefern. {:op :apply-edit-function :function {function:pr}} als einzige Regel der Aktion verwenden oder sie mit `function run` allein ausführen. :invoke-function nimmt eine QUERY-Funktion (eine, die Zeilen liefert)."
+ :refusal.actions/invoke-external-systems
+   ":invoke-function — {fn} deklariert :external-systems, die eine Funktion innerhalb der Transaktion einer Aktion nicht nutzen darf. Ausgehender Verkehr einer Aktion ist :invoke-webhook (Freigabe der Quelle + Markings + Exportrecht); eine Funktion erreicht ihre Quellen, wenn eine App-Variable oder der Function-Run-Endpunkt sie aufruft."
+ :refusal.actions/invoke-input-kind
+   ":invoke-function — Eingabeart beim Anwenden nicht ausführbar: {kind} (:object-type, :scalar, :language-model, :media oder :media-set verwenden)"
+ :refusal.actions/invoke-language
+   ":invoke-function — {fn} ist in {language:pr} geschrieben, das beim Anwenden nicht als Funktion laufen kann. Eine Funktion führt Benutzercode aus: :language ∈ {languages} deklarieren."
+ :refusal.actions/invoke-media-item
+   ":invoke-function — {fn} öffnet das Medienobjekt {alias:pr}, was eine Aktionsregel nicht kann; live aufrufen"
+ :refusal.actions/invoke-media-set
+   ":invoke-function — {fn} liest das Media-Set {alias:pr}, das eine Aktionsregel nicht öffnen kann; live aufrufen (Eval, App) oder die Medien in einem Build lesen"
+ :refusal.actions/invoke-multiple-outputs
+   ":invoke-function — {fn} lieferte MEHRERE benannte Ausgaben. Das ist die Form eines Build-Transforms (eine je Ausgabetabelle); eine Funktion liefert ein Ergebnis. Eine einzige Zeilenfolge zurückgeben."
+ :refusal.actions/invoke-query-language
+   ":invoke-function — {fn} ist in {language:pr} geschrieben, das beim Anwenden nicht als Funktion laufen kann. Ein SQL-Rumpf löst seine :inputs als Datenbank-Views über GEBAUTE Tabellen auf; ein Aktionsschritt hat lebende Ontologie-Zeilen und keine solchen Tabellen. Die Funktion in :python oder :clojure schreiben oder sie zu einem Build-Transform machen und dessen Ausgabe lesen."
+ :refusal.actions/invoke-scalar-unbound
+   ":invoke-function — {fn} deklariert die :scalar-Eingabe {alias:pr}, und der Aufruf hat ihr nichts zugewiesen. {remedy} Stattdessen nil zu übergeben, machte 'kein Argument' ununterscheidbar von 'das Argument war nil'."
+ :refusal.actions/invoke-unknown-function
+   ":invoke-function — unbekannte Funktion {function} (unter den :functions des Presets registrieren)"
+ :refusal.actions/llm-failed
+   ":use-llm — {msg}"
+ :refusal.actions/llm-query-where
+   ":use-llm :query-objects :where — eine Klausel [:op prop v] oder ein Vektor davon, erhalten: {where:pr}"
+ :refusal.actions/llm-tool-unknown-action
+   ":use-llm-Werkzeug — unbekannte Aktion {action}"
+ :refusal.actions/llm-tool-unknown-type
+   ":use-llm-Werkzeug — unbekannter Objekttyp {object-type}"
+ :refusal.actions/llm-unknown-tool
+   ":use-llm — unbekanntes Werkzeug {tool:pr} — {:query-objects T :properties [..] :where [..]} {:apply-action A} :calculator"
+ :refusal.actions/media-param-not-a-value
+   "Parameter {parameter} hält eine Medienreferenz: entweder eine gelandete Adresse (64 Hex) oder {:bytes-b64 … :filename … :mime …} — nicht beides und nichts anderes."
+ :refusal.actions/media-param-required
+   "Parameter {parameter} ist Pflicht und leer."
+ :refusal.actions/media-param-too-large
+   "Parameter {parameter}: Datei zu groß."
+ :refusal.actions/no-matching-release
+   "Funktion {fn} hat kein Release, das {wanted} erfüllt. Veröffentlicht: {published}"
+ :refusal.actions/no-release-published
+   "Funktion {fn} hat kein Release, das {wanted} erfüllt. Veröffentlicht: keines — :version an der Funktion angeben und pushen, um ein Release zu veröffentlichen, oder die Festlegung weglassen, um ihre aktuelle Quelle auszuführen"
+ :refusal.actions/params-invalid
+   "{why}"
+ :refusal.actions/params-missing
+   "{why}"
+ :refusal.actions/params-violate-constraints
+   "{why}"
+ :refusal.actions/plan-model-not-asked
+   "ein Plan fragt das Modell {model} nicht"
+ :refusal.actions/proposal-already-decided
+   "Vorschlag {id} ist schon {status}"
+ :refusal.actions/proposal-decided-concurrently
+   "Vorschlag {id} wurde gleichzeitig entschieden"
+ :refusal.actions/proposal-not-found
+   "kein Vorschlag {id} an dieser Automatisierung"
+ :refusal.actions/proposal-unknown-parameter
+   "kein Parameter {names} an {action}"
+ :refusal.actions/propose-direct-write
+   "Vorschlagsmodus: {fn} schrieb {op} direkt — nur Aktionen können vorgeschlagen werden"
+ :refusal.actions/propose-step-edits
+   "Vorschlagsmodus: ein {op}-Schritt ändert die Ontologie direkt. Nur Aktionen können zur Prüfung vorgeschlagen werden — die Änderung in eine Aktion fassen und mit :apply-action (oder einem :apply-action-Werkzeug) anwenden."
+ :refusal.actions/rbac-operation-denied
+   "RBAC: Operation verweigert — der Rolle des Principals fehlt diese Operation"
+ :refusal.actions/replay-nondeterministic
+   "der Lauf fragte bei der Wiederholung etwas anderes als zuvor (externer Aufruf {n}) — seine Auswertung ist nicht deterministisch"
+ :refusal.actions/run-deadline-passed
+   "{label} hat seine Zeitgrenze von {timeout-ms} ms überschritten und wurde verworfen — nichts von dem, was er vorgemerkt hat, wird angewendet"
+ :refusal.actions/run-timed-out
+   "{label} hat seine Zeitgrenze von {timeout-ms} ms überschritten und wurde verworfen"
+ :refusal.actions/run-too-many-edits
+   "der Lauf hat {edits} Änderungen vorgemerkt, mehr als die {limit}, die ein Lauf anwenden darf — teile die Arbeit auf mehrere Läufe auf"
+ :refusal.actions/run-too-many-objects
+   "der Lauf hat {loaded} Objekte geladen, mehr als die {limit}, die ein Lauf laden darf — aggregiere, oder sortiere und begrenze die Objektmenge"
+ :refusal.actions/stage-no-parent
+   "Staging nicht möglich: kein Elternzweig aktiv oder schon auf einem Staging-Zweig"
+ :refusal.actions/staged-action-stale
+   "Commit abgewiesen: die vorgemerkte Action {n} ({action-name}) passt nicht mehr auf {branch}, wie es jetzt ist: {why}"
+ :refusal.actions/submission-blocked
+   "{why}"
+ :refusal.actions/sys-action-not-callable
+   "sys/*-Aktionen sind nicht direkt aufrufbar: {action}"
+ :refusal.actions/unknown-object-set
+   "Unbekanntes Object-Set: {query-name}"
+ :refusal.actions/webhook-answer
+   "Webhook antwortete HTTP {status}{detail}"
+ :refusal.actions/webhook-failed
+   ":invoke-webhook — Quelle {source-name} Webhook {webhook-name} gescheitert (HTTP {status}){detail}"
+ :refusal.actions/webhook-request-no-input
+   "Webhook-Anfrage {request} hat keine Eingabe — die Parameter des Webhooks nennen jede Anfrage bei ihrem :as"
+ :refusal.actions/webhook-request-unanswered
+   "Webhook-Anfrage {request} liest {key} von {from}, das darauf nicht geantwortet hat"
+ :refusal.actions/webhook-table-not-allowed
+   "Webhook-Tabelle {table} steht nicht auf der :writeback-Liste der Quelle"
+ :refusal.actions/webhook-unknown-source
+   ":invoke-webhook — unbekannte Quelle {source}"
+ :refusal.automation/ambiguous-object-parameter
+   "automate: {function} hat {n} Parameter vom Typ {on} — den Parameter für das Objekt in den :inputs des Effekts nennen"
+ :refusal.automation/claim-superseded
+   "überholt: der Claim auf dieses Ereignis gehört nicht mehr diesem Worker"
+ :refusal.automation/field-not-edn
+   "Automatisierung {field} ist kein lesbares EDN: {error}"
+ :refusal.automation/field-shape
+   "Automatisierung {field} muss eine EDN-Map, ein Vektor oder ein Keyword sein, erhalten: {spec:pr}"
+ :refusal.automation/manual-no-objects
+   "eine manuelle Ausführung nennt ihre Objekte: ids und/oder where"
+ :refusal.automation/needs-owner
+   "Automatisierung {automation} braucht einen Eigentümer: sie wird von einem Benutzer gespeichert, mit dessen Rechten ihre Bedingung und ihre Effekte laufen"
+ :refusal.automation/no-edit-function
+   "automate: {function} ist keine Edit-Funktion"
+ :refusal.automation/no-owner
+   "die Automatisierung hat keinen Eigentümer — ihre Effekte laufen nicht, bis ein Benutzer sie speichert"
+ :refusal.automation/owner-gone
+   "der Eigentümer {owner} der Automatisierung existiert nicht mehr — ihre Effekte laufen nicht, bis jemand, der sie besitzen darf, sie neu installiert"
+ :refusal.automation/unrecognized-when
+   "automate: unbekannte :when-Klausel {when:pr}"
+ :refusal.builds/cdc-not-enabled
+   "kein Change Data Capture auf {table} — auf der Quelle sys.sp_cdc_enable_db und sys.sp_cdc_enable_table ausführen, bei laufendem SQL Server Agent"
+ :refusal.builds/cdc-sync-incomplete
+   "ein CDC-Sync braucht :primary-key :deletion-column an {stream}"
+ :refusal.builds/chained-transform-not-found
+   "Verketteter Transform nicht gefunden"
+ :refusal.builds/datasource-input-incomplete
+   ":datasource-Eingabe muss :table oder :query deklarieren"
+ :refusal.builds/endpoint-fk-not-endpoint
+   ":endpoint-fk-Transform verweist auf einen Objekttyp, der kein Ende des Links ist"
+ :refusal.builds/external-transform-source
+   "die Quelle ist ein :{type}-:external-transform-Konnektor (von Code gelesen) und kann keine :datasource/SQL-Eingabe tragen — stattdessen den Objekttyp lesen, den dieser Konnektor ablegt"
+ :refusal.builds/given-rows-need-code
+   "ein Lauf auf gegebenen Zeilen braucht einen Code-Transform (:python oder :clojure)"
+ :refusal.builds/import-from-incomplete
+   "import :from muss :query oder :table angeben"
+ :refusal.builds/incremental-intermediate-no-key
+   "ein inkrementelles Zwischenergebnis braucht :primary-key"
+ :refusal.builds/incremental-pull-unbound
+   "inkrementelles Holen nach {dataset:pr} hat nichts, woran es sein `?` binden kann: {column:pr} ist nicht im gelandeten Datensatz und die Deklaration nennt kein :initial"
+ :refusal.builds/input-kind-invalid
+   "Transform-:input.kind muss eines von {kinds} sein"
+ :refusal.builds/inputs-unknown-datasource
+   "Unbekannte Datenquelle für einen :inputs-Eintrag"
+ :refusal.builds/language-not-runnable
+   "Transform {transform:pr} hat keine ausführbare :language {language:pr} — bekannt: {known}"
+ :refusal.builds/link-import-strategy
+   "Unbekannte Strategie für den Link-Import: {strategy:pr}"
+ :refusal.builds/materialization-outputs
+   "Materialisierung {transform} muss genau eine Datensatz-Ausgabe haben, hat {n}"
+ :refusal.builds/media-set-source-not-files
+   "Media-Set {set} synchronisiert von {source}, das keine Dateiquelle ist"
+ :refusal.builds/media-set-unmatched-files
+   "Media-Set {set} hält {formats}, und {files} Dateien sind etwas anderes, etwa {path}. Die Filter des Syncs einengen oder :ignore-unmatched-schema setzen."
+ :refusal.builds/no-import-block
+   "das Preset hat keinen :import-Block"
+ :refusal.builds/no-such-output
+   "der Transform hat keine solche Ausgabe erzeugt"
+ :refusal.builds/nothing-to-build
+   "das Schema deklariert keine :sources und keine :datasets — nichts, woraus gebaut werden kann"
+ :refusal.builds/object-import-no-key
+   "dem Objektimport für {object-type} fehlt :primary-key"
+ :refusal.builds/one-to-one-duplicates
+   "1:1-Link {link}: {duplicate-count} {fk}-Wert(e) stehen in mehr als einer Zeile"
+ :refusal.builds/output-name-needed
+   "ein Transform mit mehreren Ausgaben braucht einen :output-name zur Auswahl — einen von {names}"
+ :refusal.builds/retry-count-invalid
+   "retry-count muss eine nicht negative ganze Zahl sein, erhalten: {retry-count:pr}"
+ :refusal.builds/retry-no-import-plan
+   "retry-run!: der Zweig hat keinen Importplan"
+ :refusal.builds/retry-other-branch
+   "retry-run!: Lauf {run-id} lief auf Zweig {branch} — dort wiederholen (`--branch {branch}`)"
+ :refusal.builds/retry-unknown-run
+   "retry-run!: unbekannter Lauf"
+ :refusal.builds/root-transform-no-source
+   "Der Wurzel-Transform muss :source.table oder :source.query deklarieren"
+ :refusal.builds/source-no-cdc
+   "Quelle {source} vom Typ {type} hat keinen CDC-Sync"
+ :refusal.builds/sql-transform-no-query
+   "dem SQL-Transform fehlt :query"
+ :refusal.builds/stream-unknown-source
+   "der Streaming-Sync nennt keine Quelle {source}"
+ :refusal.builds/transform-chain-cycle
+   "Zyklus in der Transform-Kette"
+ :refusal.builds/unit-test-language
+   "ein Unit-Test führt einen SQL-, :python- oder :clojure-Transform aus, nicht {language:pr}"
+ :refusal.builds/unit-test-unknown-transform
+   "kein Transform namens {transform}"
+ :refusal.builds/unknown-compute-mode
+   "unbekannter Rechenmodus {mode:pr}"
+ :refusal.builds/unknown-datasource
+   "Unbekannte Datenquelle"
+ :refusal.builds/unknown-input-kind
+   "unbekannte Eingabe-:kind {kind} für Alias {alias:pr} — resolve-compute-inputs behandelt {handled}"
+ :refusal.builds/version-retained-away
+   "Version {version} von {dataset} wurde durch die Aufbewahrung gelöscht; die älteste Version zum Zurückrollen ist {horizon}"
+ :refusal.builds/virtual-unknown-source
+   "ein virtueller Datensatz liest die Quelle {source:pr}, die dieses Schema nicht deklariert"
+ :refusal.compute/cap-batch-over
+   "cap-batch: {items} Einträge über einer Grenze von {cap} in einem Lauf, der seine Ausgabe ersetzt, weil eine Eingabe Zeilen überschrieben oder entfernt hat. Diese Eingabe unter :static-inputs deklarieren."
+ :refusal.compute/compile-failed
+   "Clojure-Transform ließ sich nicht kompilieren: {error}{trace}"
+ :refusal.compute/deps-sandbox-missing
+   "Python-Abhängigkeiten können nicht bereitgestellt werden — bwrap-Sandbox nicht verfügbar"
+ :refusal.compute/edit-function-failed
+   "Clojure-Edit-Funktion {function} schlug fehl: {error}{trace}"
+ :refusal.compute/model-call-failed
+   "Sprachmodell-Aufruf gescheitert: {why}"
+ :refusal.compute/model-call-status
+   "Sprachmodell-Aufruf gescheitert ({status}): {body}"
+ :refusal.compute/python-sandbox-missing
+   "Python-Sandbox nicht verfügbar — ohne Sandbox wird nicht ausgeführt"
+ :refusal.compute/render-failed
+   "Rendern fehlgeschlagen — {detail}"
+ :refusal.compute/render-no-result
+   "das Rendern lieferte kein Ergebnis"
+ :refusal.compute/sandbox-saturated
+   "{n} Läufe in der Sandbox haben ihre Frist überschritten und laufen noch; kein neuer startet, bis sie enden oder der Prozess neu startet"
+ :refusal.compute/template-parameter-problem
+   "Template-Parameter {parameter}: {message}"
+ :refusal.compute/template-parameter-unresolved
+   "Template-Parameter {parameter} {message}"
+ :refusal.compute/transform-sandbox-missing
+   "Transform-Sandbox nicht verfügbar — ohne Sandbox wird nicht ausgeführt"
+ :refusal.compute/traversal-anchor-not-object
+   "Template-Parameter {parameter} folgt {search-around} von {of}, das kein :object-Parameter ist — eine Traversierung braucht ein Objekt als Start. Verankere ihn an einem :object-Parameter und nenne jede Seite des Wegs in :search-around [...]."
+ :refusal.compute/user-message
+   "{msg}"
+ :refusal.evals/cases-from-incomplete
+   ":cases-from braucht :object-type und eine :input- oder :expected-Map {case-column source}"
+ :refusal.evals/function-evaluator-local
+   ":function-Evaluatoren laufen über den Server"
+ :refusal.evals/llm-judge-no-model
+   ":llm-judge braucht ein Sprachmodell — die Suite über den Server ausführen"
+ :refusal.evals/model-not-literal
+   "Funktion {fn} nennt ihr Modell nicht als Literal ({left}) — ein Experiment kann es nicht tauschen; das Modell zu einer :language-model-Eingabe machen"
+ :refusal.evals/no-cases
+   "Eval-Suite {suite:pr} hat keine Fälle"
+ :refusal.evals/no-cases-drawn
+   "Eval-Suite {suite:pr} hat keine Fälle — :cases-from fand {found}"
+ :refusal.evals/unknown-evaluator-kind
+   "unbekannte Evaluator-Art {kind:pr} — eine von {kinds}"
+ :refusal.access/external-subject-taken
+   "das {source}-Subjekt {subject} gehört schon {principal} — ein externes Subjekt meldet sich als ein Principal an"
+ :refusal.access/principal-exists
+   "{principal} ist schon ein Principal"
+ :refusal.access/service-user-by-hand
+   "{principal} kann nicht als {source}-Principal registriert werden — ein Dienstbenutzer entsteht mit seinem OAuth-Client, nie von Hand"
+ :refusal.access/service-user-sign-in
+   "{principal} ist der Dienstbenutzer des gleichnamigen OAuth-Clients; er meldet sich nur über dessen client_credentials-Grant an und nimmt kein Passwort und keine andere Anmeldung"
+ :refusal.access/trust-name
+   "der :name einer Vertrauensstellung besteht aus Kleinbuchstaben, Ziffern und -: {given:pr}"
+ :refusal.access/trust-public-key
+   "der :public-key einer Vertrauensstellung ist der Ed25519-Schlüssel der anderen Instanz (GET /api/federation/key dort)"
+ :refusal.access/trust-self
+   "eine Instanz vertraut sich nicht selbst"
+ :refusal.access/trust-subjects
+   "die :subjects einer Vertrauensstellung ordnen entfernten Benutzernamen lokale zu, beide als Zeichenketten"
+ :refusal.access/trust-url
+   "die :url einer Vertrauensstellung ist eine http(s)-Basis-URL ohne Query oder Fragment: {url:pr}"
+ :refusal.agents/api-refused
+   "{why}"
+ :refusal.agents/branch-name
+   "ein Zweig kann nicht {branch} heißen"
+ :refusal.agents/branch-protected
+   "der Zweig {branch} ist geschützt"
+ :refusal.agents/branch-unnamed
+   "nenne den Zweig, den start_change dir gab"
+ :refusal.agents/change-title
+   "eine Änderung braucht einen Titel"
+ :refusal.agents/ent-not-a-file
+   "{path} ist ein .ent-Text: er geht über die Projektion (pull_texts, push_texts), nicht als Datei"
+ :refusal.agents/foreign-change
+   "der Zweig {branch} ist die Änderung von jemand anderem — beginne deine eigene"
+ :refusal.agents/model-not-registered
+   "das Modell {model:pr} steht nicht im LLM-Register"
+ :refusal.agents/model-unregistered
+   "der Agent {agent-name} nutzt das Modell {model:pr}, das nicht im LLM-Register steht — registriere es mit seinen Preisen"
+ :refusal.agents/no-agent
+   "kein Agent {agent}"
+ :refusal.agents/no-branch
+   "kein Zweig {branch}"
+ :refusal.agents/no-dataset
+   "kein Datensatz namens {dataset}"
+ :refusal.agents/no-doc
+   "kein Dokument {name} — read_doc ohne Namen listet sie"
+ :refusal.agents/no-file
+   "keine Datei {path}"
+ :refusal.agents/no-file-mention
+   "keine Datei in {dataset} nennt {file}"
+ :refusal.agents/no-file-to-edit
+   "keine Datei {path} — write_code_file legt eine an"
+ :refusal.agents/no-media-column
+   "{dataset} hat keine Medienspalte mit einem Medienset"
+ :refusal.agents/no-open-change
+   "der Zweig {branch} hat keine offene Änderung — rufe zuerst start_change auf"
+ :refusal.agents/no-repository
+   "kein Repository namens {repository}"
+ :refusal.agents/no-source
+   "der Agent {agent-name} nennt keine :source, und die Instanz hat keine einzelne Sprachmodell-Quelle als Vorgabe — deklariere :source am Agenten"
+ :refusal.agents/no-text
+   "kein Text {path} — list_texts nennt sie"
+ :refusal.agents/not-a-pattern
+   "kein Muster: {why}"
+ :refusal.agents/not-checked-out
+   "{path} ist nicht in deinem Checkout — hole es"
+ :refusal.agents/nothing-checked-out
+   "auf {branch} ist nichts ausgecheckt — zuerst pull_texts"
+ :refusal.agents/nothing-to-push
+   "keine geänderten Dateien zum Pushen"
+ :refusal.agents/old-ambiguous
+   "old kommt {hits}-mal in {what} vor — gib mehr Kontext"
+ :refusal.agents/old-empty
+   "old darf nicht leer sein"
+ :refusal.agents/old-missing
+   "old kommt in {what} nicht vor — lies es noch einmal"
+ :refusal.agents/ontology-via-projection
+   "die Ontologie wird über die Projektion geändert — pull_texts"
+ :refusal.agents/path-deleted
+   "{path} ist in deinen Änderungen gelöscht"
+ :refusal.agents/path-dropped
+   "{path} ist verworfen"
+ :refusal.agents/path-unnamed
+   "nenne den Pfad"
+ :refusal.agents/retrieval-unknown-type
+   "Agenten-Abruf — unbekannter Objekttyp {object-type}"
+ :refusal.agents/runs-queue-full
+   "{waiting} Agentenläufe warten schon — frage gleich noch einmal"
+ :refusal.agents/text-dropped
+   "{path} ist in deinem Checkout verworfen"
+ :refusal.agents/tool-unknown-kind
+   "Agenten-Werkzeug — unbekannte Art {kind:pr}"
+ :refusal.agents/tool-unknown-type
+   "Agenten-Werkzeug — unbekannter Objekttyp {object-type}"
+ :refusal.agents/type-not-readable
+   "kein Objekttyp {type:pr}, den du lesen darfst — rufe list_object_types auf"
+ :refusal.agents/unknown-filter-operator
+   "unbekannter Filter-Operator {op-name:pr} — einer von {known}"
+ :refusal.authoring/code-file-missing
+   "keine solche Code-Datei auf {branch} — {gone}. Eine Code-Datei, die kein Knoten bindet, bleibt nicht in einem Repository: schicke sie mit diesem Text in einem `slice push` oder gib dem Knoten seinen :code."
+ :refusal.authoring/declared-by-decorator
+   "der @transform-Decorator deklariert diese, ändere sie in der .py-Datei: {names}"
+ :refusal.authoring/edit-function-failed
+   "die Python-Edit-Funktion {function} ist gescheitert: {why}"
+ :refusal.authoring/edit-function-no-edit
+   "die Funktion {function} deklariert einen :target-type, ist also eine EDIT-Funktion, aber ihr Rumpf ergibt keine Änderung — jeder Schritt ist ein wirkungsloser :effect. Das Vokabular für Änderungen ist `.create-<type>`, `.update-<type>`, `.delete-<type>`, `.link-<relation>`; eine Zuweisung (`obj.field = x`) sieht dieser Parser nicht, also schreibe `(-> OntologyClient/action (.update-<type> obj {:field x}))`. Soll der Rumpf ein registriertes Verb aufrufen und nichts ändern, ist er keine Edit-Funktion — lass :target-type und :source weg."
+ :refusal.authoring/edit-function-user-error
+   "{why}"
+ :refusal.authoring/edit-undeclared-types
+   "die Edit-Funktion {function} ändert {types}, die ihr {how} nicht deklariert"
+ :refusal.authoring/function-invalid
+   "Funktion {function}: {why}"
+ :refusal.authoring/function-language
+   "die Funktion {function} deklariert :language {language:pr}, die nicht als Funktion laufen kann. Eine Funktion wird beim Anwenden aufgerufen und führt Benutzercode aus: deklariere :language ∈ {languages:pr}. Ein :sql-Rumpf liest Datenbank-Views über gebaute Tabellen — schreibe ihn stattdessen unter :transforms, wo ein Build ihn materialisiert."
+ :refusal.authoring/function-output
+   "die Funktion {function} deklariert einen :output. Eine Funktion gibt ihre Zeilen dem zurück, der sie aufrief (:invoke-function bindet sie); sie erzeugt keine Tabelle. Ein Output machte sie zum Transform hinter diesem Ziel — geplant und materialisiert von jedem Build, also der ANDERE Lebenszyklus. Lass den :output weg, damit sie eine Funktion bleibt, oder schreibe sie unter :transforms, um den Output zu behalten."
+ :refusal.authoring/install-needs-schema
+   "install braucht eine :schema-Map"
+ :refusal.authoring/install-no-repository
+   "kein Repository namens {repository:pr}"
+ :refusal.authoring/install-not-lowerable
+   "das Install-Schema lässt sich nicht absenken: {why}"
+ :refusal.authoring/install-unallowed-structure
+   "das Install-Schema hat unerlaubte Struktur oder Schlüssel"
+ :refusal.authoring/install-unresolved-references
+   "das Install-Schema hat unaufgelöste Verweise"
+ :refusal.authoring/instance-scoped-on-branch
+   "nicht verzweigt — diese gehören der Instanz (Quellen, Syncs, Modelle, Container, Rollen, Markings): {named-text} — ändere sie auf main (ein Projection-Push bringt sie selbst dorthin), nicht auf Zweig {branch}"
+ :refusal.authoring/materialization-derived
+   "eine Materialisierung hält gespeicherte Eigenschaften, keine abgeleiteten: {names}. Berechne den Wert in einem Transform oder lies ihn in einer Funktion."
+ :refusal.authoring/no-installation
+   "keine Produktinstallation {install-id}"
+ :refusal.authoring/no-projection
+   "keine Projektion namens {name:pr}"
+ :refusal.authoring/no-release
+   "kein Release {product} {version}"
+ :refusal.authoring/no-such-resource
+   "kein {kind}: {name}"
+ :refusal.authoring/product-channel
+   "kein Kanal {channel-name} — einer von {known}"
+ :refusal.authoring/product-credentials
+   "ein Produkt trägt nie Zugangsdaten"
+ :refusal.authoring/product-name
+   "der Name eines Produkts besteht aus Kleinbuchstaben, Ziffern und Bindestrichen"
+ :refusal.authoring/product-no-projects
+   "nenne die Projekte, die das Produkt enthält (--projects a,b)"
+ :refusal.authoring/product-unknown-projects
+   "kein Projekt {names}"
+ :refusal.authoring/product-version
+   "{version:pr} ist keine Version (1.2.3)"
+ :refusal.authoring/projection-write-files
+   "ein Projection-Schreiben braucht :files {path text}"
+ :refusal.authoring/transform-version
+   "der Transform {transform} deklariert :version {version:pr}. Eine :version veröffentlicht ein FUNKTIONS-Release, das Verbraucher festlegen (:apply-edit-function / :invoke-function einer Action); ein Build-Transform hat keine solchen Verbraucher — verbraucht wird seine Ausgabetabelle. Für eine vollständige Neuberechnung erhöhe :semantic-version (eine ganze Zahl). Um daraus eine Funktion zu machen, schreibe ihn unter :functions."
+ :refusal.authoring/unknown-operations
+   "die eigene Anwendung {custom-application} deklariert :operations {unknown:pr}, die keinen API-Namensraum nennen. Eine Operation ist das erste Pfadsegment nach /api/ — z. B. :objects, :actions, :object-types, :function."
+ :refusal.branching/push-refused
+   "{why}"
+ :refusal.branching/refused
+   "{why}"
+ :refusal.checkouts/code-changed-both
+   "hier und seit deinem Pull geändert: {paths} — mit --mine oder --theirs pushen, um zu entscheiden, oder neu pullen"
+ :refusal.checkouts/no-repository
+   "kein Repository {repo}"
+ :refusal.checkouts/slice-needs-branch
+   "ein Slice wird auf einen Zweig gepusht: `branch <name>`, dann --branch <name>"
+ :refusal.checkouts/texts-staged
+   "die Texte bleiben vorgemerkt, sonst lief nichts: {refused}"
+ :refusal.checkouts/trunk-needs-proposal
+   "{trunk} übernimmt Vorschläge sofort; öffne vor dem Push von Code von Hand einen"
+ :refusal.documents/draft-invalid
+   "Entwurf „{draft}“: {why}"
+ :refusal.documents/lineage-graph-only
+   "nur ein Lineage-Graph wird im Dokument gezeichnet"
+ :refusal.documents/no-document
+   "kein Dokument {id}"
+ :refusal.documents/no-saved-graph
+   "kein gespeicherter Graph „{graph}“"
+ :refusal.foreign/actor-stamp
+   "Tabelle {table:pr} stempelt {actor-columns} bei {op} — der Schreibvorgang braucht einen :actor"
+ :refusal.foreign/anchorless-traversal "Template-Parameter {parameter} folgt {link} von {anchor}, der ungebunden ist — eine Traversierung ohne Anker läse den ganzen Typ"
+ :refusal.foreign/catalog-not-external "Quelle {source-name:pr} ist nicht als :external-transform markiert — ihr Katalog wird nicht gelesen"
+ :refusal.foreign/changes-nothing
+   "Writeback würde nichts ändern — jeder :set-Wert gleicht seinem :expect"
+ :refusal.foreign/clojure-external-systems "Transform {transform:pr} deklariert :external-systems, die eine :clojure-Transform nicht nutzen kann: die Interpreter-Sandbox hat kein Interop, also keinen Socket für Egress und keinen Weg, ein freigegebenes Secret zu verwenden. Nimm eine :python-Transform für eine externe Transform, oder erreiche ein Modell über einen :language-model-Input (sutra/chat), der auditiert wird."
+ :refusal.foreign/column-drawn
+   "Spalte {column:pr} wird aus {table:pr} selbst gezogen — der Aufrufer darf sie nicht liefern"
+ :refusal.foreign/column-minted
+   "Spalte {column:pr} wird aus {from} vergeben — der Aufrufer darf sie nicht liefern"
+ :refusal.foreign/columns-not-insertable
+   "Spalte(n) nicht auf :insertable-columns für {table}: {bad}"
+ :refusal.foreign/columns-not-writable "Spalte(n) nicht auf :writable-columns für {table}: {bad}"
+ :refusal.foreign/command-not-allowed
+   "Kommando {command:pr} steht nicht auf der :allow-commands-Whitelist"
+ :refusal.foreign/commands-undeclared
+   "Kommando-Datenquelle muss eine nicht-leere :allow-commands-Whitelist deklarieren"
+ :refusal.foreign/composite-generated-keys "ein zusammengesetzter Schlüssel lässt sich auf {dialect} nicht über generierte Schlüssel zurücklesen"
+ :refusal.foreign/composite-key-arity
+   "zusammengesetzter Schlüssel {pk-value:pr} hat {parts} Teil(e), {pk-columns:pr} braucht {needs}"
+ :refusal.foreign/connector-collides
+   "ein Plugin bringt Connector-Typ(en) {types}, die die Plattform schon hat — bitte umbenennen"
+ :refusal.foreign/connector-failed "der Connector antwortete mit einem Fehler {code}: {message}"
+ :refusal.foreign/connector-field-invalid "Connector-Feld {field} hat einen ungültigen Wert {value:pr}"
+ :refusal.foreign/connector-field-missing "Connector-Spec ohne {field}"
+ :refusal.foreign/connector-log "ein {type}-Connector führt kein Änderungsprotokoll in seiner Quelle — :writeback :log der Tabelle entfernen"
+ :refusal.foreign/connector-malformed "Connector {type} ist fehlerhaft: {problems}"
+ :refusal.foreign/connector-not-loaded "hier ist kein Connector für {type} geladen — sein Plugin fehlt (am Egress-Agenten: ein Plugin mit :connectors true oder ein Sidecar in SUTRA_CONNECTOR_SIDECARS)"
+ :refusal.foreign/connector-unreachable "der Connector unter {url} antwortete nicht"
+ :refusal.foreign/counter-exhausted "Zähler {table:pr} erreichte {digits}, das nicht mehr in {width} Stellen passt — der Nummernkreis ist erschöpft"
+ :refusal.foreign/counter-no-width
+   "Zähler lieferte keine Breite — die Nummer lässt sich nicht auffüllen"
+ :refusal.foreign/counter-rows "Zähler {table:pr} traf {rows} Zeile(n) für {where:pr} — eine Nummernquelle muss genau eine Zeile sein"
+ :refusal.foreign/csv-path-missing "CSV-Datenquelle ohne :path"
+ :refusal.foreign/datasource-not-csv "eine :clojure-Transform kann einen :datasource-Input nur lesen, wenn er eine CSV-Datei ist (Alias {alias:pr} → {path:pr}). Die Sandbox hat kein Dateisystem, also hat ein anderes Format keinen Leser: nimm es mit einer Python-Transform oder einem Source-Sync auf und lies das entstandene Dataset als :dataset-Input."
+ :refusal.foreign/dec-not-number
+   "sutra/dec nimmt eine Zahl oder einen numerischen String, bekommen: {got:pr}"
+ :refusal.foreign/delete-conflict "Writeback-Konflikt: {table} #{pk-value} hält nicht mehr die Werte, auf denen dieses Löschen beruhte — jemand hat sie zuerst geändert, oder sie ist schon weg"
+ :refusal.foreign/delete-key-not-unique "Writeback-Löschen traf {rows} Zeilen von {table} für Schlüssel {pk-value:pr} — der Writeback-Schlüssel ist in der Quelle nicht eindeutig"
+ :refusal.foreign/done-key-shape
+   "done_key muss \"<input-alias>.<column>\" sein, bekommen: {done-key:pr}"
+ :refusal.foreign/duplicate-row
+   "{table} führt diese Zeile schon ({match}) als {existing:pr} — sie wird kein zweites Mal geschrieben"
+ :refusal.foreign/edit-conflict "Writeback-Konflikt: {table} #{pk-value} hält nicht mehr die Werte, auf denen diese Änderung beruhte — jemand hat sie zuerst geändert"
+ :refusal.foreign/edit-wall-clock
+   "Clojure-Edit-Funktion {function} überschritt ihre Wanduhr von {seconds}s"
+ :refusal.foreign/egress-not-allowed "Egress zu {target:pr} steht nicht auf der Allowlist"
+ :refusal.foreign/egress-undeclared
+   "Netzwerk-Datenquelle {type} muss eine :egress-Allowlist deklarieren"
+ :refusal.foreign/expect-guard-missing
+   "Writeback-:expect muss jede :delete-guard-Spalte tragen; es fehlt {missing}"
+ :refusal.foreign/expect-set-missing
+   "Writeback-:expect muss den vorigen Wert jeder gesetzten Spalte tragen; es fehlt {missing}"
+ :refusal.foreign/export-markings "Export für Quelle {source} verweigert — Marking(s) {leaking} stehen nicht auf der :export-markings-Allowlist"
+ :refusal.foreign/export-transform-unimplemented "die Python-:export-transform-Naht ist deklariert, aber noch nicht umgesetzt — liefere eine Sandbox-Transform (Objektform-Werte → {shape})."
+ :refusal.foreign/folded-column "Input {input:pr} hat keine Spalte {key} — meinst du {column}? Eine gespeicherte Spalte heißt nach der Faltung der Plattform (`-` → `_`, Umlaute ausgeschrieben); diesen Namen zeigt `dataset preview`."
+ :refusal.foreign/function-transform-decorated "Function {transform:pr} ist mit @transform dekoriert. Eine Function ist `from functions.api import function` mit `@function(sources=[...], api_name=...)`, ihre Argumente sind die Parameter der dekorierten Funktion; @transform erklärt einen Build-Transform, der seine Ausgaben schreibt."
+ :refusal.foreign/glpi-path-missing "glpi-api-Quelle ohne :path zum Ablegen"
+ :refusal.foreign/insert-empty "Writeback-:insert ist leer — nichts einzufügen"
+ :refusal.foreign/jdbc-url-missing "Datenquellen-Spec ohne :jdbc-url"
+ :refusal.foreign/jdbc-url-refused ":jdbc-url der Datenquelle abgewiesen: {reason}"
+ :refusal.foreign/key-not-unique "Writeback traf {rows} Zeilen von {table} für Schlüssel {pk-value:pr} — der Writeback-Schlüssel ist in der Quelle nicht eindeutig"
+ :refusal.foreign/last-form-not-fn "die letzte Form einer Clojure-Transform muss zu einer Funktion eines Arguments (der Inputs-Map) auswerten; diese ergab {type}. Beende den Rumpf mit `(fn [inputs] …)`, einem `(sutra/transform {…} (fn …))` oder der `defn`-Form selbst."
+ :refusal.foreign/lm-service-unconfigured "der Language Model Service ist NICHT konfiguriert, aber Transform {transform:pr} ruft Sprachmodelle auf — sie läuft nicht. Ein direkter Provider-Aufruf wäre UNPROTOKOLLIERT, und jeder LLM-Aufruf muss auditierbar sein (llm_call_log). Hinterlege den LMS-Endpunkt (instance_config `lm_service_url`, aus SUTRA_LM_SERVICE_URL beim Serverstart)."
+ :refusal.foreign/logged-delete-needs-actor "Tabelle {table:pr} protokolliert ihre Änderungen — ein Löschen braucht einen :actor (kein Rückfall auf das Dienstkonto)"
+ :refusal.foreign/logged-insert-needs-actor "Tabelle {table:pr} protokolliert ihre Änderungen — ein Einfügen braucht einen :actor (kein Rückfall auf das Dienstkonto)"
+ :refusal.foreign/logged-writeback-needs-actor "Tabelle {table:pr} protokolliert ihre Änderungen — Writeback braucht einen :actor (kein Rückfall auf das Dienstkonto)"
+ :refusal.foreign/media-not-bytes
+   "put-media-item braucht Bytes oder einen String, bekommen: {type:pr}"
+ :refusal.foreign/mem-delete-conflict "Writeback-Konflikt: {table} #{pk-value} hält nicht mehr die Werte, auf denen dieses Löschen beruhte"
+ :refusal.foreign/mem-edit-conflict "Writeback-Konflikt: {table} #{pk-value} hält nicht mehr die Werte, auf denen diese Änderung beruhte"
+ :refusal.foreign/mem-no-numbers "die mem-Quelle vergibt keine Nummern (:autonumber, :sequence)"
+ :refusal.foreign/mem-no-table "keine Tabelle {table:pr} in {source:pr}"
+ :refusal.foreign/mem-select
+   "die mem-Quelle beantwortet SELECT 1 und SELECT * FROM <table>, nicht {sql:pr}"
+ :refusal.foreign/model-not-external "Quelle {source-name:pr} ist nicht als :external-transform markiert — ihr Modell wird nicht durchgereicht"
+ :refusal.foreign/multi-source "eine Action schreibt in eine Quelle — {source:pr} neben {other:pr} wäre kein gemeinsamer Commit; mehrere Quellen gehen über eine Pipeline"
+ :refusal.foreign/no-api-key "Sprachmodell-Quelle hat keinen :api-key — ohne kommt nur ein Modellserver auf diesem Rechner oder in einem privaten Netz aus"
+ :refusal.foreign/no-delete-guard
+   "Tabelle {table:pr} hat keinen :delete-guard — ein Löschen ohne Guard ist bedingungslos"
+ :refusal.foreign/no-insertable-columns
+   "Tabelle {table:pr} hat keine :insertable-columns-Allowlist — Einfügen verweigert"
+ :refusal.foreign/no-model-input
+   "kein :language-model-Input namens {alias:pr} — diese Transform deklariert {have:pr}"
+ :refusal.foreign/no-platform-type "Spalte {column} hält ein {class}, das keinen Plattformtyp hat — lass sie aus der Abfrage weg oder caste sie"
+ :refusal.foreign/no-runner "kein Code-Runner für die Sprache {language:pr}"
+ :refusal.foreign/not-a-boolean "kein Wahrheitswert (true/false, ja/nein): {value:pr}"
+ :refusal.foreign/not-a-number "keine Zahl: {value:pr}"
+ :refusal.foreign/not-an-object "kein Ontologie-Objekt: {object}"
+ :refusal.foreign/not-cleared
+   "keine Freigabe für Quelle {source} — sie verlangt die Markings {markings}"
+ :refusal.foreign/not-deletable "Tabelle {table:pr} ist nicht :deletable? — Löschen verweigert"
+ :refusal.foreign/export-rows-ragged "ein Export schreibt EIN INSERT über eine Spaltenliste, und eine Zeile von {table:pr} trägt nicht jede Spalte aus {columns:pr} — Dataset und Ziel müssen 1:1 übereinstimmen"
+ :refusal.foreign/not-truncatable "Tabelle {table:pr} ist nicht :truncatable? — ein Export-Modus, der das Ziel leert, braucht diese Freigabe im :writeback-Eintrag der Quelle; das zeilenweise :deletable? schließt sie nicht ein"
+ :refusal.foreign/nothing-insertable
+   "nichts einzufügen — das Objekt trägt keine freigegebene Spalte außer der Identität"
+ :refusal.foreign/object-no-pk "Objekt hat keinen PK-Wert für den Writeback"
+ :refusal.foreign/object-no-pk-delete "Objekt hat keinen PK-Wert für das Writeback-Löschen"
+ :refusal.foreign/object-set-value "ein :object-set-Parameter nimmt eine Liste von IDs oder eine Lese-Spec, nicht {value:pr} — von der CLI: `--value p=id1,id2`, `--value 'p=[\"id1\" \"id2\"]'` oder `--value 'p={:where {:status {:= \"offen\"}}}'`"
+ :refusal.foreign/order-unknown-column "Scan soll nach {attribute:pr} ordnen, eine Spalte, die die Tabelle nicht hat ({order:pr}) — eine übernommene Ordnung sortiert der Kern nicht noch einmal, unsortierte Zeilen wären also stillschweigend die falsche Antwort"
+ :refusal.foreign/order-without-key "Scan soll ordnen ({order:pr}), aber die Tabelle hat keinen Schlüssel — gleiche Werte lassen sich dann nicht wie vorgesehen nach dem Schlüssel auflösen"
+ :refusal.foreign/outside-edit "ontology/… und edits/… gibt es nur innerhalb einer Edit-Funktion"
+ :refusal.foreign/parameter-required "Template-Parameter {parameter} ist Pflicht"
+ :refusal.foreign/path-outside
+   "Pfad {path:pr} liegt außerhalb der erlaubten Verzeichnisse ({dirs})"
+ :refusal.foreign/pk-immutable
+   "der Primärschlüssel {pk} eines bestehenden {type} kann nicht geändert werden"
+ :refusal.foreign/pk-value-missing "Writeback ohne :pk-value"
+ :refusal.foreign/prompt-key-inputs
+   "prompt_key-Spalten müssen alle aus EINEM Input stammen, bekommen: {aliases:pr}"
+ :refusal.foreign/prompt-key-shape
+   "prompt_key-Einträge müssen \"<input-alias>.<column>\" sein, bekommen: {entry:pr}"
+ :refusal.foreign/reach-path-outside "Pfad {path:pr} liegt außerhalb der erlaubten Verzeichnisse ({dirs})"
+ :refusal.foreign/remote-input-no-path "entfernte Transform: Input {alias:pr} hat keinen konkreten Pfad zum Versenden (im Decorator fest verdrahtete Pfade gehen über den Worker-Transport nicht)"
+ :refusal.foreign/image-invalid "Das Image {image} kann nicht laufen: {why}"
+ :refusal.foreign/image-unknown "Der Transform {transform} nennt das Image {image}, das nicht hochgeladen ist (bin/sutra image push)"
+ :refusal.foreign/container-workflows-off "Der Transform {transform} läuft in einem Container, und Container-Workflows sind auf dieser Instanz aus (ein Administrator: bin/sutra settings container-workflows true)"
+ :refusal.foreign/image-unreachable "Der Transform {transform} läuft in einem Container, und sein Worker erreicht die Image-Layer nicht (SUTRA_WORKER_API_URL fehlt)"
+ :refusal.foreign/remote-wheelhouse "entfernte Transform: :wheelhouse geht über den Worker-Transport nicht (das Paketverzeichnis müsste mitreisen)"
+ :refusal.foreign/reread-needs-table
+   "das Live-Nachlesen beim Writeback braucht eine deklarierte :table oder :query"
+ :refusal.foreign/reread-query-needs-sql
+   "eine Writeback-:query auf {table} braucht eine Quelle, die SQL beantwortet"
+ :refusal.foreign/rest-auth-mode "REST-Authentifizierungsart unbekannt: {mode}"
+ :refusal.foreign/egress-policy-not-active "Keine aktive Network-Egress-Policy für {address} (Zustand {state}): ein Administrator entscheidet sie unter `source egress policy`"
+ :refusal.foreign/egress-policy-decision "Eine Network-Egress-Policy wird genehmigt oder widerrufen, nicht {decision}"
+ :refusal.foreign/egress-policy-unknown "Keine Network-Egress-Policy {id}"
+ :refusal.foreign/rest-egress-not-allowed "REST-Egress zu {target:pr} steht nicht auf der Allowlist"
+ :refusal.foreign/rest-resource-unknown "REST-Ressource nicht deklariert: {resource}"
+ :refusal.foreign/rest-too-many-redirects "zu viele Weiterleitungen einer REST-Quelle, zuletzt nach {url}"
+ :refusal.foreign/returning-not-identity
+   ":returning {returning:pr} muss der :identity-Spalte der Tabelle gleichen, {identity:pr}"
+ :refusal.foreign/row-not-map "{where} muss Zeilen-MAPS liefern; gefunden: ein {type}: {row:pr}"
+ :refusal.foreign/rows-not-sequence
+   "{where} muss eine Folge von Zeilen-Maps liefern, geliefert: {got:pr}"
+ :refusal.foreign/sandbox-lm-unconfigured "Sprachmodell-Transform {transform:pr} erreichte die Sandbox ohne Konfiguration des Language Model Service — ein UNPROTOKOLLIERTER direkter Provider-Aufruf unterbleibt."
+ :refusal.foreign/secret-not-external "Quelle {source-name:pr} ist nicht als :external-transform markiert — ihr Secret wird nicht herausgegeben"
+ :refusal.foreign/set-empty "Writeback-:set ist leer — nichts zu ändern"
+ :refusal.foreign/single-output-map "Transform {transform:pr} deklariert ein einzelnes :output, muss also eine FOLGE von Zeilen-Maps liefern — sie lieferte eine Map. Pack sie ein: [row], oder erzeuge viele mit `for`/`map`."
+ :refusal.foreign/source-not-read-write
+   "Quelle {source} ist nicht :read-write — Writeback verweigert"
+ :refusal.foreign/source-other-agent
+   "Quelle {source-name:pr} gehört zum Egress-Agenten {agent:pr}, nicht zu diesem ({refused-by:pr})"
+ :refusal.foreign/source-path-missing "Quellpfad im Dateisystem existiert nicht: {source-path}"
+ :refusal.foreign/source-read-only "Quelle ist nicht :read-write — Writeback verweigert"
+ :refusal.foreign/spec-decl-not-map
+   "die {key}-Deklaration muss eine MAP von Spec-Feldern sein; bekommen: {type}"
+ :refusal.foreign/sql-ambiguous
+   "SQL, das SQL-Dialekte verschieden lesen ({what}), weist der Read-only-Wächter ab"
+ :refusal.foreign/sql-empty "leeres SQL vom Read-only-Wächter abgewiesen"
+ :refusal.foreign/sql-forbidden-verb "verbotenes SQL-Verb im Read-only-Kontext: {verb}"
+ :refusal.foreign/sql-multiple "mehrere SQL-Anweisungen sind nicht erlaubt (Read-only-Wächter)"
+ :refusal.foreign/sql-not-select
+   "nur SELECT/WITH/VALUES/TABLE/EXPLAIN erlaubt (Read-only-Wächter); bekommen: {leading:pr}"
+ :refusal.foreign/sql-unterminated "nicht abgeschlossene(r) {what} im SQL (Read-only-Wächter)"
+ :refusal.foreign/table-not-writable "Tabelle {table:pr} steht nicht auf der :writeback-Allowlist"
+ :refusal.foreign/template-no-body "Template {template} trägt keinen Rumpf"
+ :refusal.foreign/transform-cycle "Die Transforms {cycle} hängen im Kreis voneinander ab: ein Build kann sie nicht ordnen. Den Kreis auflösen, auch wo er über einen Objekttyp und seine Materialisierung läuft."
+ :refusal.foreign/transform-fn-not-fn
+   "sutra/transform nimmt eine Spec-Map und dann eine FUNKTION; als Funktion kam {got:pr}"
+ :refusal.foreign/transform-function-decorated "Transform {transform:pr} ist mit @function dekoriert. Ein Transform ist `@transform(inputs={...}, output=...)` und schreibt seine Ausgaben einmal je Build; @function erklärt eine Function, die ihrem Aufrufer einen Wert zurückgibt — sie gehört unter :functions."
+ :refusal.foreign/transform-reads-own-output "Transform {transform:pr} liest {target} als Eingabe {input:pr} und schreibt es zugleich. Dasselbe Dataset als Ein- und Ausgabe ist eine zyklische Abhängigkeit: der Build kann sie nicht ordnen. Die Zeilen des vorigen Laufs liest previous_output() (ein :incremental-Transform); sonst in ein anderes Dataset schreiben."
+ :refusal.foreign/transform-spec-not-map
+   "sutra/transform nimmt eine Spec-MAP und dann eine Funktion; als Spec kam {type}"
+ :refusal.foreign/transform-wall-clock "Clojure-Transform {transform:pr} überschritt ihre Wanduhr von {seconds}s (Profil {profile:pr}). Der Interpreter-Thread wurde unterbrochen; ignoriert er die Unterbrechung, lebt er bis zum Neustart des Prozesses weiter."
+ :refusal.foreign/unknown-agent "unbekannter Agent {agent}"
+ :refusal.foreign/unknown-column-type "unbekannter Spaltentyp {type:pr}"
+ :refusal.foreign/unknown-egress-agent
+   "Egress-Agent {agent:pr} wird von dieser Instanz nicht betrieben — bekannt: {known}"
+ :refusal.foreign/unknown-input-kind "unbekannte Input-:kind {kind:pr} für Alias {alias:pr}"
+ :refusal.foreign/unknown-parameter-type "unbekannter Parametertyp {type:pr} bei {parameter}"
+ :refusal.foreign/unknown-spec-keys
+   "unbekannte {key}-Felder {unknown:pr} — eine Transform darf deklarieren: {allowed:pr}"
+ :refusal.foreign/unsafe-identifier "unsicherer SQL-Bezeichner: {identifier:pr}"
+ :refusal.foreign/unsafe-pk-value "unsicherer PK-Wert für das Live-Nachlesen"
+ :refusal.foreign/unsupported "{op} wird auf einer {type}-Quelle nicht unterstützt"
+ :refusal.foreign/value-not-allowed
+   "Wert {value:pr} steht nicht auf :column-values für {table}.{column}"
+ :refusal.foreign/webhook-no-rest "Quelle hat keine :rest-Fähigkeit — Webhook verweigert"
+ :refusal.foreign/webhook-not-allowed
+   "Webhook {webhook-id:pr} steht nicht auf der :webhooks-Allowlist"
+ :refusal.foreign/webhook-params "Webhook-Parameter entsprechen nicht genau der Allowlist"
+ :refusal.foreign/write-session-gone
+   "Schreibsitzung {tx} ist weg — sie lief über {seconds} s hinaus oder wurde beendet"
+ :refusal.foreign/write-session-other-source "eine Schreibsitzung gehört zu EINER Quelle"
+ :refusal.foreign/writeback-unsupported-type
+   "Writeback wird für den Quelltyp {type:pr} nicht unterstützt"
+ :refusal.governance/branch-behind-parent
+   "Commit abgewiesen: der Zweig ist nicht auf dem Stand von {parent} — zuerst rebasen"
+ :refusal.governance/merged-schema-invalid
+   "Commit gescheitert: ungültiges Schema nach dem Merge (diese Prüfungen beurteilen das zusammengeführte Schema — `sutra changeset diff <datei…>` beantwortet sie vor dem Push)"
+ :refusal.foundation/external-call-on-branch
+   "ein externer Aufruf von Zweig '{branch}' wird abgewiesen: ein Zweig ist eine Testumgebung, und dieses Schreiben erreichte das Produktivsystem wirklich"
+ :refusal.foundation/object-id-needs-type
+   "object-id verlangt die RID eines Objekttyps, bekam: {type-ref:pr}"
+ :refusal.foundation/op-bad-signature
+   "Operationsaufruf mit ungültiger Signatur"
+ :refusal.foundation/op-not-served
+   "{op} wird von diesem Prozess nicht bedient"
+ :refusal.foundation/op-outside-window
+   "Operationsaufruf außerhalb seines Zeitfensters"
+ :refusal.foundation/op-replayed
+   "Operationsaufruf zweimal gesendet"
+ :refusal.foundation/op-unsigned
+   "unsignierter Operationsaufruf"
+ :refusal.foundation/op-wrong-kind
+   "{op} ist ein {kind-is}, kein {kind}"
+ :refusal.foundation/peer-refused
+   "{peer} hat abgelehnt: {why}"
+ :refusal.foundation/peer-unreachable
+   "{peer} nicht erreichbar"
+ :refusal.foundation/setting-invalid
+   "{name} {why}"
+ :refusal.foundation/trace-too-wide
+   "die Präfixe {prefixes:pr} treffen {matched} Vars, mehr als die {max}, die dies umhüllt — grenze sie ein"
+ :refusal.foundation/unknown-setting
+   "keine Instanzeinstellung {setting:pr} — eine von: {known}"
+ :refusal.governance/no-request
+   "keine solche Anfrage: {id}"
+ :refusal.governance/proposal-already-open
+   "ein offener Vorschlag für {source} → {target} besteht schon"
+ :refusal.governance/proposal-missing-branch
+   "kein solcher Zweig: {missing}"
+ :refusal.governance/proposal-no-source
+   "es fehlt der :source-Zweig"
+ :refusal.governance/proposal-same-branch
+   "ein Vorschlag führt ZWISCHEN Zweigen zusammen ({source} → {target})"
+ :refusal.governance/request-invalid
+   "{why}"
+ :refusal.governance/request-not-eligible
+   "nicht berechtigt, über diese Anfrage zu entscheiden — sie braucht {needs}"
+ :refusal.governance/request-not-open
+   "die Anfrage ist {status}, nicht offen"
+ :refusal.health/unknown-node
+   "Der Health-Check nennt einen unbekannten Knoten: {ref}"
+ :refusal.catalog/acl-denied
+   "ACL: {op-name} verweigert — der Rolle des Principals fehlt {operation} im Projekt dieser Ressource ({what})"
+ :refusal.catalog/clojure-parse-error "Der Clojure-Quelltext lässt sich nicht lesen"
+ :refusal.catalog/computed-value
+   "Ein Wert ist hier ein Name, (:prop x) oder (.method x) — diese Funktion wird übersetzt, nicht ausgeführt, also würde {form} als Daten geschrieben. Den Wert so übergeben, wie er ist, oder ihn in einer ausgeführten Edit-Funktion berechnen: ^{:sutra/function {:edits [<object-type> …]}}"
+ :refusal.catalog/constraint-violation "Constraint verletzt bei {type-name}: {messages}"
+ :refusal.catalog/doseq-one-binding "doseq nimmt EINE Bindung: (doseq [x coll] …)"
+ :refusal.catalog/edit-function-edits
+   "^{:sutra/function {:edits [<object-type> …]}} an {function} muss die Objekttypen nennen, die sie ändert"
+ :refusal.catalog/edit-params-destructured
+   "Die Parameter einer Edit-Funktion sind einfache Namen (im Rumpf zerlegen): {params:pr}"
+ :refusal.catalog/expectation-failed "Datenerwartung nicht erfüllt bei {type-name}: {messages}"
+ :refusal.catalog/fk-link-on-missing
+   "Der Transform-Output, der den Link-Typ {link-type} speist, trägt {key} {value:pr}. Ein FK-Link hat keinen Moment, in dem er scheitern oder überspringen könnte: er ist der Join seiner Enden, eine Zeile mit leerem oder ins Leere zeigendem FK verlinkt einfach nicht. Nur :skip wird noch angenommen, und es bewirkt nichts."
+ :refusal.catalog/function-invalid "Funktion {function-name}: {listed}"
+ :refusal.catalog/link-input-kind-unknown
+   "Der Transform, der den Link-Typ {link-type} speist, hat ein unbekanntes :input.kind {kind:pr}"
+ :refusal.catalog/link-output-incomplete
+   "Dem Transform-Output, der den Link-Typ {link-type} speist, fehlt {missing} (verlangt für die Form {style})."
+ :refusal.catalog/marking-not-cleared
+   "Marking: diese Ressource trägt ein Marking, für das du nicht freigegeben bist"
+ :refusal.catalog/move-target-no-project
+   "Das Ziel muss ein Projekt sein — „Ohne Projekt“ ist kein Ort, an den etwas verschoben wird."
+ :refusal.catalog/no-defn "Im Quelltext steht keine defn-Form"
+ :refusal.catalog/object-output-incomplete
+   "Dem Transform-Output, der {object-type} speist, fehlen Pflichtfelder. Verlangt ist eines von: Datensatz → :input.kind=:dataset + :input.dataset (die tragende Datenquelle — bevorzugt); alt → :input.kind=:datasource + :input.datasource + (:source.table oder :source.query) — von der Schichtgrenze ABGEWIESEN, stattdessen in einen Datensatz synchronisieren; oder Berechnung → :language ∈ {languages:pr} + :inputs + (:query für :sql / :code für :python|:clojure). Dazu :primary-key für alle drei."
+ :refusal.catalog/object-type-unfed
+   "Objekttyp {object-type} hat keinen speisenden Transform-Output. Jeder Objekttyp muss Ziel eines :output-Eintrags {:kind :object-type :object-type {object-type}} sein."
+ :refusal.catalog/one-of-over-link
+   "Ein exakter Abgleich über mehrere Werte braucht eine Eigenschaft des gesuchten Typs, nicht {property}"
+ :refusal.catalog/polymorphic-source-incomplete
+   "Der polymorphe Transform, der den Link-Typ {link-type} speist, hat eine Quelle ohne :from-type / :from-key-column / :to-key-column."
+ :refusal.catalog/project-not-on-branch "Ein Projekt „{project}“ gibt es auf diesem Zweig nicht."
+ :refusal.catalog/python-edit-one-def
+   "Eine :python-Edit-Funktion deklariert genau EIN mit @function dekoriertes def; gefunden: {count}{named}"
+ :refusal.catalog/python-unbalanced-params "unausgeglichene Parameterliste in def {entry}"
+ :refusal.catalog/search-unknown-type
+   "Die Suche nennt einen unbekannten Objekttyp: {type}. Bekannte Objekttypen: {known}. (Hinweis: den Typnamen in der Einzahl verwenden, z. B. :airport statt :airports.)"
+ :refusal.catalog/transform-cycle "{label}: Zyklus im Transform-Graphen"
+ :refusal.catalog/traverse-untyped
+   "Von {binding} aus lässt sich nicht weitergehen: kein bekannter Objekttyp."
+ :refusal.catalog/unknown-binding "Unbekannte Bindung: {binding}"
+ :refusal.catalog/unknown-filter-format "Unbekanntes Filterformat"
+ :refusal.catalog/unknown-filter-type "Unbekannte Filterart"
+ :refusal.catalog/unknown-function-input "Unbekannte Eingabe der Funktion: {input}"
+ :refusal.catalog/unknown-kernel-op "Unbekannte Kernel-Operation: {op}"
+ :refusal.catalog/unknown-language "Unbekannte Sprache: {language}"
+ :refusal.catalog/unknown-type "Unbekannter Typ: {type}"
+ :refusal.catalog/unrecognized-binding "Unbekannte Bindungsform"
+ :refusal.catalog/unrecognized-reduce "Unbekanntes reduce-Muster"
+ :refusal.catalog/unrecognized-threading "Unbekannte Threading-Form"
+ :refusal.catalog/use-llm-media ":use-llm {problem}"
+ :refusal.catalog/use-llm-missing ":use-llm braucht {missing:pr}"
+ :refusal.catalog/use-llm-output ":use-llm :output — {problem}"
+ :refusal.cli/latest-ambiguous
+   "--latest: {type} hat mehrere Zeiteigenschaften ({properties}) — mit --order <property>:desc sagen, welche 'latest' ist"
+ :refusal.cli/latest-no-time
+   "--latest: {type} hat keine :timestamp/:date-Eigenschaft zum Ordnen — --order <property>:desc verwenden, oder `describe {type}`, um die Form zu sehen"
+ :refusal.cli/unknown-node-kind "unbekannte Knotenart {kind} — eine von {kinds}"
+ :refusal.dialect/action-log-param "Action {action-name}: :action-log :params {param-name} — {why}"
+ :refusal.dialect/action-log-value "Action {action-name}: :action-log :values {attr-name} — {why}"
+ :refusal.dialect/action-param-reserved
+   "Action {action}: der Parameter {param} ist in Regelwerten für [:now]/[:current-user] reserviert — den eigenen umbenennen"
+ :refusal.dialect/action-set-shape
+   "Action {action}: :set nimmt einen Vektor von Eigenschaftsnamen, nicht {set:pr}"
+ :refusal.dialect/ambiguous-name
+   "der Name {name:pr} steht in mehreren Räumen — {names:pr} in {spaces:pr}; ein Projekt des gemeinten Raums nennen (X-Sutra-Project, `--project`) oder die RID verwenden"
+ :refusal.dialect/attribute-link-names-twice
+   "Attribut-:link ergibt denselben Link-Namen mehrfach: {links:pr} — gib :name an."
+ :refusal.dialect/bucket-unit-spelling
+   "keine Schreibweise in {dialect-name} für die Bucket-Einheit {unit:pr}"
+ :refusal.dialect/expectation "Erwartung {shown}: {problem}"
+ :refusal.dialect/expectations-unknown-type "unbekannter Typ {type:pr}"
+ :refusal.dialect/field-type-vs-value-type
+   "Attribut {attribute} deklariert den Feldtyp {field-type:pr}, aber der Werttyp {value-type} hat die Basis {value-type-base:pr} — ein Werttyp umhüllt seinen Basistyp, er ändert die Speicherung nicht. Den Feldtyp an die Basis des Werttyps angleichen (oder umgekehrt)."
+ :refusal.dialect/fk-many-to-many
+   "Link {link} ist :many-to-many — ein Fremdschlüssel kann das nicht ausdrücken (es gibt keinen Ort für einen einzelnen Schlüssel)."
+ :refusal.dialect/fk-one-to-one
+   "Link {link} ist :one-to-one — kein Ende ist die `many`-Seite, also kann :fk nicht ableiten, welches den Schlüssel trägt. Es benennen: {:fk {:attribute … :side :from|:to}}."
+ :refusal.dialect/fk-resolve-side
+   "Link {link} {:fk-resolve} bei {cardinality} muss die :side des Fremdschlüssels nennen (:from|:to) — kein Ende ist eindeutig die `many`-Seite."
+ :refusal.dialect/fk-resolve-transform-taken
+   "Link {link} {:fk-resolve} würde den Transform {transform} erzeugen, aber der ist schon deklariert."
+ :refusal.dialect/join-on-fk-cardinality
+   "Link {link} ist {cardinality}, deklariert aber ein :join (eine Kante über eine Join-Tabelle). Eine {cardinality}-Kante ist ein Fremdschlüssel eines Objekttyps — {:fk …} verwenden (der Fremdschlüssel sitzt auf der many-Seite). Ist die Kante wirklich many-to-many, ihre :cardinality auf :many-to-many setzen."
+ :refusal.dialect/link-backing-and-producer
+   "Link {link} hat ein {backing}, aber ein Transform {transform} ist auch deklariert — ein Link trägt eine eingebettete Grundlage ODER einen handgeschriebenen Erzeuger, nicht beides."
+ :refusal.dialect/link-backings
+   "Link {link} trägt {backings:pr} — ein Link hat genau eine Grundlage. :fk für eine Fremdschlüssel-Kante (ohne Join-Tabelle), :join für eine Many-to-many-Kante über eine Join-Tabelle, oder :fk-resolve, um einen Abgleich ohne Primärschlüssel zuerst in einen Fremdschlüssel zu rechnen."
+ :refusal.dialect/link-declared-twice
+   "Link {link} steht in :links UND entsteht aus einem Attribut-:link — eine Beziehung wird an einer Stelle deklariert."
+ :refusal.dialect/link-side-ambiguous
+   "Die Link-Seite {link:pr} ist bei {type} mehrdeutig — jede Seite eines Link-Typs braucht ihren eigenen API-Namen (:forward-api-name / :reverse-api-name)"
+ :refusal.dialect/malformed-aggregate "fehlerhaftes Aggregat: {detail}"
+ :refusal.dialect/malformed-object-set "fehlerhafte Objektmenge: {reason}"
+ :refusal.dialect/no-column-type "Kein Spaltentyp für den Werttyp {value-type:pr}"
+ :refusal.dialect/no-link-side
+   "Der Objekttyp {type} hat keine Link-Seite namens {link:pr} (Seiten: {sides:pr})"
+ :refusal.dialect/no-version "keine Version {version}"
+ :refusal.dialect/no-version-to-publish
+   "keine Version {version} zum Veröffentlichen — Versionen: {versions}"
+ :refusal.dialect/object-set-unknown-keys
+   "unbekannte(r) Schlüssel {unknown:pr} in einer flachen Objektmenge — bekannt: {allowed:pr}"
+ :refusal.dialect/param-type-underivable
+   "Action {action}: der Parameter {param} hat keinen :type, und keiner lässt sich ableiten — er schreibt {writes-text}. Wo es keinen gibt, ihn angeben."
+ :refusal.dialect/parameter-invalid "Parameterwert {value:pr} ist ungültig: {error}"
+ :refusal.dialect/parameters-without-value
+   "Parameter {names} haben keinen Wert — ein Parameter ohne Wert ist ein Platzhalter und lässt sich nicht bauen"
+ :refusal.dialect/shared-property-type-vs-value-type
+   "Die geteilte Eigenschaft {shared-property} deklariert :type {type:pr}, aber der Werttyp {value-type} hat die Basis {value-type-base:pr} — ein Werttyp umhüllt seinen Basistyp, er ändert die Speicherung nicht. :type weglassen (er folgt dem Werttyp) oder angleichen."
+ :refusal.dialect/shared-property-value-type-undeclared
+   "Die geteilte Eigenschaft {shared-property} nennt :value-type {value-type}, der kein deklarierter :value-types-Eintrag ist {known-value-types} — ihn deklarieren oder der geteilten Eigenschaft einen eigenen :type geben, wenn der Werttyp in einer anderen Datei steht."
+ :refusal.dialect/undeclared-parameters
+   "der Transform-Rumpf nennt nicht deklarierte Parameter {names} — sie unter :parameters deklarieren"
+ :refusal.dialect/unknown-attribute-type
+   "Unbekannter Typ {type} am Attribut {attribute} — kein skalarer Werttyp und kein deklarierter :value-types-Eintrag {known-value-types}"
+ :refusal.dialect/unknown-link "Unbekannter Link: {link}"
+ :refusal.dialect/unknown-rollup "unbekanntes Rollup :agg {agg:pr} — bekannt: {known:pr}"
+ :refusal.dialect/unresolved-references
+   "Ungültiges .ent ({source}): nicht aufgelöste Verweise\n  - {listed}"
+ :refusal.dot/graphviz-missing
+   "graphviz {engine} ist auf diesem Host nicht vorhanden — die Layouts dieses Plugins lassen sich hier nicht zeichnen ({why})"
+ :refusal.dot/graphviz-no-header
+   "graphviz antwortete ohne Graph-Kopf — kein Layout zu lesen"
+ :refusal.dot/graphviz-refused "graphviz {engine} hat den Graphen abgewiesen: {reason}"
+ :refusal.dot/graphviz-timeout
+   "graphviz {engine} hat nicht innerhalb von {seconds} s geantwortet"
+ :refusal.lineage/by-facet "--by nimmt {facets} — nicht {by}"
+ :refusal.lineage/depth "Die Tiefe ist eine Zahl oder all, nicht {depth}"
+ :refusal.lineage/no-column "kein Datensatz und kein Objekttyp hat eine Spalte {column:pr}"
+ :refusal.lineage/no-node
+   "kein Lineage-Knoten {node:pr} — ein Name, Art/Name oder eine RID eines Transforms, Datensatzes, Objekttyps, Link-Typs, einer Quelle, Action oder App"
+ :refusal.lineage/no-project "kein Projekt {project:pr}"
+ :refusal.lineage/no-rollback-table "Der Knoten hat keine Tabelle, die sich zurücksetzen lässt"
+ :refusal.lineage/rollback-needs-version
+   "Zurücksetzen braucht ein Versionskennzeichen — die ID eines Store-Schnappschusses"
+ :refusal.lineage/rollback-object-type
+   "ein Objekttyp hat keine eigenen Transaktionen: setze sein zugrunde liegendes Dataset{backing-text} zurück, die Objekte folgen"
+ :refusal.lineage/rollback-unsupported
+   "Zurücksetzen von {node-key} wird nicht unterstützt"
+ :refusal.lineage/stale-duration "--stale nimmt eine Dauer wie 7d, 24h, 30m — nicht {stale}"
+ :refusal.lineage/to-two-nodes "--to fragt nach dem Weg zwischen einem Knoten und einem anderen"
+ :refusal.parser/board-first-op "Board: die erste Operation muss :from sein"
+ :refusal.parser/board-op-failed
+   "{why}"
+ :refusal.parser/board-scalar-op
+   "Board: die skalare Operation {op} lässt sich nicht nach SQL übersetzen"
+ :refusal.parser/board-table-op "Board: unbekannte Tabellenoperation {name}"
+ :refusal.parser/conflicting-export-scope
+   "Export: :all-projects? und :project {project} sind zwei verschiedene Bereiche — einen angeben"
+ :refusal.parser/declared-twice
+   "{p} und {q} deklarieren beide {section} {key}{field-note}, verschieden — es in einer der beiden behalten"
+ :refusal.parser/ent-names-ontology
+   "Ungültiges .ent ({source}): ein `.ent` darf KEINE :ontology nennen — die Instanz bedient genau eine Ontologie (ihr DB-Name steht in der Verbindungskonfiguration), nicht die Schemadatei. Den Schlüssel :ontology entfernen."
+ :refusal.parser/extension-redeclares
+   "{path}: {key} hat schon ein Attribut {attribute} — eine Erweiterung fügt nur hinzu"
+ :refusal.parser/file-language-unknown "{path}: keine Autorensprache {language}"
+ :refusal.parser/file-unreadable "{path}: {reason}"
+ :refusal.parser/grammar-too-new
+   "Der Text ({source}) ist in Grammatik {grammar} geschrieben, neuer als die {reads}, die diese Plattform liest. Die Plattform aktualisieren oder den Text in Grammatik {major}.x schreiben."
+ :refusal.parser/grammar-version-shape
+   "Ungültiger Text ({source}): :sutra/grammar ist eine Versionszeichenkette wie \"1.0\", nicht {grammar:pr}"
+ :refusal.parser/invalid-text
+   "{what} ({source}): {n} Problem(e) — jeweils `Pfad — Grund`:\n{lines}\n{hint}"
+ :refusal.parser/no-format
+   "{path}: keine Autorendeklaration nimmt diese Datei an (versucht: {tried})"
+ :refusal.parser/projection-not-allowed "die Projektion {name} darf nicht: {what}"
+ :refusal.parser/projection-unread "die Projektion {name} liest keinen Text {files:pr}"
+ :refusal.parser/require-conflict
+   ":require-Konflikt: {section}/{key} ist in zwei Dateien verschieden definiert"
+ :refusal.parser/require-cycle ":require-Zyklus über {path}"
+ :refusal.parser/require-section-conflict ":require-Konflikt in der Sektion {section}"
+ :refusal.parser/retire-section-gone
+   "Ungültiges .ent ({source}): die Sektion `:retire` gibt es nicht mehr. Stilllegung ist ein LEBENSZYKLUS-ZUSTAND an der Ressource, keine Namensliste daneben. Kündige sie AN der Sache an, wo ein Nutzer sie sieht:\n       :status :deprecated\n       :deprecation {:reason \"…\" :deadline \"YYYY-MM-DD\"\n                     :replacement :the-new-one}\n  2. Dann LASS SIE aus dem Baum WEG. Fehlen in einem maßgeblichen\n     `.ent` IST die Entfernung, und die Prüfung `retire` erlaubt es,\n     sobald der Status es tut.\n\nWarum sie gehen musste: sie nannte Identitäten ein zweites Mal an einer zweiten Stelle; sie konnte keinen Grund, keine Frist und keinen Nachfolger tragen; und sie stellte ihre `delete-*`-Schritte an `declare/deletion-status-block` vorbei, löschte also eine `:active` Ressource, die jede andere Tür nicht anrührt. Die git-Tür hat sie auch nie angenommen — `:retire` ist keine Sektion des Ontologie-Repositorys, also wies `scope` den Push ab."
+ :refusal.parser/runbook-shape
+   "Ungültiges .entr ({source}): ein Runbook ist eine Map mit einem geordneten `:steps`-Vektor."
+ :refusal.parser/two-owners
+   "{section} {key} wird von {owner-a} ({p}) und von {owner-b} ({q}) deklariert — eine Ressource hat einen Eigentümer; das andere Projekt importiert sie, statt sie noch einmal zu deklarieren"
+ :refusal.parser/unknown-format "keine Autorendeklaration {format}"
+ :refusal.parser/unknown-language "keine Autorensprache {language}"
+ :refusal.parser/unknown-project "unbekanntes Projekt: {project}"
+ :refusal.parser/unknown-projection "keine Projektion {projection:pr} ist deklariert"
+ :refusal.parser/unknown-repository "unbekanntes Repository: {repository}"
+ :refusal.platform-sdk/ambiguous-link-side
+   "Die Link-Seite {side:pr} ist bei {object-type} mehrdeutig — dem Link verschiedene :forward-api-name / :reverse-api-name geben"
+ :refusal.platform-sdk/unspellable
+   "{kind-name} {name:pr} lässt sich nicht als Clojure-Name schreiben — in der Ontologie umbenennen"
+ :refusal.types/action-in-no-text "Aktion {aktion} steht in keinem Text"
+ :refusal.types/click-without-view-decision
+   "der Klick hielt keine Ansichtsentscheidung fest (älteres Fenster?)"
+ :refusal.types/malformed-series-read "fehlerhafte Serienabfrage: {detail}"
+ :refusal.types/no-click-in-session "kein Klick in dieser Sitzung"
+ :refusal.types/no-error-in-session "kein Fehler in dieser Sitzung"
+ :refusal.types/no-llm-catalog-adapter
+   "kein LLM-Katalog-Adapter für die Quelle {source:pr} (base-url {base-url:pr}) — ein Plugin steuert ihn zu :llm/catalogues bei"
+ :refusal.types/no-unique-action "keine eindeutige Aktion zu „{text}“"
+ :refusal.types/not-a-duration
+   "keine Dauer: {duration:pr} — Millisekunden angeben, `<n>ms|s|m|h|d` (z. B. 90s, 2m), oder {:unit \"SECONDS\" :value 30}"
+ :refusal.types/too-many-points
+   "die Serienabfrage überschritt {limit} Punkte ({points}) — das Fenster eingrenzen oder ein gröberes :bucket verlangen"
+ :refusal.types/too-many-series
+   "die Serienabfrage nannte {series} Serien (Grenze {limit}) — die Objektmenge eingrenzen, die sie auflöst"
+ :refusal.types/unknown-review-term "unbekannter Review-Begriff {term:pr} — bekannt: {known:pr}"
+ :refusal.viz/unknown-layout "unbekanntes Layout {layout:pr} — installiert sind {installed}"
+ :refusal.viz/unknown-richtung "unbekannte :richtung {richtung:pr} — :links-rechts oder :oben-unten"
+ :refusal.lifecycle/transition-refused
+   "{lifecycle} {id:pr}: {event} ist aus {from} nicht erlaubt{why}"
+ :refusal.git/text-through-projection
+   "git trägt nur Code — dieser Push ändert {texts}. Ein Text ist eine Projektion der Ontologie und ändert sich über `sutra projection pull`/`push`; die Deklaration eines Transforms steht im @transform seiner .py-Datei"
+ :refusal.git/tag-not-accepted "diese Instanz nimmt auf diesem Repository keine Tags an"
+ :refusal.git/unsupported-ref
+   "nicht unterstützte Ref: {ref} — projiziert werden nur refs/heads/* und refs/tags/*"
+ :refusal.git/machine-namespace
+   "`{branch}` ist ein Maschinen-Namensraum (staging/run/scenario), kein Zweig, auf den man pusht"
+ :refusal.git/fetch-first
+   "erst holen: der Server hat Commits, die dein Zweig nicht enthält (ein committetes `.ent` dieses Repositorys wird als git-Commit auf den Zweig geprägt) — `git pull --rebase origin {branch}`, dann erneut pushen"
+ :refusal.git/protected
+   "`{branch}` ist geschützt — über ein Proposal landen, nicht per direktem Push: {steps}"
+ :refusal.git/no-open-proposal
+   "`{branch}` hat kein offenes Proposal — NICHTS wurde geschrieben. Ein git-Push landet auf einem Zweig nur, solange sein Proposal offen ist: {steps} (commit nur, wenn etwas gestagt ist; ein committetes `.ent` dieses Repositorys wird auf den git-Zweig geprägt, daher das Rebase)"
+ :refusal.llm/call-refused
+   "Sprachmodell-Aufruf abgelehnt ({status}): {why}"
+ :refusal.llm/media-invalid
+   ":use-llm :media — {why}"
+ :refusal.llm/reprice-incomplete
+   "llm reprice braucht :model, :in, :out und :effective-from"
+ :refusal.llm/reprice-negative
+   "llm reprice: :{field-name} muss ein nicht negativer Preis je 1 Mio. Tokens sein"
+ :refusal.llm/reprice-unregistered
+   "llm reprice: {model:pr} ist nicht registriert — das Hauptbuch bepreist nur nutzbare Modelle; registriere es zuerst"
+ :refusal.llm/unknown-wire
+   "unbekannte Sprachmodell-Anbindung {wire} — eine von {known}"
+ :refusal.media/format-not-held
+   "Dieses Media-Set hält {formats-text} — {mime:pr} gehört nicht dazu."
+ :refusal.media/input-no-media-refs
+   "der Datensatz {dataset} enthält keine Medienverweise"
+ :refusal.media/input-not-address
+   "eine :media-Eingabe nimmt eine Medienadresse, nicht {address:pr}"
+ :refusal.media/input-unreferenced
+   "keine Zeile von {dataset} verweist auf das Medienelement {address}"
+ :refusal.media/item-invalid
+   "Medienset {name}: {why}"
+ :refusal.media/set-not-readable
+   "das Medienset {name} ist hier nicht lesbar"
+ :refusal.media/source-kind
+   "eine Medienquelle ist ein Medienset oder ein Datensatz, nicht {kind:pr}"
+ :refusal.media/undeclared-media-set
+   "Kein Media-Set {set:pr} erklärt. Medien landen nur in einem erklärten Set — sonst gibt es keine Ressource, deren Projekt über das Lesen entscheidet."
+ :refusal.media/undeclared-output
+   "{transform} schrieb in den nicht deklarierten Medien-Output {output}"
+ :refusal.media/virtual-source-gone
+   "die Quelle eines virtuellen Medienelements ist weg: {source}"
+ :refusal.object-set/invalid-filter
+   "INVALID_FILTER: {what:pr} ist kein Filter, den ein Abo versteht"
+ :refusal.object-set/invalid-object-type "INVALID_OBJECT_TYPE: {what:pr} nennt keinen Objekttyp"
+ :refusal.object-set/not-supported
+   "OBJECT_SET_NOT_SUPPORTED: {what:pr} ist keine Objektmenge, die ein Abo beobachten kann"
+ :refusal.peering/peer-refused
+   "Peer {trust} hat abgelehnt ({status}): {why}"
+ :refusal.peering/peer-unreachable
+   "Peer {trust} nicht erreichbar: {why}"
+ :refusal.peering/profile-not-kept
+   "das Profil lässt sich nicht speichern"
+ :refusal.objects/all-links-read-denied
+   "ACL: Lesen verweigert — alle Links aufzulisten verlangt Leserecht auf der Plattform"
+ :refusal.objects/around-needs-types
+   "ein Objektverweis trägt seinen Typ: nenne die Objekttypen dieser {seeds} Objekte in :types (`around <id…> --type <typ>`)"
+ :refusal.objects/around-too-large
+   "{links} Links berühren diese {seeds} Objekte, mehr als die {cap}, die :around mit ihren Nachbarn beantwortet. Lies einen Link als Objektmenge: POST /api/ontology/query {:find <type> :ids […] :around [<side>] :limit … :count? true} (`query <type> --around`)."
+ :refusal.objects/around-with-dir
+   ":around nennt eine Link-SEITE, die ihre Richtung schon trägt — lass :dir in {around:pr} weg"
+ :refusal.objects/derive-cap
+   "ein Lesen von {object-type} erreicht über {link-name} → {far-type}.{attrs} eine ABGELEITETE Eigenschaft des fernen Typs, also müssen diese {actual} Objekte oberhalb des Speichers geladen und abgeleitet werden — die Plansprache kennt eine Faltung über eine Spalte, und ein abgeleiteter Wert hat keine. Die Grenze liegt bei {limit} Objekten für einen Schritt einer Kette. Grenze das Lesen ein (ein Filter, eine Seite) oder lass einen Transform den fernen Wert als Ergänzung speichern (:role :supp): dann ist die Faltung eine SQL-Anweisung über eine Spalte und keine Grenze gilt."
+ :refusal.objects/derive-cycle
+   "{why}"
+ :refusal.objects/derived-not-computable
+   "das Lesen filtert, ordnet oder aggregiert nach {attr-name}, einer abgeleiteten Eigenschaft von {type-name}, die der Speicher nicht berechnen kann: die Plansprache kennt Faltungen über einen Link und Arithmetik über sie und die Zeile, nicht diesen Ausdruck. Mach es zu einem davon oder berechne den Wert in einem Transform, damit der Typ ihn als Spalte trägt."
+ :refusal.objects/exploration-kind
+   "Gespeichert wird eine :exploration oder eine :list."
+ :refusal.objects/exploration-not-owner
+   "Diese Exploration ändert nur, wer sie besitzt."
+ :refusal.objects/explorer-unknown-type
+   "kein Objekttyp {name}"
+ :refusal.objects/filter-empty
+   "Der Filter auf {attr:pr} ist leer — er nennt ein Attribut und verlangt nichts von ihm. Ein leerer Filter, der übergangen wird, ist von gar keinem Filter nicht zu unterscheiden."
+ :refusal.objects/filter-id-equality
+   "Ein Filter auf :id meint die Identität des Objekts und nimmt nur = (bekam {filter:pr})"
+ :refusal.objects/filter-not-a-map
+   "Der Filter auf {attr:pr} muss eine Map op → Wert sein, bekam {filter:pr}"
+ :refusal.objects/filter-unknown-op
+   "Unbekannter Filter-Operator {op:pr} — einer von {known}"
+ :refusal.objects/group-by-without-aggs
+   ":group-by nennt {group-by:pr}, aber das Lesen verlangt keine :aggs, und Gruppieren allein berechnet nichts (sutra.types.aggregate). Statt dessen die ungruppierten Zeilen zu liefern, gäbe ein Zeilenlesen unter dem Namen einer Aggregation zurück — sag, was je Gruppe berechnet wird, oder lass :group-by weg."
+ :refusal.objects/nested-derived-fold
+   "{object-type} liest {far-type}.{attrs} über {link-name}, durchlaufen aus einem Prädikat über {near-type} — ein Link-Operator in einem :connected?-Prädikat läuft vom fernen Objekt aus, und die abgeleiteten Eigenschaften dessen, was ER erreicht, gehören nicht zur Kette dieses Lesens. Erkläre diese Faltung zu einer abgeleiteten Eigenschaft von {near-type} und lies diese Eigenschaft im Prädikat; dann ist sie eine Stufe der Kette wie jede andere."
+ :refusal.objects/no-home-files
+   "Auf dieser Instanz liegen keine Dateien im Home-Ordner: wähle ein Projekt."
+ :refusal.objects/op-own-attributes
+   "{op:pr} nimmt die eigenen Attribute des Typs, keine Link-Seite"
+ :refusal.objects/plan-caps-exceeded
+   "die Objektmenge überschreitet die Grenzen des Plans: {caps-hit:pr}"
+ :refusal.objects/read-capped
+   "Objekttyp {type-name} hält {objects} Objekte, und dieses Lesen ist auf {max} begrenzt. Ein Typ, nach dessen Zeilen nichts fragt, wird GANZ ausgeliefert — ein `:where`, das der Speicher nicht beantworten kann, filtert, was schon angekommen ist, und kürzt die Nutzlast nicht. So wird sie gekürzt: sage, welche Zeilen die App braucht, dann bindet sie eine ABFRAGE statt des Typs — eine `:from`-Variable über diesen Typ, deren jede Klausel eines seiner Attribute unter `=`, `not=`, `<`, `>`, `<=`, `>=` oder ein `contains` mit nicht-leerer Nadel nennt, wird ins Lesen gesenkt (sutra.capps.variables/store-where), und nur ihre Zeilen werden gelesen, abgeleitet und ausgeliefert. `truthy`/`falsy` und `in` werden NICHT gesenkt — sie nennen einen fehlenden Wert wahr, was kein SQL-Vergleich tut. Drei Wege, die die Nutzlast stattdessen vermeiden: eine Object View (`.entv`), deren Nutzlast die Ein-Schritt-Nachbarschaft EINES Objekts ist; ein Rollup in :derived-properties, das über dieselbe Kante zählt, ohne Zeilen auszuliefern; oder `:aggregate-types`, abfragbar statt ausgeliefert. `settings app-bind-max` anheben, um dies zu übergehen."
+ :refusal.objects/series-unknown-keys
+   "Zeitreihen-Lesen: unbekannte Schlüssel {unknown:pr} — eine Einschränkung, die diese Tür nicht versteht, fiele weg, und die Antwort wäre breiter als die Frage. Objektschlüssel: {object-keys:pr}; Reihenschlüssel: {series-keys:pr}"
+ :refusal.objects/set-ordering-layered
+   "die Objektmenge {object-set:pr} trägt ihre eigene Ordnung/Seitenteilung — :order-by/:limit/:offset lassen sich nicht darüberlegen"
+ :refusal.objects/set-without-type
+   "die Objektmenge {object-set:pr} nennt keinen Typ — gib mit :find an, als welcher Typ sie gelesen wird"
+ :refusal.objects/temporary-set-gone
+   "keine lebende temporäre Objektmenge {object-set:pr}"
+ :refusal.objects/unknown-accuracy
+   "unbekannte Genauigkeit {accuracy:pr} — bekannt: [:exact :approximate]"
+ :refusal.objects/unknown-engine
+   "unbekannte Engine {engine:pr} — bekannt: {known:pr}"
+ :refusal.objects/unknown-object-set
+   "Unbekannte Objektmenge: {object-set:pr}"
+ :refusal.objects/unknown-type
+   "Unbekannter Objekttyp/Interface: {type:pr}"
+ :refusal.peering/activate-by-originator
+   "die anfragende Seite aktiviert die Verbindung"
+ :refusal.peering/ceiling-invalid
+   "die Obergrenze der Verbindung"
+ :refusal.peering/ceiling-refused
+   "{why}"
+ :refusal.peering/data-type-not-taken
+   "diese Seite nimmt {data-type-name} von {type} über die Verbindung nicht an"
+ :refusal.peering/data-types-invalid
+   "die Datentypen der Verbindung"
+ :refusal.peering/dataset-not-readable
+   "{why}"
+ :refusal.peering/datasets-not-taken
+   "die Verbindung {name} nimmt keine Datensätze an"
+ :refusal.peering/invite-invalid
+   "die Einladung kann nicht angenommen werden"
+ :refusal.peering/invite-refused
+   "{why}"
+ :refusal.peering/invite-unreadable
+   "der Einladungscode lässt sich nicht lesen"
+ :refusal.peering/item-hash-mismatch
+   "der Hash von {path} passt nicht zu seiner Adresse"
+ :refusal.peering/mapping-invalid
+   "der Objekttyp {local-type} kann nicht als {remote-type} gekoppelt werden"
+ :refusal.peering/media-direction
+   "ein Medienset koppelt in eine Richtung: --direction export|import"
+ :refusal.peering/media-direction-not-allowed
+   "die Verbindung lässt hier kein Medien-{dir} zu — ihre Datentypen nennen {media-types}"
+ :refusal.peering/media-not-taken
+   "diese Seite nimmt Medien von {type} über die Verbindung nicht an"
+ :refusal.peering/no-approval-pending
+   "die Verbindung wartet auf keine Genehmigung"
+ :refusal.peering/no-connection
+   "keine Peering-Verbindung {connection-id}"
+ :refusal.peering/no-connection-named
+   "keine Peering-Verbindung {connection}"
+ :refusal.peering/no-dataset
+   "kein Datensatz {dataset}"
+ :refusal.peering/no-media-set
+   "hier kein Medienset {media-set}"
+ :refusal.peering/no-profile
+   "kein Peering-Profil {profile}"
+ :refusal.peering/no-profile-of-pair
+   "hier kein Peering-Profil des Paars {pair}"
+ :refusal.peering/no-remote-type
+   "kein Objekttyp {type} in dem Space, den diese Verbindung koppelt"
+ :refusal.peering/no-trust
+   "keine Vertrauensstellung namens {trust} — lege sie zuerst an (trust set)"
+ :refusal.peering/not-activatable
+   "eine Verbindung im Zustand {status-name} kann nicht aktiviert werden — die andere Seite genehmigt sie zuerst"
+ :refusal.peering/not-approved
+   "die Verbindung ist nicht genehmigt"
+ :refusal.peering/profile-not-edn
+   "lässt sich nicht als EDN lesen: {why}"
+ :refusal.peering/proposed-ceiling-invalid
+   "die vorgeschlagene Obergrenze"
+ :refusal.peering/remote-dataset-missing
+   "die andere Seite teilt keinen Datensatz {table}"
+ :refusal.peering/remote-silent
+   "die andere Seite antwortet nicht für {remote-type}: {why}"
+ :refusal.peering/stream-backed
+   "ein Stream-gestützter Objekttyp koppelt keine {peered}: stütze ihn auf eine direkte Datenquelle, die der Stream speist, oder synchronisiere den Stream (peer sync)"
+ :refusal.peering/unknown-message
+   "keine Peering-Nachricht {op}"
+ :refusal.repos/anchor-moved
+   "der Anker von {branch} in {repo} ist auf {tip} gerückt — dieses Schreiben las {expected}"
+ :refusal.repos/bad-ref
+   "der Zweig lässt sich nicht in eine gültige Git-Ref übersetzen: {branch}"
+ :refusal.repos/branch-gone
+   "der Zweig {branch} ist weg — kein Git-Schreiben für ihn"
+ :refusal.repos/former-dataset-name
+   "dies nennt einen Datensatz bei seinem früheren Namen: {renames}"
+ :refusal.repos/ref-update-refused
+   "Ref-Update abgewiesen: {ref} → {sha} ({result})"
+ :refusal.repos/shared-output
+   "zwei Transforms dieses Baums deklarieren denselben Output: {names}"
+ :refusal.retention/policy-incomplete
+   "eine Aufbewahrungsrichtlinie braucht :name, :datasets (:all oder Namen) und :selectors"
+ :refusal.retention/recommended-unchangeable
+   "empfohlene Richtlinien gehören der Plattform und lassen sich nicht ändern"
+ :refusal.retention/recommended-unremovable
+   "empfohlene Richtlinien gehören der Plattform und lassen sich nicht entfernen"
+ :refusal.retention/no-selectors "eine Richtlinie ohne Selektoren würde nichts löschen"
+ :refusal.finding/blocking "abgewiesen wegen {n} blockierender Befunde, der erste: {first}"
+ :refusal.schedules/listener-no-source
+   "Zeitplan-Auslöser :listener nennt {of:pr}, das keine Quelle ist"
+ :refusal.schedules/listener-not-imap
+   "Zeitplan-Auslöser :listener nennt die Quelle {source} vom Typ {type} — nur eine :imap-Quelle hat einen Listener"
+ :refusal.schedules/no-import-plan
+   "für diesen Zweig ist kein Importplan gespeichert"
+ :refusal.schedules/no-target
+   "Zeitplan {schedule:pr} nennt kein :target. Nennen, was er baut: einen Datensatz / Objekttyp / erzeugenden Transform (mehrere, durch Komma getrennt), dazu einen :scope (:self | :with-dependencies | :downstream | :connecting). Für einen Wurzelknoten, den eine Quelle speist, einen Takt verwenden; weiter unten besser einen :parent-updated-Auslöser — `schedule candidates <target>` nennt die Eltern eine Stufe höher."
+ :refusal.schedules/not-parallelized
+   "Zeitplan {schedule:pr} ist nicht parallelisiert — seine Parameterwerte gehören ihm; sie am Zeitplan setzen"
+ :refusal.schedules/run-setups-full
+   "ein Zeitplan hält höchstens {max} Lauf-Setups"
+ :refusal.schedules/schedule-problem
+   "Zeitplan {schedule:pr}: {problem}"
+ :refusal.schedules/trigger-not-evaluatable
+   "Zeitplan-Auslöser {kind:pr} {why}. Auswertbare Blätter sind {leaves}; mit {:kind :all-of|:any-of :triggers [...]} kombinieren."
+ :refusal.schedules/undeclared-parameters
+   "Zeitplan {schedule:pr} setzt Parameter {params}, die kein Transform deklariert — ein Zeitplan reicht seine Werte an die Transforms weiter, die sie unter :parameters deklarieren"
+ :refusal.schedules/unknown-schedule
+   "kein Zeitplan namens {name:pr} auf Zweig {branch}"
+ :refusal.schedules/virtual-no-detect
+   "Zeitplan-Auslöser :parent-updated beobachtet virtuelle Datensätze {virtual:pr} ohne :detect — jedem `:virtual {… :detect {:column <eine Spalte, die jede Änderung erhöht>}}` geben (oder {}, um bei jeder Probe jede Zeile zu prüfen), oder einen :cadence verwenden"
+ :refusal.serve/hot-patch-no-ns
+   "der Code des Hot-Patches beginnt nicht mit einer ns-Form"
+ :refusal.serve/hot-patch-path
+   "Pfad des Hot-Patches abgewiesen: {path}"
+ :refusal.serve/hot-patch-wrong-ns
+   "der Hot-Patch {path} enthält den Namensraum {ns} nicht"
+ :refusal.serve/hot-reload-disarmed
+   "Hot-Reload ist entschärft"
+ :refusal.sources/command-agent-exit
+   "Command-Connector (ssh-agent) endete mit {exit}"
+ :refusal.sources/command-agent-timeout
+   "Command-Connector (ssh-agent) hat die Zeit überschritten"
+ :refusal.sources/command-exit
+   "Command-Connector endete mit {exit}"
+ :refusal.sources/egress-blocked
+   "{what}: keine Verbindung zu {host} innerhalb von {seconds} s — der Ausgang dorthin ist gesperrt: die Kernel-Egress-Liste des Hosts lässt ihn nicht hinaus. Eine genehmigte Policy für {host} öffnet ihn beim nächsten Abgleich, sofern der Host sie nicht pausiert hat (`egress-policy` zeigt beides)"
+ :refusal.sources/egress-failed
+   "{what} gescheitert: {why}"
+ :refusal.sources/egress-unresolved
+   "{what}: {host} lässt sich vom Egress-Agenten aus nicht auflösen"
+ :refusal.sources/embedding-call-status
+   "Embedding-Aufruf antwortete HTTP {status}"
+ :refusal.sources/foreign-scan-agg
+   "ein fremder Scan nimmt kein :agg"
+ :refusal.sources/foreign-scan-keyless
+   "ein fremder Scan ordnet und blättert nur eine Tabelle mit Schlüssel (:writeback :pk, der :key einer Ressource)"
+ :refusal.sources/http-status
+   "{what} gescheitert: HTTP {status}"
+ :refusal.sources/http-transport-error
+   "{what}: Transportfehler"
+ :refusal.sources/imap-folders-silent
+   "IMAP-Listener: Ordner {names} hat/haben nicht geantwortet"
+ :refusal.sources/imap-quoted-control
+   "eine IMAP-Zeichenkette in Anführungszeichen kann kein CR, LF oder NUL tragen"
+ :refusal.sources/imap-refused
+   "IMAP {what} abgelehnt: {reply}"
+ :refusal.sources/model-call-status
+   "Sprachmodell-Aufruf antwortete HTTP {status}"
+ :refusal.sources/model-inventory-failed
+   "Sprachmodell-Inventar-Ausgang gescheitert: {why}"
+ :refusal.sources/model-inventory-status
+   "Sprachmodell-Inventar antwortete HTTP {status}"
+ :refusal.sources/no-embeddings
+   "die Sprachmodell-Anbindung {wire-name} bietet keine Embeddings"
+ :refusal.sources/no-listener
+   "die Quelle {source-name} (Typ {type}) hat keinen Listener — nur eine :imap-Quelle lässt sich abhören"
+ :refusal.sources/reach-unsupported-type
+   "reach! behandelt den Datenquellentyp {type:pr} nicht"
+ :refusal.sources/session-no-token
+   "das Öffnen der Sitzung lieferte kein Token"
+ :refusal.sources/table-keyless
+   "die Tabelle {table} deklariert keinen Schlüssel (:writeback :pk, der :key einer Ressource)"
+ :refusal.sources/unknown-connector-op
+   "unbekannte Connector-Operation {op:pr}"
+ :refusal.sources/writeback-already-written
+   "nichts zurückzuschreiben — jeder geänderte Wert steht schon in der Quelle"
+ :refusal.sources/writeback-blocked
+   "Writeback blockiert: {why}"
+ :refusal.sources/writeback-confirm-unseen
+   "eine Writeback-Bestätigung trägt die Quellwerte, die ihre Vorschau zeigte (:seen) — die Quelle wird gegen sie geprüft"
+ :refusal.sources/writeback-create-in-flight
+   "ein anderes Anlegen dieses Abgleichswerts läuft schon — nicht doppelt angelegt"
+ :refusal.sources/writeback-create-rejected
+   "Writeback-Webhook {webhook} hat das Anlegen abgelehnt (HTTP {status})"
+ :refusal.sources/writeback-no-edits
+   "nichts zurückzuschreiben — dieses Objekt trägt keine Änderungen"
+ :refusal.sources/writeback-no-identity
+   "Writeback-Webhook {webhook} antwortete ohne Identität unter {identity-path:pr}"
+ :refusal.sources/writeback-no-source-key
+   "das Objekt trägt keinen Quellschlüssel für {what}"
+ :refusal.sources/writeback-not-enabled
+   "der Objekttyp ist nicht für Writeback freigegeben"
+ :refusal.sources/writeback-object-missing
+   "Objekt für Writeback nicht gefunden"
+ :refusal.sources/writeback-pk-unknown
+   "writeback :pk nennt keine Spalte dieses Objekttyps"
+ :refusal.sources/writeback-row-missing
+   "die Zielzeile des Writebacks steht nicht in der Quelle"
+ :refusal.sources/writeback-unknown-mode
+   "unbekannter Writeback-:mode {mode:pr}"
+ :refusal.store/config-key-too-long
+   "der instance_config-Schlüssel hat {length} Zeichen, mehr als die {max}, die die Spalte fasst — bilde ihn mit `cfg-key`: {key}"
+ :refusal.store/control-resident-dataset
+   "der Datensatz {dataset} liegt im Control-Speicher; eine eigene SQL-Prüfung kann ihn nicht lesen"
+ :refusal.store/delta-not-a-snapshot
+   "aus Version {version:pr} lässt sich kein Delta ableiten — sie ist keine Snapshot-ID; der Verbraucher muss neu aufsetzen"
+ :refusal.store/duplicate-primary-key
+   "Primärschlüssel nicht eindeutig: {duplicates} Schlüssel von {rows} ausgegebenen Zeilen kollidieren in {dataset} — der Speicher behielte die LETZTE Zeile je Schlüssel und verwürfe die anderen ohne ein Wort"
+ :refusal.store/group-override-incomplete
+   "eine Gruppenvorgabe nennt mindestens eine Gruppe und eine URL"
+ :refusal.store/home-url-not-path
+   "eine Startseiten-URL ist ein Pfad auf dieser Plattform, beginnend mit einem /: {url:pr}"
+ :refusal.store/logo-not-data-uri
+   "das Logo {size-name} muss eine base64-Bild-Data-URI sein"
+ :refusal.store/logo-too-large
+   "das Logo {size-name} ist größer als die {kb} KB, die ein Plattform-Logo haben darf"
+ :refusal.store/mixed-lanes "ein Commit kann nicht Tabellen verschiedener Lanes schreiben: {tables:pr} liegen auf {lanes:pr}"
+ :refusal.parser/facet-mismatch "{path}: der Text ist nach Projekt {facet} benannt, deklariert aber {project}"
+ :refusal.parser/foreign-resource "{path}: eine Ressource hier gehört zu Projekt {owner}, nicht zu {project} — verschiebe sie in den Text des Projekts, dem sie gehört"
+ :refusal.parser/homeless "keine Deklaration nimmt {section} {name} auf — gib einer :home-for {section-key}"
+ :refusal.parser/out-of-scope "{path}: eine {format}-Datei enthält {sections} — ihre Deklaration erlaubt {allowed}"
+ :refusal.parser/project-count "{path}: der Text eines Projekts deklariert genau ein Projekt unter :projects; dieser deklariert {count}"
+ :refusal.parser/stray-sections "{path}: der Text eines Projekts kann {sections} nicht deklarieren — sie haben kein besitzendes Projekt; halte sie in {central}"
+ :refusal.parser/synonym-clash "{path}: das Synonym {synonyms} ist auch ein Typ, den dieses Projekt deklariert — ein Synonym nennt einen Typ, der anderswo lebt"
+ :refusal.path/empty-or-nul "Pfad abgelehnt: er ist leer oder enthält ein NUL"
+ :refusal.path/absolute "Pfad abgelehnt: {path:pr} ist absolut, verlangt ist ein relativer"
+ :refusal.path/dot-dot "Pfad abgelehnt: {path:pr} steigt mit `..` hinaus"
+ :refusal.path/leading-dash "Pfad abgelehnt: {path:pr} beginnt mit `-`"
+ :refusal.path/outside "Pfad abgelehnt: {path:pr} liegt außerhalb seiner Wurzel"
+ :refusal.sheet/no-sheet "eine Tabelle hat mindestens ein Blatt"
+ :refusal.sheet/unnamed "ein Blatt ohne Namen"
+ :refusal.sheet/duplicate-name "zwei Blätter mit demselben Namen"
+ :refusal.sheet/too-many-cells "mehr als {max} Zellen — so viel gehört in ein Dataset"
+ :refusal.sheet/not-a-cell "keine Zelladresse: {cell}"
+ :refusal.sheet/unreadable "dieser Text ist keine Tabelle: {reason}"
+ :refusal.notification/recipient-shape
+   ":notification — ein Empfänger ist ein Name, {:param …}, {:param … :property …} oder {:function …}, nicht {recipient:pr}"
+ :refusal.notification/too-many-recipients
+   ":notification — {recipients} Empfänger, mehr als die {max}, die eine Benachrichtigung haben darf"
+ :refusal.notification/recipient-may-not-read
+   ":notification — darf nicht lesen, worum es in der Benachrichtigung geht: {denied-list} — jeder Empfänger muss es dürfen (oder :require :any setzen)"
+ :refusal.notification/no-recipient-may-read
+   ":notification — kein Empfänger darf lesen, worum es in der Benachrichtigung geht: {denied-list}"
+ :refusal.http/no-user "kein angemeldeter Benutzer, für den gehandelt wird"
+ :refusal.object-filter/no-not-over-text
+   "Objektfilter: die Prädikate des Speichers kennen kein NOT über Text"
+ :refusal.object-filter/negated-range "Objektfilter: ein verneinter Bereich wird nicht angeboten"
+ :refusal.object-filter/linked-one-value
+   "Objektfilter: eine verlinkte Eigenschaft nimmt einen Wert je Filter"
+ :refusal.object-filter/linked-or
+   "Objektfilter: ein verlinkter Filter lässt sich nicht mit OR verbinden"
+ :refusal.projection/unread "Projektion {projection}: liest keinen Text {files:pr}"
+ :refusal.projection/no-base
+   "Projektion {projection}: ein Schreiben braucht die Basis des Pulls, den es ändert — erneut pullen"
+ :refusal.projection/stale-shape
+   "Projektion {projection}: die Projektion schneidet ihre Elemente anders als bei deinem Pull (:elements geändert) — erneut pullen"
+ :refusal.projection/outside
+   "Projektion {projection}: {taken}, was dieser Push nicht mitbringt — erneut pullen, oder beide Texte pullen, um es zu verschieben"
+ :refusal.projection/out-of-scope "Projektion {projection}: zeigt {sections:pr} nicht"
+ :refusal.projection/conflict
+   "Projektion {projection}: hier und seit deinem Pull geändert: {labels} — mit --mine oder --theirs entscheiden, oder erneut pullen"
+ :refusal.projection/unsound "Projektion {projection}: {detail}"
+ :refusal.access/protect-all-admin-only "nur der Admin schützt alles auf einmal"
+ :refusal.access/resources-unnamed
+   "nenne die Ressourcen: {:resources [\"object-types/x\" …] :on true}"
+ :refusal.access/unknown-resource "keine solche Ressource: {unknown-list}"
+ :refusal.access/protection-owner-only
+   "nur ein Owner ihres Projekts darf den Schutz von {denied-list} ändern"
+ :refusal.access/unknown-project "kein solches Projekt: {project}"
+ :refusal.access/policy-owner-only "nur ein Owner von {project} darf seine Richtlinie ändern"
+ :refusal.access/default-project-admin-only "nur der Admin legt das Standardprojekt fest"
+ :refusal.access/unknown-principal "kein solcher Principal: {for}"
+ :refusal.access/unknown-request "keine solche Anfrage: {id}"
+ :refusal.access/close-request-author-only "nur ihr Autor oder der Admin schließt eine Anfrage"
+ :refusal.branch/name-or-parent-missing "es fehlt :name oder :parent"
+ :refusal.branch/unknown-space "kein solcher Space: {space}"
+ :refusal.branch/main-unbranched "main hat keine verzweigten Ressourcen"
+ :refusal.branch/remove-unnamed "nenne sie: {:remove [\"section/rid\" …]}"
+ :refusal.branch/not-changed "auf {branch} nicht geändert: {not-changed-list}"
+ :refusal.branch/removal-needed
+   "eine andere Änderung auf diesem Zweig braucht, was du entfernen würdest: {reasons-text}"
+ :refusal.branch/unknown-branch "kein solcher Zweig: {branch}"
+ :refusal.store/mixed-module-commit
+   "ein Commit mischt Datensätze eines gerouteten Moduls mit denen eines anderen Speichers"
+ :refusal.store/module-without-db
+   "{setting}: ein Modul, das keine eigene Datenbank haben kann — {why}"
+ :refusal.store/no-property
+   "keine Eigenschaft {property:pr} an {object-type:pr}"
+ :refusal.store/no-stream
+   "kein Stream namens {stream} — ein Datensatz wird zum Stream, indem er in seiner `.ent` `:stream` deklariert; das legt seinen heißen Puffer an"
+ :refusal.store/not-a-revision
+   "as-of {as-of:pr} ist keine Speicher-Revision"
+ :refusal.store/not-a-snapshot
+   "Datensatz {dataset}: '{snapshot}' ist keine Snapshot-ID und kann ihn nicht adressieren"
+ :refusal.store/query-input-missing
+   "die Abfrage-Eingabe {alias} ({table}) hat keine Tabelle"
+ :refusal.store/series-sync-not-dataset
+   "die Zeitreihen-Eigenschaft {property:pr} nennt den Sync {sync:pr}, der in dieser Ontologie kein Datensatz ist"
+ :refusal.store/series-unreadable
+   "die Zeitreihen-Eigenschaft {property:pr} kann nicht gelesen werden: {message}"
+ :refusal.store/stream-batch-rejected
+   "der Stapel wurde abgewiesen — {rejected-count} von {records} Datensätzen erfüllen das Schema des Streams nicht"
+ :refusal.store/stream-not-resettable
+   "der Stream {stream} wird von einem Transform geschrieben: nur ein Ingest-Stream lässt sich zurücksetzen, spiele stattdessen seine Pipeline neu ab"
+ :refusal.store/unknown-logo-size
+   "unbekannte Logo-Größe {unknown:pr}"
+ :refusal.store/write-denied
+   "Schreiben verweigert — {coll-name} des Projekts {project} zu ändern verlangt dort :update"
+ :refusal.widget-set/unknown "Ein Widget Set „{name}“ gibt es nicht."
+ :refusal.widget-set/name-shape "Der Name eines Widget Sets ist klein-mit-bindestrich: {name:pr}"
+ :refusal.widget-set/exists "Das Widget Set „{name}“ gibt es schon."
+ :refusal.widget-set/manifest-missing "Ein Release braucht {manifest} im Wurzelordner."
+ :refusal.widget-set/manifest-unreadable "{manifest}: {reason}"
+ :refusal.widget-set/not-releasable "{problems-text}"
+ :refusal.widget-set/version-shape "Eine Version heißt x.y.z, nicht {version:pr}"
+ :refusal.widget-set/version-published
+   "Version {version} ist veröffentlicht und bleibt, wie sie ist. Nimm eine neue."
+ :refusal.scenario/seal-non-scenario "nur ein Szenario-Zweig lässt sich versiegeln"
+ :refusal.scenario/opaque-entries
+   "das Szenario hat {opaque-count} Logeintrag/-einträge, die ein Replay nicht nachbilden kann — mit :force? laufen nur die deklarierten Actions erneut, mit womöglich anderem Ergebnis"
+ :refusal.scenario/too-many-actions
+   "das Szenario hat {actions} Actions, mehr als die Grenze von {max} — ein Szenario ist eine begrenzte Überlagerung, kein zweites Dataset"
+ :refusal.scenario/replay-failed "Replay bei seq {seq} ({action}) gescheitert: {reason}"
+ :refusal.scenario/replay-failed-at-action
+   "Replay bei Action {index} (seq {seq}, {action}) gescheitert: {reason}"
+ :refusal.scenario/not-a-scenario "kein Szenario-Zweig"
+ :refusal.scenario/rebuilt-while-active
+   "das Szenario {branch} nahm weiter Actions an, während es neu aufgebaut wurde — noch einmal versuchen"
+ :refusal.scenario/branch-exists "der Zweig {branch} existiert schon"
+ :refusal.scenario/applied-already
+   "das Szenario {branch} wurde schon angewendet — ein erneutes Anwenden führt jede seiner Actions ein zweites Mal aus"
+ :refusal.eval/suite-declared
+   "die Eval-Suite {suite} ist in der Ontologie deklariert (:eval-suites) — dort ändern: projection pull, bearbeiten, projection push"
+ :refusal.eval/unknown-suite "keine solche Eval-Suite {suite:pr}"
+ :refusal.eval/case-shape "ein Testfall braucht eine :id und eine :input-Map ({column value})"
+ :refusal.eval/case-exists
+   "die Eval-Suite {suite-name} hat schon einen Fall {case} — gib dem neuen eine andere id"
+ :refusal.eval/suite-unnamed "nenne eine Eval-Suite — `eval suites` listet sie auf"
+ :refusal.eval/unknown-suite-listed
+   "keine solche Eval-Suite {suite:pr} — `eval suites` listet sie auf"
+ :refusal.eval/no-release
+   "die Function {function-name} hat kein Release {version} — veröffentlicht: {published}"
+ :refusal.eval/unknown-agent "die Eval-Suite nennt keinen Agenten {agent:pr}"
+ :refusal.eval/action-suite-local
+   "eine :action-Suite läuft über den Server (sie braucht die Kante des Zweigs)"
+ :refusal.eval/judge-without-model ":llm-judge braucht :model — kein Standardmodell ist registriert"
+ :refusal.edit-function/unknown-link "Edit-Function: unbekannter Link {link}"
+ :refusal.edit-function/unsupported-filter "Edit-Function: nicht unterstützter Filter {op:pr}"
+ :refusal.edit-function/unknown-type "Edit-Function: unbekannter Objekttyp {type}"
+ :refusal.edit-function/too-many-rounds
+   "die Python-Edit-Function {function} hat {rounds}-mal nach Daten gefragt; lies ganze Objektmengen statt eines Objekts nach dem anderen"
+ :refusal.edit-function/no-object "Edit-Function: kein {type} {pk:pr}"
+ :refusal.edit-function/set-on-multi-link
+   "Edit-Function: {op} auf einem Mehrfach-Link; füge seine Mitglieder hinzu oder entferne sie"
+ :refusal.scaffold/name-required "Name ist Pflicht."
+ :refusal.scaffold/object-type-id-invalid
+   "Die ID besteht aus Kleinbuchstaben, Ziffern und Bindestrichen und beginnt mit einem Buchstaben."
+ :refusal.scaffold/plural-required "Der Mehrzahl-Name ist Pflicht."
+ :refusal.scaffold/object-type-needs-property
+   "Ein Objekttyp braucht mindestens eine Eigenschaft."
+ :refusal.scaffold/property-id-invalid
+   "Eine Eigenschafts-ID beginnt mit einem Buchstaben und enthält nur Buchstaben, Ziffern, - und _."
+ :refusal.scaffold/property-ids-unique "Zwei Eigenschaften tragen dieselbe ID."
+ :refusal.scaffold/object-type-needs-title
+   "Wähl eine Titel-Eigenschaft — sie benennt jedes Objekt."
+ :refusal.scaffold/title-not-a-property
+   "Die Titel-Eigenschaft gibt es nicht (mehr) — wähl eine vorhandene."
+ :refusal.scaffold/link-needs-name-from-to "Name, Von und Nach sind Pflicht."
+ :refusal.scaffold/link-needs-fk
+   "Ein Link aus einer Viel-Seite braucht einen Fremdschlüssel: die Eigenschaft der Viel-Seite, die den Primärschlüssel der anderen Seite trägt (bei one-to-one mit ihrer Seite)."
+ :refusal.scaffold/link-needs-join
+   "Many-to-many braucht eine Join-Tabelle: ein Dataset (oder eine Quelle mit Tabelle oder Abfrage) und beide Schlüsselspalten."
+ :refusal.scaffold/shared-property-needs-type
+   "Eine geteilte Eigenschaft braucht einen Basistyp (z. B. string)."
+ :refusal.scaffold/transform-language
+   "Sprache {language:pr} läuft nicht als Transform — nimm eine von {allowed}"
+ :refusal.scaffold/function-language
+   "Sprache {language:pr} läuft nicht als Function — nimm eine von {allowed}. Eine Function führt Nutzercode beim Anwenden aus; ein :sql-Rumpf liest Sichten über gebaute Tabellen, also verfasse das als Transform"
+ :refusal.scaffold/needs-input "ein Transform oder eine Function braucht mindestens einen Input (label:kind:ref)"
+ :refusal.scaffold/function-has-no-output
+   "eine Function hat keinen Output — sie gibt ihre Zeilen dem zurück, der sie aufruft. Ein Output machte sie zum TRAGENDEN Transform des Ziels, das ein Build materialisiert. Lass den Output {given} weg, oder verfasse sie als Transform, um ihn zu behalten."
+ :refusal.scaffold/one-output
+   "gib genau EINEN Output an (Objekttyp, Datensatz oder Link-Typ), nicht {count}"
+ :refusal.scaffold/needs-output
+   "ein Transform braucht einen Output: einen Objekttyp mit Primärschlüssel, einen Datensatz oder einen Link-Typ mit seinen zwei Schlüsselspalten"
+ :refusal.scaffold/link-output-needs-keys
+   "ein Link-Typ-Output braucht seine zwei Schlüsselspalten: zuerst den PK der From-Seite, dann den der To-Seite"
+ :refusal.scaffold/object-output-needs-pk "ein Objekttyp-Output braucht seinen Primärschlüssel"
+ :refusal.scaffold/edit-function-needs-target
+   "eine Edit-Function braucht den Objekttyp, den sie bearbeitet"
+ :refusal.writeback-check/table-not-allowlisted
+   "{table} steht in keiner :writeback-Erlaubnisliste von {source} ({allowed})"
+ :refusal.writeback-check/table-not-plain "Tabellenname {table:pr} ist kein einfacher Bezeichner"
+ :refusal.writeback-check/column-missing
+   "Spalte {column} steht in der Erlaubnisliste, fehlt aber in {table}"
+ :refusal.writeback-check/pk-no-attribute
+   ":pk {pk} führt auf kein Attribut von {object-type} — jede Action auf den Typ stirbt; :column-map {\"<attr>\" \"{pk}\"} ergänzen"
+ :refusal.writeback-check/no-primary-key
+   "{table} hat keinen Primärschlüssel — die Konfliktprüfung über {pk} ist nicht eindeutig gesichert"
+ :refusal.writeback-check/pk-not-primary-key
+   ":pk {pk} ist nicht der Primärschlüssel von {table} ({primary-key})"
+ :refusal.writeback-check/trigger-row-count
+   "Trigger {trigger} ohne SET NOCOUNT ON — seine Zeilenzahl überlagert die des UPDATE, die Konfliktprüfung meldet einen falschen Konflikt"
+ :refusal.writeback-check/datetime-in-condition
+   "Spalte {column} ({type}) geht in die Konfliktbedingung — Vorwerte müssen sekundengenau ankommen"
+ :refusal.writeback-check/sync-masks-value
+   "Sync {transform} liest {column} durch ISNULL/COALESCE — der Vorwert ist nicht der Tabellenwert, die Konfliktprüfung vergleicht falsch"
+ :refusal.writeback-check/log-none
+   "{table} schreibt mit :log :none — kein Änderungsprotokoll im Fremdsystem"
+ :refusal.writeback-check/actor-column-unset
+   "Spalte {column} existiert, wird vom Rückschreibweg aber nicht gesetzt — bleibt leer"
+ :refusal.data/file-conversion
+   "Die Datei ließ sich nicht umwandeln: {error}"
+ :refusal.data/file-export-markings
+   "Ein Datensatz mit Marking(s) {markings} verlässt die Plattform nicht als Datei"
+ :refusal.access/a-login-takes-username-password
+   "eine Anmeldung nimmt {\"username\": …, \"password\": …}"
+ :refusal.access/a-password-change-takes-current
+   "ein Passwortwechsel nimmt {\"current\": …, \"new\": …}"
+ :refusal.access/a-repository-clone-token-cannot
+   "ein Clone-Token eines Repositorys kann die Plattform-API nicht aufrufen"
+ :refusal.access/a-second-factor-is-required
+   "auf dieser Instanz ist ein zweiter Faktor Pflicht"
+ :refusal.access/admin-only-requires-the-admin
+   "nur Admin — {reason} verlangt den Admin-Principal"
+ :refusal.access/an-agent-token-reaches-only
+   "ein Agent-Token erreicht nur die Routen seiner Werkzeuge"
+ :refusal.access/consumer-access-is-restricted-to
+   "Consumer-Zugriff ist auf seine Application beschränkt"
+ :refusal.access/custom-applications-are-not-installed
+   "Custom Applications sind auf dieser Instanz nicht installiert"
+ :refusal.access/has-no-user-object
+   "{username} hat kein Benutzerobjekt ({user-id})"
+ :refusal.access/is-not-configured-set-its
+   "{label} ist nicht eingerichtet — Einstellungen setzen und einschalten"
+ :refusal.access/maps-to-no-local-principal
+   "{trust}:{subject} entspricht keinem lokalen Principal — ein Admin nennt ihn in den :subjects des Trusts"
+ :refusal.access/name-a-session-id-or
+   "eine Sitzung nennen: {\"id\": …} oder {\"others\": true}"
+ :refusal.access/name-the-operation-op-read
+   "die Operation nennen: ?op=read|create|update|delete|manage-permissions|…"
+ :refusal.access/name-the-resource-resource-rid
+   "die Ressource nennen: ?resource=<rid|name>"
+ :refusal.access/no-identity-provider
+   "kein Identity Provider {id}"
+ :refusal.access/no-named-you-may-see
+   "kein {what} namens {nm:pr}, das du sehen darfst"
+ :refusal.access/no-outbound-trust-named
+   "kein ausgehender Trust namens {to:pr}"
+ :refusal.access/no-principal
+   "kein Principal {u}"
+ :refusal.access/no-principal-a-username-or
+   "kein Principal {user:pr} — ein Benutzername oder die Id eines Benutzerobjekts"
+ :refusal.access/no-such-marking
+   "kein solches Marking: {k}"
+ :refusal.access/no-such-principal
+   "kein solcher Principal: {user}"
+ :refusal.access/no-such-project
+   "kein solches Projekt: {project}"
+ :refusal.access/no-trust-named
+   "kein Trust namens {nm}"
+ :refusal.access/only-a-sign-in-session
+   "nur eine Anmeldesitzung ändert ihr Passwort"
+ :refusal.access/only-a-sign-in-session-2
+   "nur eine Anmeldesitzung trägt ihren Benutzer zu einer anderen Instanz"
+ :refusal.access/only-the-admin-ends-another
+   "nur der Admin beendet die Sitzungen eines anderen Principals"
+ :refusal.access/passed-error-problem
+   "{message}"
+ :refusal.access/passed-password-policy-explain-ps
+   "{message}"
+ :refusal.access/principal-not-provisioned
+   "Principal nicht angelegt: {subject}"
+ :refusal.access/reads-no-directory
+   "{label} liest kein Verzeichnis"
+ :refusal.access/role-must-be-one-of
+   "die Rolle ist eine von {list}{value}"
+ :refusal.access/single-sign-on-negotiate-is
+   "Single Sign-on (negotiate) ist auf dieser Instanz nicht eingerichtet"
+ :refusal.access/that-code-does-not-match
+   "dieser Code passt nicht zum ausstehenden Seed"
+ :refusal.access/this-instance-has-no-user
+   "diese Instanz hat keinen Typ :user"
+ :refusal.access/this-instance-has-no-user-2
+   "diese Instanz hat keinen Typ :user zum Anlegen"
+ :refusal.access/this-principal-has-no-second
+   "dieser Principal hat keinen zweiten Faktor"
+ :refusal.access/this-principal-signs-in-through
+   "dieser Principal meldet sich über {value} an — sein Passwort wird hier nicht geführt"
+ :refusal.access/this-session-must-first-change
+   "diese Sitzung muss zuerst ihr Initialpasswort ändern oder einen zweiten Faktor einrichten (POST /api/password, /api/mfa/enroll)"
+ :refusal.actions/a-batch-of-holds-at
+   "ein Batch von {action} hält höchstens {limit} Aufrufe; eine funktionsgestützte Action ohne :batched ruft ihre Funktion je Aufruf einmal auf"
+ :refusal.actions/missing-action-in-body
+   ":action fehlt im Rumpf"
+ :refusal.actions/missing-requests-in-body
+   ":requests fehlt im Rumpf"
+ :refusal.actions/writeback-confirm-needs-object-type
+   "die Writeback-Bestätigung braucht :object-type und :object-id"
+ :refusal.actions/writeback-preview-needs-object-type
+   "die Writeback-Vorschau braucht :object-type und :object-id"
+ :refusal.agents/a-question-needs-an-input
+   "eine Frage braucht einen :input-Text"
+ :refusal.agents/agent-run-failed
+   "Agent-Lauf fehlgeschlagen: {error}"
+ :refusal.agents/invoke-needs-an-input-string
+   "invoke braucht einen :input-Text"
+ :refusal.agents/no-run-in-this-thread
+   "kein Lauf {run} in diesem Thread"
+ :refusal.agents/no-such-agent
+   "kein solcher Agent '{nm}'"
+ :refusal.agents/no-such-agent-2
+   "kein solcher Agent '{agent}'"
+ :refusal.agents/no-thread
+   "kein Thread {id}"
+ :refusal.apps/a-client-does-not-run
+   "ein Client läuft nicht als frei gewählter Principal: mit dem Grant :client-credentials bekommt er einen eigenen Servicebenutzer, mit ihm angelegt und benannt wie seine Client-Id. Diesem Rollen geben (access grant <project> --role <role> --to <client-id>)."
+ :refusal.apps/a-default-workspace-must-be
+   "ein Standard-Workspace muss hervorgehoben sein"
+ :refusal.apps/a-draft-application-authorizes-no
+   "eine :draft-Application autorisiert niemanden"
+ :refusal.apps/app-not-published
+   "Custom Application {app-name} ist nicht :published — eine :draft-Tür gibt kein Token aus"
+ :refusal.apps/approver-gone
+   "den genehmigenden Principal gibt es nicht mehr"
+ :refusal.apps/cannot-rename-application-it-is
+   "Application {nm} lässt sich nicht umbenennen: sie ist eine Object View ({ff}), deren Name aus ihrem Objekttyp folgt — stattdessen den Objekttyp umbenennen"
+ :refusal.apps/client-app-undeclared
+   "Client {client-id} verweist auf die Custom Application {app}, die nicht mehr deklariert ist"
+ :refusal.apps/client-is-revoked-rotation-needs
+   "der Client ist widerrufen — eine Rotation braucht einen gültigen Zugang"
+ :refusal.apps/no-access-to-this-workspace
+   "kein Zugriff auf diesen Workspace"
+ :refusal.apps/no-application-named
+   "keine Application namens {name:pr}"
+ :refusal.apps/no-attachment
+   "kein solcher Anhang"
+ :refusal.apps/no-edit-access-to-workspace
+   "kein Bearbeitungsrecht für den Workspace {name}"
+ :refusal.apps/no-store-meaning-for-the
+   "keine Bedeutung im Store für den where-Operator {op:pr}"
+ :refusal.apps/no-such-client
+   "kein solcher Client"
+ :refusal.apps/no-such-client-for-this
+   "kein solcher Client für diese Application"
+ :refusal.apps/no-such-custom-application
+   "keine solche Custom Application"
+ :refusal.apps/no-text-kind-of-the
+   "keine Textart der Projektion :code-repository nimmt eine App auf — eine deklarieren (:kind :app)"
+ :refusal.apps/no-workspace
+   "kein Workspace {workspace:pr}"
+ :refusal.apps/only-a-sign-in-session
+   "nur eine Anmeldesitzung autorisiert einen Client"
+ :refusal.apps/passed-challenge-problem-code-challenge-code
+   "{message}"
+ :refusal.apps/passed-msg
+   "{message}"
+ :refusal.apps/guard-denied
+   "{message}"
+ :refusal.apps/passed-msg-parsed
+   "{message}"
+ :refusal.apps/passed-redirect-uri-message
+   "{message}"
+ :refusal.apps/preview-needs-a-file-map
+   "die Vorschau braucht eine :file-Map — die bearbeitete .enta"
+ :refusal.apps/previewing-an-app-is-editing
+   "eine App in der Vorschau zu sehen heißt, sie zu BEARBEITEN — dieser Principal darf {nm}{value} nicht bearbeiten"
+ :refusal.apps/promoting-a-workspace-is-a
+   "einen Workspace hervorzuheben ist ein ADMINISTRATOR-Recht des Workspace Frames, getrennt vom Bearbeiten — dieser Principal darf {name} bearbeiten, aber nicht ändern, ob er hervorgehoben ist"
+ :refusal.apps/redirect-uri-is-not-registered
+   "redirect_uri ist für diesen Client nicht registriert: {redirect-uri:pr}"
+ :refusal.apps/save-needs-a-file-map
+   "Speichern braucht eine :file-Map (oder :content als EDN-Text)"
+ :refusal.apps/save-needs-a-file-map-2
+   "Speichern braucht eine :file-Map"
+ :refusal.apps/the-application-s-permissions-do
+   "die :permissions der Application nennen weder {username} noch die Rolle {role} — ein Admin lässt einen Benutzer zu, indem er ihn dort deklariert"
+ :refusal.apps/the-client-points-at-a
+   "der Client verweist auf eine Custom Application, die nicht mehr deklariert ist"
+ :refusal.apps/this-client-does-not-carry
+   "dieser Client trägt den Grant authorization-code nicht"
+ :refusal.apps/type-and-id-are-required
+   ":type und :id sind Pflicht — das Objekt, dessen Ansicht gelesen wird"
+ :refusal.apps/unknown-object-type
+   "unbekannter Objekttyp"
+ :refusal.apps/unknown-object-type-2
+   "unbekannter Objekttyp {type:pr}"
+ :refusal.authoring/adopt-refused
+   "{message}"
+ :refusal.authoring/adopt-table
+   "adopt braucht :table"
+ :refusal.authoring/datasource-not-found
+   "Datenquelle nicht gefunden"
+ :refusal.authoring/entry-not-map
+   "ein Eintrag in {section-name} ist eine Map"
+ :refusal.authoring/function-not-found
+   "Funktion nicht gefunden"
+ :refusal.authoring/installation-elsewhere
+   "Installation {id} liegt auf Zweig {branch} — ihn nennen: --branch {branch}"
+ :refusal.authoring/installation-needed
+   "Installation {id} wird von {products} gebraucht — diese zuerst deinstallieren"
+ :refusal.authoring/linked-first
+   "zuerst müssen verknüpfte Produkte installiert sein — mit --with-linked zusammen installieren"
+ :refusal.authoring/linked-missing
+   "verknüpfte Produkte fehlen auf dieser Instanz"
+ :refusal.authoring/mutation-conflict
+   "{error}"
+ :refusal.authoring/name-release
+   "das wiederherzustellende Release nennen — Releases: {versions}"
+ :refusal.authoring/no-deleted
+   "kein gelöschtes {kind-name} namens {name} in der Schema-Historie dieses Zweigs"
+ :refusal.authoring/no-entity-named
+   "kein {kind} namens {name}"
+ :refusal.authoring/no-installable-release
+   "kein installierbares Release von {product}{which}"
+ :refusal.authoring/no-product
+   "kein Produkt {product}"
+ :refusal.authoring/no-resource-with-rid
+   "keine Ressource mit dieser RID"
+ :refusal.authoring/no-transform-or-dataset
+   "kein solcher Transform und kein solches Dataset"
+ :refusal.authoring/no-versioned
+   "kein {section} '{name}', das Versionen führt ({verb})"
+ :refusal.authoring/not-declared
+   "kein {section} '{name}' deklariert"
+ :refusal.authoring/not-edn
+   "nicht als EDN lesbar: {reason}"
+ :refusal.authoring/object-type-only-status
+   "{status-kw} ist ein Status nur für Objekttypen; ein {kind} nimmt :active / :experimental / :deprecated / :example"
+ :refusal.authoring/projection-files
+   "ein Schreiben in eine Projektion braucht :files {path text}"
+ :refusal.authoring/release-conflicts-installation
+   "das Release und diese Installation haben beide {n} Element(e) geändert -- mit --mine (Release) oder --theirs (Installation) entscheiden"
+ :refusal.authoring/release-conflicts-instance
+   "das Release und diese Instanz haben beide {n} Element(e) geändert -- mit :resolve :mine (Release) oder :theirs (Instanz) entscheiden"
+ :refusal.authoring/release-not-released
+   "{product} {version} ist {state-name} — nur eine veröffentlichte Version lässt sich installieren"
+ :refusal.authoring/release-withdrawn
+   "{product} {version} ist zurückgezogen"
+ :refusal.authoring/restore-exists
+   "{kind-name} {name} existiert schon — nichts wiederherzustellen"
+ :refusal.authoring/section-not-edited
+   "{section} wird nicht als Text bearbeitet"
+ :refusal.authoring/section-not-text
+   "{section} wird nicht als Text bearbeitet — Sektionen, die es werden: {sections}"
+ :refusal.authoring/source-spec
+   "{error}"
+ :refusal.authoring/status-missing
+   "status set braucht einen :status"
+ :refusal.authoring/transform-not-at-commit
+   "Transform in diesem Commit nicht gefunden"
+ :refusal.authoring/transform-not-found
+   "Transform nicht gefunden"
+ :refusal.authoring/type-not-at-commit
+   "den Typ gab es in diesem Commit nicht"
+ :refusal.authoring/unknown-kind
+   "unbekannte Art '{kind}'"
+ :refusal.authoring/unknown-package
+   "unbekanntes Paket {package:pr} -- bekannt: {known-list}"
+ :refusal.authoring/unrestorable-kind
+   "nicht wiederherstellbare Art — eine von {kinds}"
+ :refusal.automation/no-such-automation
+   "keine solche Automation"
+ :refusal.branching/a-commit-needs-files-path
+   "ein Commit braucht :files {path text}"
+ :refusal.branching/checks-needs-a-commit-sha
+   "checks braucht ?commit=<sha>"
+ :refusal.branching/no-branch
+   "kein Zweig"
+ :refusal.branching/no-file
+   "keine Datei {path}"
+ :refusal.branching/no-such-proposal
+   "kein solcher Vorschlag: {id}"
+ :refusal.branching/no-such-repository
+   "kein solches Repository"
+ :refusal.branching/no-such-task-on-this
+   "keine solche Aufgabe in diesem Vorschlag: {task}"
+ :refusal.branching/nothing-to-set-pass-one
+   "nichts zu setzen — eines von {value} übergeben"
+ :refusal.branching/pass-or-a-closed-branch
+   "{:inactive bool} oder {:closed true} übergeben — ein geschlossener Zweig lässt sich nicht wieder öffnen"
+ :refusal.branching/passed-error
+   "{message}"
+ :refusal.branching/passed-error-r
+   "{message}"
+ :refusal.branching/roles-need-a-principal
+   "Rollen brauchen einen :principal"
+ :refusal.branching/the-ontology-is-changed-through
+   "die Ontologie wird über ihre Projektion geändert"
+ :refusal.builds/build-scope
+   "{error}"
+ :refusal.builds/dataset-not-found
+   "Dataset nicht gefunden"
+ :refusal.builds/empty-upload
+   "leerer Upload: die Datei ist der Rumpf der Anfrage"
+ :refusal.builds/file-too-large
+   "Datei größer als {limit} Bytes"
+ :refusal.builds/no-backing-to-reindex
+   "der Objekttyp hat keinen zugrunde liegenden Transform, gegen den neu indiziert werden kann"
+ :refusal.builds/no-backing-to-reset
+   "der Objekttyp hat keinen zugrunde liegenden Transform, gegen den zurückgesetzt werden kann"
+ :refusal.builds/no-import-plan
+   "für diesen Zweig ist kein Importplan gespeichert — zuerst Datenquellen und Planeinträge anlegen"
+ :refusal.builds/no-llm-call
+   "keine Zeile in llm_call_log mit dieser request-id"
+ :refusal.builds/no-producer
+   "kein Transform baut {name}: ein erzwungener Snapshot wirkt erst beim nächsten Build. Um die Zeilen zu ersetzen, einen Snapshot schreiben (`dataset write`)."
+ :refusal.builds/no-run
+   "Lauf nicht gefunden"
+ :refusal.builds/no-transform-named
+   "kein Transform namens {transform-name}"
+ :refusal.builds/preview-no-transform
+   "{error}"
+ :refusal.builds/reindex-would-delete
+   "der Reindex würde Objekte ohne Quellzeile und ohne Bearbeitungsherkunft löschen — vermutlich Writeback-Objekte. Mit ?force=true trotzdem ausführen (nicht umkehrbar)."
+ :refusal.builds/rows-refused
+   "{message}"
+ :refusal.builds/unknown-format
+   "unbekanntes Format: csv, parquet oder arrow"
+ :refusal.builds/unknown-transform
+   "unbekannter Transform"
+ :refusal.builds/unknown-transform-or-input
+   "unbekannter Transform oder unbekanntes Eingabe-Dataset"
+ :refusal.builds/upload-mode
+   "mode ist append oder snapshot"
+ :refusal.builds/virtual-no-rows
+   "ein virtuelles Dataset hält keine Zeilen: seine Quelle exportieren"
+ :refusal.builds/virtual-no-versions
+   "ein virtuelles Dataset hat keine Versionen: seine Quelle führt keine Historie, die diese Plattform lesen kann"
+ :refusal.canvas/a-dashboard-layout-needs-layout
+   "ein Dashboard-Layout braucht :layout"
+ :refusal.canvas/invalid-uuid
+   "ungültige UUID"
+ :refusal.canvas/no-layout
+   "kein Layout für {object-type}"
+ :refusal.canvas/no-such-graph
+   "kein solcher Graph"
+ :refusal.canvas/no-such-graph-invalid-scheme
+   "kein solcher Graph / ungültige Schema-UUID"
+ :refusal.canvas/only-a-lineage-graph-can
+   "nur ein :lineage-Graph lässt sich auf dem Server zeichnen"
+ :refusal.checkouts/a-slice-needs-nodes
+   "ein Slice braucht Knoten"
+ :refusal.compute/image-project
+   "ein Image gehört einem Projekt — :project fehlt"
+ :refusal.compute/image-push-denied
+   "ein Image nach {project} zu schieben braucht dort :update"
+ :refusal.documents/api-documents-id-live-ist
+   "/api/documents/:id/live ist ein WebSocket"
+ :refusal.documents/client-nennt-die-yjs-client
+   "?client= nennt die Yjs-Client-Id"
+ :refusal.documents/der-vorlagenname-ist-ein-api
+   "der Vorlagenname ist ein API-Name: Kleinbuchstaben, Ziffern, Bindestrich"
+ :refusal.documents/diese-live-sitzung-ist-beendet
+   "Diese Live-Sitzung ist beendet"
+ :refusal.documents/dieses-dokument-ist-keine-tabelle
+   "dieses Dokument ist keine Tabelle"
+ :refusal.documents/draft-names-what-the-branch
+   "der Entwurf {kw} nennt, was der Zweig nicht hat: {list}"
+ :refusal.documents/ein-speichern-nennt-die-geladene
+   "ein Speichern nennt die geladene Version (:expect-version) oder seine Live-Sitzung (:live)"
+ :refusal.documents/eine-vorlage-gehoert-einem-project
+   "eine Vorlage gehört einem Project — :project fehlt"
+ :refusal.documents/kein-solches-dokument
+   "kein solches Dokument"
+ :refusal.documents/keine-bearbeitungsrechte-im-project
+   "keine Bearbeitungsrechte im Project {project}"
+ :refusal.documents/passed-ex-message-e
+   "{message}"
+ :refusal.documents/passed-msg
+   "{message}"
+ :refusal.evals/a-test-case-needs-the
+   "ein Testfall braucht die Frage (:input)"
+ :refusal.evals/a-test-case-needs-the-2
+   "ein Testfall braucht die erwartete Antwort (:reference) oder was sie enthalten muss"
+ :refusal.evals/already-in-the-repository
+   "schon im Repository: {list}"
+ :refusal.evals/an-evaluation-needs-the-judge
+   "eine Bewertung braucht das :model des Richters und das :markdown, das er bewertet"
+ :refusal.evals/name-a-media-source-kind
+   "eine Medienquelle nennen (?kind=media-set|dataset&name=)"
+ :refusal.evals/name-the-media-source-source
+   "die Medienquelle nennen (:source)"
+ :refusal.evals/name-the-page-page-from
+   "die Seite nennen (:page, ab 0)"
+ :refusal.evals/no-media-item-in
+   "kein Medienelement {addr} in {name}"
+ :refusal.evals/no-media-source
+   "keine Medienquelle {name}"
+ :refusal.evals/no-such-agent
+   "kein solcher Agent '{agent}'"
+ :refusal.evals/no-test-suite
+   "keine Testsuite {suite}"
+ :refusal.evals/passed-failure-e
+   "{message}"
+ :refusal.evals/passed-refusal
+   "{message}"
+ :refusal.evals/strategy-one-of
+   "Strategie — eine von {list}"
+ :refusal.evals/the-entities-strategy-needs-its
+   "die Strategie entities braucht ihre :entities (Name → Typ)"
+ :refusal.evals/the-strategy-needs-a-model
+   "die Strategie {strategy} braucht ein Modell (:strategy :model)"
+ :refusal.evals/the-suite-has-no-test
+   "die Suite hat noch keinen Testfall"
+ :refusal.evals/this-suite-is-running-already
+   "diese Suite läuft schon"
+ :refusal.feedback/das-fazit-ist-unvollstaendig
+   "das Fazit ist unvollständig"
+ :refusal.feedback/keine-solche-feedback-sitzung
+   "keine solche Feedback-Sitzung"
+ :refusal.feedback/niemand-angemeldet
+   "niemand angemeldet"
+ :refusal.health/a-check-group-has-a
+   "eine Prüfgruppe hat einen :name und :check-ids [...]"
+ :refusal.health/every-is-15m-1h-daily
+   "every ist 15m, 1h, daily, weekly oder :every-ms"
+ :refusal.health/level-is-all-critical-or
+   "level ist all, critical oder none"
+ :refusal.health/snooze-takes-hours-n-or
+   "snooze nimmt {:hours n} oder {:until iso-instant}"
+ :refusal.http/bad-blob-hash
+   "ungültiger Blob-Hash"
+ :refusal.http/no-branch
+   "kein aktueller Zweig"
+ :refusal.http/no-such-blob
+   "kein solcher Blob"
+ :refusal.http/unknown-dataset
+   "unbekanntes Dataset"
+ :refusal.http/unknown-object-type
+   "unbekannter Objekttyp"
+ :refusal.lineage/no-saved-graph
+   "kein gespeicherter Graph {graph:pr}"
+ :refusal.lineage/node-is-required
+   "ein Knoten ist Pflicht"
+ :refusal.llm/set-budget-needs-eur-n
+   "das Budget setzen braucht {:eur n}, {:reserve-pct n}, {:project p :quota n|nil} oder {:source s :quota n|nil}"
+ :refusal.llm/unknown-source
+   "unbekannte Quelle {nm:pr}"
+ :refusal.media/datei-zu-gross
+   "Datei zu groß"
+ :refusal.media/empty-upload
+   "leerer Upload"
+ :refusal.media/leerer-oder-ungueltiger-upload-bytes
+   "leerer oder ungültiger Upload (:bytes-b64 fehlt oder ist kein base64)"
+ :refusal.media/media-land-braucht-dataset-und
+   "media-land braucht :dataset und :media-column"
+ :refusal.media/passed-message
+   "{message}"
+ :refusal.notifications/no-user-to-stream-notifications
+   "kein Benutzer, an den Benachrichtigungen gestreamt werden"
+ :refusal.notifications/passed-p
+   "{message}"
+ :refusal.notifications/read-takes-ids-or-all
+   "read nimmt {:ids [...]} oder {:all true}"
+ :refusal.notifications/smtp-answer
+   "smtp: {line}"
+ :refusal.notifications/smtp-no-starttls
+   "smtp: der Relay bietet kein STARTTLS an"
+ :refusal.objects/exploration-fields
+   "braucht :kind, :object-type, :name und :query"
+ :refusal.objects/knn-query-missing
+   "?vector=<Zahlen> angeben (oder ?q=<Text> bei eingerichtetem Embedding-Modell)"
+ :refusal.objects/no-embedding-model
+   "kein Embedding-Modell angebunden — stattdessen einen vorberechneten ?vector=<Zahlen> übergeben"
+ :refusal.objects/no-exploration
+   "keine solche Exploration"
+ :refusal.objects/no-link-type
+   "kein Linktyp '{type}'"
+ :refusal.objects/no-object-type
+   "kein Objekttyp '{type}'"
+ :refusal.objects/no-object-type-on-branch
+   "kein solcher Objekttyp auf diesem Zweig"
+ :refusal.objects/no-semantic-search
+   "Objekttyp '{type}' deklariert keine :semantic-search"
+ :refusal.objects/project-map
+   "{error}"
+ :refusal.objects/search-around-dir
+   ":search-around nennt eine Seite des Links (ihren API-Namen), die die Richtung schon trägt — :dir weglassen"
+ :refusal.objects/temp-set-no-principal
+   "eine temporäre Objektmenge gehört einem Principal — diese Anfrage hat keinen"
+ :refusal.objects/temp-set-spec-missing
+   ":ir (eine Objektmengen-IR) oder eine Abfrage (:find/:object-set …) angeben"
+ :refusal.peering/connection-is-with-not
+   "Verbindung {connection-id} besteht mit {trust}, nicht mit {signer}"
+ :refusal.peering/no-peer-connection
+   "keine Peer-Verbindung {connection-id}"
+ :refusal.peering/only-who-can-manage-manages
+   "nur wer {value} verwalten darf, verwaltet seine Peer-Verbindungen"
+ :refusal.peering/the-connection-is-not-active
+   "die Verbindung ist auf dieser Seite nicht aktiv"
+ :refusal.peering/the-connection-s-ingress-does
+   "der Eingang der Verbindung lässt diese Adresse nicht zu"
+ :refusal.projects/annotation-ref
+   "eine Annotation braucht :ref"
+ :refusal.projects/collection-name
+   "eine Sammlung braucht :name"
+ :refusal.projects/empty-upload
+   "leerer Upload"
+ :refusal.projects/exploration-into-folder
+   "Eine Exploration legt man in einen Ordner oder in ein Projekt."
+ :refusal.projects/exploration-via-place
+   "Eine Exploration wandert über /api/kompass/place in ein anderes Projekt."
+ :refusal.projects/favorite-ref
+   "ein Favorit braucht :ref"
+ :refusal.projects/file-denied
+   "Diese Datei liegt in einem Projekt, das du nicht ändern oder lesen darfst."
+ :refusal.projects/file-fields
+   "Eine Datei braucht :name und Inhalt."
+ :refusal.projects/file-role
+   "Rolle: viewer, editor oder owner."
+ :refusal.projects/file-roles-kinds
+   "Rollen je Datei gibt es für Dokumente, Explorationen und hochgeladene Dateien."
+ :refusal.projects/file-roles-off
+   "Dieses Projekt nimmt keine Rollen auf einzelne Dateien an: Das schaltet sein Owner im Zugriff ein."
+ :refusal.projects/file-too-large
+   "Datei zu groß"
+ :refusal.projects/folder-name
+   "ein Ordner braucht :name"
+ :refusal.projects/folder-without-project
+   "Dieser Ordner liegt in keinem Projekt."
+ :refusal.projects/grant-principal
+   "Wem? :principal fehlt."
+ :refusal.projects/link-gone
+   "Dieser Link gilt nicht mehr."
+ :refusal.projects/move-kinds
+   "In ein anderes Projekt verschieben lassen sich hier Dokumente und Ordner."
+ :refusal.projects/no-document
+   "kein solches Dokument"
+ :refusal.projects/no-exploration
+   "keine solche Exploration"
+ :refusal.projects/no-file
+   "keine solche Datei"
+ :refusal.projects/placement-ref
+   "eine Platzierung braucht :ref"
+ :refusal.projects/portfolio-name
+   "ein Portfolio braucht :name"
+ :refusal.schedules/no-such-schedule
+   "kein solcher Zeitplan"
+ :refusal.serve/a-restore-point-needs-a
+   "ein Wiederherstellungspunkt braucht ein :label"
+ :refusal.serve/api-ontology-watch-is-a
+   "/api/ontology/watch ist ein WebSocket-Endpunkt"
+ :refusal.serve/hot-reload-disarmed-needs-sutra
+   "Hot Reload ist entschärft — braucht SUTRA_HOT_RELOAD=1 auf einer Instanz außerhalb von prod (SUTRA_INSTANCE gesetzt, nicht prod)"
+ :refusal.serve/missing-sql
+   ":sql fehlt"
+ :refusal.serve/no-eval-job-on-this
+   "kein Eval-Job {id} auf diesem Zweig"
+ :refusal.serve/no-files-to-reload
+   "keine :files zum Neuladen"
+ :refusal.serve/passed-getmessage-e
+   "{message}"
+ :refusal.serve/publish-takes-records
+   "publish nimmt {:records [{…}]}"
+ :refusal.serve/request-does-not-satisfy-its
+   "die Anfrage erfüllt den Vertrag ihres Endpunkts nicht"
+ :refusal.serve/stored-function-not-found
+   "gespeicherte Funktion nicht gefunden"
+ :refusal.serve/the-hot-patch-cannot-be
+   "der Hot Patch lässt sich nicht als aktiv belegen — prod läuft noch mit dem Code des Images"
+ :refusal.serve/unknown-stream
+   "unbekannter Stream"
+ :refusal.sources/datasource-did-not-exist-at
+   "die Datenquelle gab es in diesem Commit nicht"
+ :refusal.sources/datasource-test-refuses-a-plaintext
+   "datasource-test weist ein :password im Klartext ab — {:user :password} für den Egress-Agenten versiegeln und :secret-cipher senden"
+ :refusal.sources/missing-columns
+   ":columns fehlt"
+ :refusal.sources/missing-table
+   ":table fehlt"
+ :refusal.sources/missing-table-name
+   "?table=<name> fehlt"
+ :refusal.sources/passed-error
+   "{message}"
+ :refusal.sources/passed-message-health
+   "{message}"
+ :refusal.sources/unknown-datasource-for-this-branch
+   "unbekannte Datenquelle für diesen Zweig"
+ :refusal.widget-sets/dieses-widget-set-hat-noch
+   "dieses Widget Set hat noch kein Release"
+ :refusal.widget-sets/ein-release-darf-bytes-gross
+   "Ein Release darf {value} Bytes groß sein und nur Pfade im Release tragen."
+ :refusal.widget-sets/keine-version
+   "keine Version {version}"
+ :refusal.kit/work-cancelled
+   "die Arbeit, zu der dieser Aufruf gehört, wurde abgebrochen — der Aufruf wird abgewiesen"
+ :refusal.scenarios/does-not-apply
+   "Szenario {branch} passt nicht auf {target}: {why}"
+ :refusal.scenarios/not-open
+   "Szenario {branch} ist {state-name} — dupliziere es, um weitere Actions anzuwenden"
+}

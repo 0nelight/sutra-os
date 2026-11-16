@@ -1,0 +1,2 @@
+{:paths ["src" "resources"]
+ :deps {com.hierynomus/smbj {:mvn/version "0.15.0"}}}

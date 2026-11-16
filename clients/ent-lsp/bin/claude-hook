@@ -1,0 +1,47 @@
+#!/usr/bin/env bb
+;; PostToolUse hook for Claude Code: after an Edit/Write on a .ent-family file,
+;; the language server's findings for THAT file come back as context — what a
+;; person sees as squiggles in the IDE, an agent sees as text. The work happens in
+;; the workspace's daemon (ent-lsp.daemon, JVM, warm); this only asks it, and
+;; starts it when none answers.
+(require '[babashka.classpath :as cp] '[cheshire.core :as json] '[babashka.process :as p])
+
+(def here (-> *file* java.io.File. .getCanonicalFile .getParentFile .getParentFile str))
+(cp/add-classpath (str here "/src"))
+(require '[ent-lsp.place :as place])
+(import '[java.net UnixDomainSocketAddress] '[java.nio.channels Channels SocketChannel])
+
+(def start-wait-ms 45000)
+
+(defn ask [root req]
+  (try
+    (with-open [c (SocketChannel/open (UnixDomainSocketAddress/of ^String (place/socket root)))]
+      (let [w (java.io.PrintWriter. (Channels/newWriter c "UTF-8"))
+            r (java.io.BufferedReader. (Channels/newReader c "UTF-8"))]
+        (.println w (json/generate-string req))
+        (.flush w)
+        (:text (json/parse-string (.readLine r) true))))
+    (catch java.io.IOException _ nil)))
+
+(defn start! [root]
+  (.mkdirs (java.io.File. ^String (place/dir root)))
+  (let [log (java.io.File. ^String (place/log root))]
+    (p/process {:dir here :out :append :out-file log :err :append :err-file log}
+               "setsid" "clojure" "-M" "-m" "ent-lsp.daemon" root)))
+
+(defn ask-or-start [root req]
+  (or (ask root req)
+      (do (start! root)
+          (loop [waited 0]
+            (Thread/sleep 200)
+            (or (ask root req)
+                (if (< waited start-wait-ms)
+                  (recur (+ waited 200))
+                  (str "ent-lsp: der Daemon für " root " antwortet noch nicht (Log: " (place/log root) ")")))))))
+
+(let [in   (json/parse-string (slurp *in*) true)
+      file (or (get-in in [:tool_input :file_path]) (get-in in [:tool_response :filePath]))]
+  (when-let [root (and file (re-find #"\.ent[vap]?$" file) (place/root-of file))]
+    (let [text (ask-or-start root {:file file :all (= "1" (System/getenv "ENT_LSP_ALLE"))})]
+      (println (json/generate-string {:hookSpecificOutput {:hookEventName "PostToolUse"
+                                                           :additionalContext text}})))))

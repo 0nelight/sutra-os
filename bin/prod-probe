@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Runs real work through the live split of api, conductor and workers, which bin/test
+# cannot see. It leaves main untouched: the preview commits nothing, and the build runs
+# on a throwaway branch.
+#   bin/prod-probe [python-transform] [sql-transform]
+# A probe transform must not call a model: every run would cost money.
+set -euo pipefail
+cd "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+PY=${1:-shape-durchwahl}
+SQL=${2:-shape-auftragstyp}
+BRANCH="topologie-probe-$(date +%s)"
+
+sutra() { timeout 30 bin/sutra "$@" 2>/dev/null; }
+fail() { echo "prod-probe: FAIL: $*" >&2; exit 1; }
+
+rows=$(sutra preview-transform "$PY" --limit 3 | jq '(.rows // []) | length') \
+  || fail "preview of $PY did not answer"
+[ "${rows:-0}" -gt 0 ] || fail "preview of $PY returned no rows"
+echo "prod-probe: preview $PY: $rows rows"
+
+sutra branch "$BRANCH" >/dev/null || fail "could not fork $BRANCH"
+trap 'sutra close "$BRANCH" >/dev/null || echo "prod-probe: left $BRANCH open" >&2' EXIT
+
+run=$(sutra --branch "$BRANCH" build run --only "$PY,$SQL" --strategy selected --force --detach \
+  | jq -r 'select(."run-id") | ."run-id"') || fail "build on $BRANCH did not start"
+[ -n "$run" ] || fail "build on $BRANCH named no run"
+
+timeout 300 bin/sutra await "$run" >/dev/null 2>&1 || fail "run $run did not succeed (await)"
+
+status=$(sutra build show "$run" | jq -r .status) || fail "run $run cannot be read"
+[ "$status" = succeeded ] || fail "run $run ended $status"
+
+done_jobs=$(sutra build jobs "$run" | jq '[(.rows // .)[] | select(.status == "COMPLETED")] | length') \
+  || fail "jobs of run $run cannot be read"
+[ "$done_jobs" = 2 ] || fail "run $run completed $done_jobs of 2 jobs"
+echo "prod-probe: build $run on $BRANCH: $done_jobs jobs completed"
+echo "prod-probe: ok"

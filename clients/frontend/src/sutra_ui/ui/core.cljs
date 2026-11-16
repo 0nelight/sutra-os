@@ -1,0 +1,333 @@
+(ns sutra-ui.ui.core
+  (:refer-clojure :exclude [clone])
+  (:require [clojure.string :as str]
+            [sutra.i18n.core :as i18n]
+            [blueprint-cljs.alert :as b-alert]
+            [blueprint-cljs.breadcrumbs :as b-breadcrumbs]
+            [blueprint-cljs.button :as b-button]
+            [blueprint-cljs.callout :as b-callout]
+            [blueprint-cljs.card :as b-card]
+            [blueprint-cljs.checkbox :as b-checkbox]
+            [blueprint-cljs.collapse :as b-collapse]
+            [blueprint-cljs.context-menu :as b-context-menu]
+            [blueprint-cljs.control-card :as b-control-card]
+            [blueprint-cljs.core :as b-core]
+            [blueprint-cljs.date-input :as b-date-input]
+            [blueprint-cljs.date-range-input :as b-date-range-input]
+            [blueprint-cljs.date-utils :as b-date-utils]
+            [blueprint-cljs.dialog :as b-dialog]
+            [blueprint-cljs.divider :as b-divider]
+            [blueprint-cljs.drawer :as b-drawer]
+            [blueprint-cljs.editable-text :as b-editable-text]
+            [blueprint-cljs.entity-title :as b-entity-title]
+            [blueprint-cljs.file-input :as b-file-input]
+            [blueprint-cljs.form-group :as b-form-group]
+            [blueprint-cljs.hotkeys :as b-hotkeys]
+            [blueprint-cljs.html :as b-html]
+            [blueprint-cljs.html-select :as b-html-select]
+            [blueprint-cljs.icon :as b-icon]
+            [blueprint-cljs.input-group :as b-input-group]
+            [blueprint-cljs.link :as b-link]
+            [blueprint-cljs.menu :as b-menu]
+            [blueprint-cljs.multi-select :as b-multi-select]
+            [blueprint-cljs.navbar :as b-navbar]
+            [blueprint-cljs.non-ideal-state :as b-non-ideal-state]
+            [blueprint-cljs.numeric-input :as b-numeric-input]
+            [blueprint-cljs.omnibar :as b-omnibar]
+            [blueprint-cljs.overflow-list :as b-overflow-list]
+            [blueprint-cljs.overlay :as b-overlay]
+            [blueprint-cljs.popover :as b-popover]
+            [blueprint-cljs.portal :as b-portal]
+            [blueprint-cljs.progress-bar :as b-progress-bar]
+            [blueprint-cljs.query-list :as b-query-list]
+            [blueprint-cljs.radio :as b-radio]
+            [blueprint-cljs.radio-group :as b-radio-group]
+            [blueprint-cljs.range-slider :as b-range-slider]
+            [blueprint-cljs.section :as b-section]
+            [blueprint-cljs.segmented-control :as b-segmented-control]
+            [blueprint-cljs.skeleton :as b-skeleton]
+            [blueprint-cljs.slider :as b-slider]
+            [blueprint-cljs.spinner :as b-spinner]
+            [blueprint-cljs.suggest :as b-suggest]
+            [blueprint-cljs.switch :as b-switch]
+            [blueprint-cljs.table :as b-table]
+            [blueprint-cljs.tabs :as b-tabs]
+            [blueprint-cljs.tag :as b-tag]
+            [blueprint-cljs.tag-input :as b-tag-input]
+            [blueprint-cljs.text-area :as b-text-area]
+            [blueprint-cljs.timezone-select :as b-timezone-select]
+            [blueprint-cljs.toast :as b-toast]
+            [blueprint-cljs.tooltip :as b-tooltip]
+            [blueprint-cljs.tree :as b-tree]))
+
+(def alert b-alert/alert)
+(def breadcrumb b-breadcrumbs/breadcrumb)
+(def breadcrumbs b-breadcrumbs/breadcrumbs)
+(def anchor-button b-button/anchor-button)
+(def button b-button/button)
+(def button-group b-button/button-group)
+(def callout b-callout/callout)
+(def card b-card/card)
+(def card-list b-card/card-list)
+(def checkbox b-checkbox/checkbox)
+(def collapse b-collapse/collapse)
+(def context-menu b-context-menu/context-menu)
+(def context-menu-popover b-context-menu/context-menu-popover)
+(def hide-context-menu! b-context-menu/hide-context-menu!)
+(def show-context-menu! b-context-menu/show-context-menu!)
+(def checkbox-card b-control-card/checkbox-card)
+(def control-card b-control-card/control-card)
+(def radio-card b-control-card/radio-card)
+(def switch-card b-control-card/switch-card)
+(def cls b-core/cls)
+(def cx b-core/cx)
+(def dark-class b-core/dark-class)
+(def dom-props b-core/dom-props)
+(def intent-class b-core/intent-class)
+(def intents b-core/intents)
+(def merge-class b-core/merge-class)
+(def ns-prefix b-core/ns-prefix)
+(def date-input b-date-input/date-input)
+(def focusable-elements b-date-input/focusable-elements)
+(def format-raw b-date-input/format-raw)
+(def formatter b-date-input/formatter)
+(def invalid-date-message b-date-input/invalid-date-message)
+(def out-of-range-message b-date-input/out-of-range-message)
+(def parser b-date-input/parser)
+(def date-range-input b-date-range-input/date-range-input)
+(def overlapping-dates-message b-date-range-input/overlapping-dates-message)
+(def add-days b-date-utils/add-days)
+(def add-months b-date-utils/add-months)
+(def caption b-date-utils/caption)
+(def clamp-date b-date-utils/clamp-date)
+(def clone b-date-utils/clone)
+(def date b-date-utils/date)
+(def date-between b-date-utils/date-between)
+(def date-time b-date-utils/date-time)
+(def day-in-range? b-date-utils/day-in-range?)
+(def day-key b-date-utils/day-key)
+(def day-label b-date-utils/day-label)
+(def day-range-in-range? b-date-utils/day-range-in-range?)
+(def default-format b-date-utils/default-format)
+(def default-formats b-date-utils/default-formats)
+(def default-locale b-date-utils/default-locale)
+(def default-max-date b-date-utils/default-max-date)
+(def default-max-time b-date-utils/default-max-time)
+(def default-min-date b-date-utils/default-min-date)
+(def default-min-time b-date-utils/default-min-time)
+(def first-day-of-week b-date-utils/first-day-of-week)
+(def format-date b-date-utils/format-date)
+(def get-unit b-date-utils/get-unit)
+(def hour-12 b-date-utils/hour-12)
+(def hour-24 b-date-utils/hour-24)
+(def invalid-date b-date-utils/invalid-date)
+(def meridiem-hour b-date-utils/meridiem-hour)
+(def month-changed? b-date-utils/month-changed?)
+(def month-diff b-date-utils/month-diff)
+(def month-end b-date-utils/month-end)
+(def month-in-range? b-date-utils/month-in-range?)
+(def month-name b-date-utils/month-name)
+(def month-start b-date-utils/month-start)
+(def next-range-state b-date-utils/next-range-state)
+(def pad b-date-utils/pad)
+(def parse-date b-date-utils/parse-date)
+(def pm? b-date-utils/pm?)
+(def precision b-date-utils/precision)
+(def ranges-equal? b-date-utils/ranges-equal?)
+(def same-day? b-date-utils/same-day?)
+(def same-month? b-date-utils/same-month?)
+(def same-time? b-date-utils/same-time?)
+(def set-unit! b-date-utils/set-unit!)
+(def start-of-day b-date-utils/start-of-day)
+(def time-changed? b-date-utils/time-changed?)
+(def time-in-range b-date-utils/time-in-range)
+(def time-in-range? b-date-utils/time-in-range?)
+(def time-only b-date-utils/time-only)
+(def time-units b-date-utils/time-units)
+(def today-at-midnight b-date-utils/today-at-midnight)
+(def today? b-date-utils/today?)
+(def unit-valid? b-date-utils/unit-valid?)
+(def valid? b-date-utils/valid?)
+(def weekday-long b-date-utils/weekday-long)
+(def weekday-short b-date-utils/weekday-short)
+(def wrap-unit b-date-utils/wrap-unit)
+(def close-button b-dialog/close-button)
+(def dialog b-dialog/dialog)
+(def dialog-body b-dialog/dialog-body)
+(def dialog-footer b-dialog/dialog-footer)
+(def dialog-step b-dialog/dialog-step)
+(def multistep-dialog b-dialog/multistep-dialog)
+(def divider b-divider/divider)
+(def drawer b-drawer/drawer)
+(def sizes b-drawer/sizes)
+(def editable-text b-editable-text/editable-text)
+(def entity-title b-entity-title/entity-title)
+(def file-input b-file-input/file-input)
+(def form-group b-form-group/form-group)
+(def combo-matches b-hotkeys/combo-matches)
+(def config-aliases b-hotkeys/config-aliases)
+(def get-key-combo b-hotkeys/get-key-combo)
+(def hide-hotkeys-dialog! b-hotkeys/hide-hotkeys-dialog!)
+(def hotkey b-hotkeys/hotkey)
+(def hotkeys-dialog b-hotkeys/hotkeys-dialog)
+(def hotkeys-list b-hotkeys/hotkeys-list)
+(def hotkeys-target b-hotkeys/hotkeys-target)
+(def key-combo-tag b-hotkeys/key-combo-tag)
+(def mac? b-hotkeys/mac?)
+(def modifier-bits b-hotkeys/modifier-bits)
+(def normalize-key-combo b-hotkeys/normalize-key-combo)
+(def parse-key-combo b-hotkeys/parse-key-combo)
+(def shift-keys b-hotkeys/shift-keys)
+(def show-dialog-key-combo b-hotkeys/show-dialog-key-combo)
+(def show-hotkeys-dialog! b-hotkeys/show-hotkeys-dialog!)
+(def text-input? b-hotkeys/text-input?)
+(def blockquote b-html/blockquote)
+(def code b-html/code)
+(def h1 b-html/h1)
+(def h2 b-html/h2)
+(def h3 b-html/h3)
+(def h4 b-html/h4)
+(def h5 b-html/h5)
+(def h6 b-html/h6)
+(def html-table b-html/html-table)
+(def label b-html/label)
+(def ol b-html/ol)
+(def pre b-html/pre)
+(def ul b-html/ul)
+(def html-select b-html-select/html-select)
+(def icon b-icon/icon)
+(def register-paths! b-icon/register-paths!)
+(def registry b-icon/registry)
+(def render-icon b-icon/render-icon)
+(def input-group b-input-group/input-group)
+(def link b-link/link)
+(def menu b-menu/menu)
+(def menu-divider b-menu/menu-divider)
+(def menu-item b-menu/menu-item)
+(def multi-select b-multi-select/multi-select)
+(def tag-input-input-class b-multi-select/tag-input-input-class)
+(def navbar b-navbar/navbar)
+(def navbar-divider b-navbar/navbar-divider)
+(def navbar-group b-navbar/navbar-group)
+(def navbar-heading b-navbar/navbar-heading)
+(def icon-size-extra-small b-non-ideal-state/icon-size-extra-small)
+(def icon-size-small b-non-ideal-state/icon-size-small)
+(def icon-size-standard b-non-ideal-state/icon-size-standard)
+(def non-ideal-state b-non-ideal-state/non-ideal-state)
+(def count-decimal-places b-numeric-input/count-decimal-places)
+(def numeric-input b-numeric-input/numeric-input)
+(def round-and-clamp b-numeric-input/round-and-clamp)
+(def sanitize b-numeric-input/sanitize)
+(def omnibar b-omnibar/omnibar)
+(def overflow-list b-overflow-list/overflow-list)
+(def keyboard-focusable-elements b-overlay/keyboard-focusable-elements)
+(def merge-child-props b-overlay/merge-child-props)
+(def next-frame b-overlay/next-frame)
+(def overlay b-overlay/overlay)
+(def transition-classes b-overlay/transition-classes)
+(def arrow-svg-size b-popover/arrow-svg-size)
+(def base-placement b-popover/base-placement)
+(def dismiss-class b-popover/dismiss-class)
+(def dismiss-override-class b-popover/dismiss-override-class)
+(def popover b-popover/popover)
+(def popover-arrow b-popover/popover-arrow)
+(def transform-origin b-popover/transform-origin)
+(def portal b-portal/portal)
+(def progress-bar b-progress-bar/progress-bar)
+(def create-new-item b-query-list/create-new-item)
+(def create-new-item? b-query-list/create-new-item?)
+(def filtered-items b-query-list/filtered-items)
+(def get-active-item b-query-list/get-active-item)
+(def get-create-new-item b-query-list/get-create-new-item)
+(def get-first-enabled-item b-query-list/get-first-enabled-item)
+(def highlight-text b-query-list/highlight-text)
+(def item-disabled? b-query-list/item-disabled?)
+(def items-equal? b-query-list/items-equal?)
+(def keyboard-click? b-query-list/keyboard-click?)
+(def query-list b-query-list/query-list)
+(def render-filtered-items b-query-list/render-filtered-items)
+(def target-self-activates-on-key-up? b-query-list/target-self-activates-on-key-up?)
+(def radio b-radio/radio)
+(def radio-group b-radio-group/radio-group)
+(def range-slider b-range-slider/range-slider)
+(def section b-section/section)
+(def section-card b-section/section-card)
+(def segmented-control b-segmented-control/segmented-control)
+(def skeleton b-skeleton/skeleton)
+(def skeleton-class b-skeleton/skeleton-class)
+(def slider b-slider/slider)
+(def size-large b-spinner/size-large)
+(def size-small b-spinner/size-small)
+(def size-standard b-spinner/size-standard)
+(def spinner b-spinner/spinner)
+(def suggest b-suggest/suggest)
+(def switch b-switch/switch)
+(def cell b-table/cell)
+(def column b-table/column)
+(def column-header-cell b-table/column-header-cell)
+(def column-name b-table/column-name)
+(def copy-cells-to-clipboard! b-table/copy-cells-to-clipboard!)
+(def editable-cell b-table/editable-cell)
+(def editable-name b-table/editable-name)
+(def horizontal-cell-divider b-table/horizontal-cell-divider)
+(def json-format b-table/json-format)
+(def row-header-cell b-table/row-header-cell)
+(def table b-table/table)
+(def truncated-format b-table/truncated-format)
+(def tab b-tabs/tab)
+(def tab-ids-for b-tabs/tab-ids-for)
+(def tabs b-tabs/tabs)
+(def tabs-expander b-tabs/tabs-expander)
+(def compound-tag b-tag/compound-tag)
+(def tag b-tag/tag)
+(def tag-input b-tag-input/tag-input)
+(def text-area b-text-area/text-area)
+(def all-timezones b-timezone-select/all-timezones)
+(def current-timezone b-timezone-select/current-timezone)
+(def filter-timezones b-timezone-select/filter-timezones)
+(def format-timezone b-timezone-select/format-timezone)
+(def initial-timezones b-timezone-select/initial-timezones)
+(def minimal-timezones b-timezone-select/minimal-timezones)
+(def timezone-select b-timezone-select/timezone-select)
+(def utc b-timezone-select/utc)
+(def valid-timezone? b-timezone-select/valid-timezone?)
+(def with-names b-timezone-select/with-names)
+(def clear! b-toast/clear!)
+(def create b-toast/create)
+(def default-toaster b-toast/default-toaster)
+(def dismiss! b-toast/dismiss!)
+(def get-toasts b-toast/get-toasts)
+(def overlay-toaster b-toast/overlay-toaster)
+(def show! b-toast/show!)
+(def toast b-toast/toast)
+(def tooltip b-tooltip/tooltip)
+(def tooltip-arrow-svg-size b-tooltip/tooltip-arrow-svg-size)
+(def map-nodes b-tree/map-nodes)
+(def node-from-path b-tree/node-from-path)
+(def tree b-tree/tree)
+(def update-node b-tree/update-node)
+
+(defn empty-state
+  [{:keys [icon title hint action class small?]}]
+  [non-ideal-state
+   {:class       (cx "capp-empty" class)
+    :icon        (cond (keyword? icon) icon
+                       (some? icon)    [:span.capp-empty__icon icon])
+    :icon-size   (when small? icon-size-small)
+    :title       title
+    :description hint
+    :action      action}])
+
+(defn problem
+  ([text detail] (problem text detail nil))
+  ([text detail class]
+   [callout {:intent :danger
+             :compact true
+             :title  text
+             :class  class}
+    (when-not (str/blank? (str detail))
+      [section
+       {:title (i18n/t :ui/capp-details) :collapsible true :compact true
+        :collapse-props {:default-is-open false}}
+       [section-card
+        [:div.capp-error__msg (str detail)]]])]))

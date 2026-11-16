@@ -1,0 +1,39 @@
+.kompass-breadcrumb { padding: 0 var(--sp-6); border-bottom: 1px solid var(--c-border-line); background: var(--c-surface-soft); }
+.kompass-breadcrumb__root { color: var(--c-muted-2); }
+.kompass-role-chip { font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 1px var(--sp-2); border-radius: var(--radius-lg); color: var(--c-on-accent); }
+.kompass-doc__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-3); }
+.kompass-doc__description { font-size: var(--fs-sm); color: var(--c-muted); margin-bottom: var(--sp-3); font-style: italic; }
+.kompass-activity__entry { padding: var(--sp-2) 0; border-bottom: 1px solid var(--c-border-line); font-size: var(--fs-sm); }
+.kompass-activity__op { color: var(--c-text); }
+.kompass-grant__row { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-1) 0; border-bottom: 1px solid var(--c-border-line); }
+.kompass-grant__avatar { width: 22px; height: 22px; border-radius: 50%; flex: 0 0 auto; background: var(--c-border-soft); color: var(--c-muted); font-size: var(--fs-sm); display: flex; align-items: center; justify-content: center; }
+.kompass-grant__principal { flex: 1; font-size: var(--fs-md); color: var(--c-text); }
+.kompass-grant__add-form { display: flex; flex-direction: column; gap: var(--sp-2); margin-top: var(--pt-grid-size); }
+.kompass-access__pending { font-size: var(--fs-sm); color: var(--c-warning); }
+.kompass-access__roles-label, .kompass-access__markings-label { font-size: var(--fs-sm); color: var(--c-muted-2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.kompass-access__roles-label { margin: var(--sp-2) 0 var(--sp-0); }
+.kompass-details__tabbar { display: flex; border-bottom: 1px solid var(--c-border-soft); }
+.kompass-viewer__facts { margin: 0; display: flex; flex-direction: column; gap: var(--sp-1); font-size: var(--fs-md); }
+.kompass-viewer__fact { display: flex; gap: var(--pt-grid-size); align-items: baseline; }
+.kompass-viewer__fact dt { width: 130px; flex: 0 0 auto; color: var(--c-muted); }
+.kompass-viewer__fact dd { margin: 0; display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--pt-grid-size); }
+
+.kompass-icon--folder { color: var(--gold3); }
+.kompass-icon--promoted { color: var(--indigo3); }
+.kompass-notice { margin: 0 0 var(--pt-grid-size); padding: var(--sp-3) var(--sp-4); font-size: var(--fs-sm); background: var(--c-active-bg); color: var(--c-active-fg); border-radius: var(--radius); }
+.kompass-files__tags { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
+.kompass-files__unknown { color: var(--c-muted); }
+
+.kompass-cards, .kompass-quick { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--sp-4); }
+.kompass-nav__sub { padding-left: 34px; font-size: var(--fs-sm); }
+.kompass-drop { outline: 2px dashed var(--c-primary-strong); outline-offset: 4px; }
+.kompass-markdown { font-size: var(--fs-md); line-height: 1.5; color: var(--c-text); }
+
+.bp-dialog.kompass-modal { width: 420px; }
+.kompass-modal__body { display: flex; flex-direction: column; gap: var(--pt-grid-size); }
+.kompass-modal__field { display: flex; flex-direction: column; gap: var(--sp-1); }
+.kompass-modal__list { display: flex; flex-direction: column; gap: var(--sp-1); max-height: 280px; overflow: auto; font-size: var(--fs-md); }
+.kompass-upload__file { display: flex; flex-direction: column; gap: var(--sp-1); padding: var(--sp-3) 0; border-bottom: 1px solid var(--c-border-line); font-size: var(--fs-md); }
+.kompass-details__note { padding: var(--sp-8) var(--sp-1); font-style: italic; }
+.kompass-textarea--long { min-height: 200px; font-size: var(--fs-sm); }
+.kompass-textarea--short { min-height: 50px; font-size: var(--fs-sm); }

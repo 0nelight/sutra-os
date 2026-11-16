@@ -1,0 +1,27 @@
+#kaocha/v1
+ {:kaocha.hooks/pre-load [support.check/enable! support.cross-tx/enable!]
+  :kaocha.filter/skip-meta #profile {:default [:offen] :offen []}
+  :tests
+  [{:id          :grammar
+    :test-paths  ["tests/grammar"]
+    :ns-patterns ["grammar\\..*"]}
+   {:id          :store
+    :test-paths  ["libs/store/test"]
+    :ns-patterns ["(store|blobs|coord|datasets|streams)\\..*-test"]}
+   {:id          :ontology
+    :test-paths  ["tests/ontology"]
+    :ns-patterns ["ontology\\..*"]}
+   {:id          :platform
+    :test-paths  ["tests/platform"]
+    :ns-patterns ["platform\\..*"]}
+   {:id          :apps
+    :test-paths  ["tests/apps"]
+    :ns-patterns ["apps\\..*"]}
+   {:id          :scenario
+    :test-paths  ["tests/scenario"]
+    :ns-patterns ["scenario\\..*"]}]
+  :plugins [:kaocha.plugin/hooks :support.progress/plugin :support.load-gate/plugin
+            :support.watchdog/plugin]
+  :randomize? false
+  :capture-output? false
+  :color? false}

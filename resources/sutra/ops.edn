@@ -1,0 +1,184 @@
+{:lineage/inputs-around
+ {:service :lineage
+  :kind    :query
+  :in      :sutra.foundation.contracts/inputs-around-in
+  :out     :sutra.foundation.contracts/lineage-around
+  :doc     "What a pull remembers of the direct inputs of its nodes: their contracts and how
+            they are written, on the branch and the trunk."}
+
+ :lineage/push-report
+ {:service :lineage
+  :kind    :query
+  :in      :sutra.foundation.contracts/push-report-in
+  :out     :sutra.foundation.contracts/push-report
+  :doc     "What a push should know beyond its own texts: moved inputs, what a changed contract
+            feeds, how many readers its other changes leave as they are."}
+
+ :branching/tasks
+ {:service :branching
+  :kind    :query
+  :in      :sutra.foundation.contracts/branch-in
+  :out     :sutra.foundation.contracts/proposal-tasks
+  :doc     "What a branch changes against its merge target, as proposal tasks; nil on the trunk."}
+
+ :lineage/feeds-line
+ {:service :lineage
+  :kind    :query
+  :in      :sutra.foundation.contracts/feeds-line-in
+  :out     :sutra.foundation.contracts/feeds-line
+  :doc     "A sentence for what the given nodes feed, for a git push to print."}
+
+ :health/by-node
+ {:service :health
+  :kind    :query
+  :in      :sutra.foundation.contracts/branch-in
+  :out     :sutra.foundation.contracts/health-by-node
+  :branch? true
+  :doc     "The health checks of each lineage node: worst latest status, checks, failed."}
+
+ :issues/open-by-node
+ {:service :feedback
+  :kind    :query
+  :in      :sutra.foundation.contracts/no-input
+  :out     :sutra.foundation.contracts/issues-by-node
+  :doc     "Open reports per lineage node ([:object-type t] or [:application a]) the asker
+            may see."}
+
+ :automation/list
+ {:service :automation
+  :kind    :query
+  :in      :sutra.foundation.contracts/branch-in
+  :out     :sutra.foundation.contracts/automations
+  :branch? true
+  :doc     "The branch's automations, which lineage draws as readers."}
+
+ :canvas/saved-graph
+ {:service :canvas
+  :kind    :query
+  :in      :sutra.foundation.contracts/graph-handle
+  :out     :sutra.foundation.contracts/saved-graph
+  :doc     "[rid spec] of the saved lineage graph a handle (rid, name, title or kompass path)
+            names in the snapshot's schema, or nil."}
+
+ :branch/ended
+ {:service :governance
+  :kind    :query
+  :in      :sutra.foundation.contracts/no-input
+  :out     :sutra.foundation.contracts/branch-names
+  :doc     "The ended (closed) branches of the instance, as the governance records declare
+            them."}
+
+ :lineage/drawing
+ {:service :lineage
+  :kind    :query
+  :in      :sutra.foundation.contracts/drawing-request
+  :out     :string
+  :doc     "A lineage drawing as graphviz dot or svg text."}
+
+ :authoring/preview-projection
+ {:service :authoring
+  :kind    :query
+  :in      :sutra.foundation.contracts/staging-view
+  :out     :sutra.foundation.contracts/preview-projection
+  :doc     "What a staging view projects: its schema, derived views, staged types and ids, the
+            types without a table, and a :version fingerprint."}
+
+ :authoring/locked-projects
+ {:service :authoring
+  :kind    :query
+  :in      :sutra.foundation.contracts/locked-in
+  :out     :sutra.foundation.contracts/project-names
+  :doc     "The projects locked product installations on :branch hold, by name — a staged
+            one once its projects stand in :schema (the branch's committed schema): a
+            schema change there comes only through the marketplace's upgrade."}
+
+ :authoring/placements
+ {:service :authoring
+  :kind    :query
+  :in      :sutra.foundation.contracts/projection-ref
+  :out     :sutra.foundation.contracts/placements
+  :doc     "Where a projection's texts hold what: the placement memory of the instance."}
+
+ :scenarios/state
+ {:service :scenarios
+  :kind    :query
+  :in      :sutra.foundation.contracts/branch-in
+  :out     [:maybe :keyword]
+  :branch? true
+  :doc     "The lifecycle state of the scenario a branch is (:open, sealed, …), or nil."}
+
+ :scenarios/append-fence
+ {:service :scenarios
+  :kind    :query
+  :in      :sutra.foundation.contracts/branch-in
+  :out     :sutra.foundation.contracts/record-fence
+  :errors  #{:scenario/not-open}
+  :branch? true
+  :doc     "The record fence an action applied on a scenario branch commits under, so a
+            seal meanwhile refuses it; refuses :scenario/not-open (a :conflict) when the
+            scenario is not open."}
+
+ :builds/schema-plan
+ {:service :builds
+  :kind    :query
+  :in      :sutra.foundation.contracts/no-input
+  :out     :sutra.foundation.contracts/schema-plan
+  :doc     "What the snapshot's schema plans to build: per planned entity its datasource
+            (:import-plan), the datasources with their consumers, and what did not resolve."}
+
+ :canvas/move-layout-node
+ {:service :canvas
+  :kind    :command
+  :domain  :schema
+  :in      :sutra.foundation.contracts/layout-move
+  :out     nat-int?
+  :doc     "A graph node's layout entries move from one key to another, unless the target
+            already has one in that graph; answers how many moved."}
+
+ :canvas/sweep-dropped-graphs
+ {:service :canvas
+  :kind    :command
+  :domain  :schema
+  :in      :sutra.foundation.contracts/graphs-change
+  :out     nat-int?
+  :doc     "The side data (layouts, color schemes, kompass placements) of the graphs a world
+            change dropped; answers how many graphs were swept."}
+
+ :compute/check-edit-function
+ {:service :compute
+  :kind    :query
+  :in      :sutra.foundation.contracts/code
+  :out     [:maybe :string]
+  :doc     "nil when an edit function's Clojure source compiles, else why not."}
+
+ :actions/staged
+ {:service :actions
+  :kind    :query
+  :in      :sutra.foundation.contracts/staged-in
+  :out     :sutra.foundation.contracts/staged-rows
+  :doc     "The staged action rows of a branch: what a batch collected and has not committed,
+            which a live read shows on top of the branch."}
+
+ :governance/policies
+ {:service :governance
+  :kind    :query
+  :in      :sutra.foundation.contracts/no-input
+  :out     :sutra.foundation.contracts/branch-policies
+  :doc     "Every branch's governance row, by branch: what a write guard is decided on."}
+
+ :governance/policy-in
+ {:service :governance
+  :kind    :query
+  :in      :sutra.foundation.contracts/branch-in
+  :out     :map
+  :doc     "The policy in force on a branch: its own governance, else what it inherits."}
+
+ :health/record-expectation
+ {:service :health
+  :kind    :command
+  :domain  :builds
+  :in      :sutra.foundation.contracts/expectation-result
+  :out     nil?
+  :doc     "A build's data expectation lands in Data Health: its check (kind expectation, on
+            the transform, on the build's branch) is registered or updated, and its result
+            recorded."}}

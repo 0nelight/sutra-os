@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>…</title>
+  <script>
+   /* the theme before the first paint; sutra-ui.ui.theme keeps it afterwards */
+   (function () {
+     try {
+       var t = localStorage.getItem('sutra.theme');
+       if (t === 'dark'
+           || (t !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches))
+         document.documentElement.classList.add('bp-dark');
+     } catch (e) {}
+   })();
+  </script>
+  <script>
+   (function () {
+     try {
+       var m = location.pathname.match(/^\/workspace\/[^\/]+\/app\/([^\/]+)\/?$/);
+       var q = new URLSearchParams(location.search);
+       if (!m || q.has('branch') || q.has('scenario')) return;
+       var path = '/api/my-application/' + m[1]
+         + '?url=' + encodeURIComponent(JSON.stringify(Object.fromEntries(q)));
+       window.__sutraEarlyApp = {
+         slug: decodeURIComponent(m[1]), path: path,
+         response: fetch(path, { credentials: 'include',
+                                 headers: { accept: 'application/transit+json' } })
+       };
+     } catch (e) {}
+   })();
+   (function () {
+     try {
+       var m = location.pathname.match(/^\/object\/([^\/]+)\/([^\/]+)\/?$/);
+       if (!m || location.search) return;
+       var type = decodeURIComponent(m[1]), id = decodeURIComponent(m[2]);
+       // transit gives ~ and ^ a meaning at the start of a string; such a read waits for the bundle
+       if (/^[~^`]/.test(type) || /^[~^`]/.test(id)) return;
+       window.__sutraEarlyObject = {
+         type: type, id: id,
+         response: fetch('/api/object-view/standard', {
+           method: 'POST', credentials: 'include',
+           headers: { accept: 'application/transit+json',
+                      'content-type': 'application/transit+json',
+                      'x-sutra-span': 'fe-early-' + Math.random().toString(36).slice(2, 8) },
+           body: JSON.stringify(['^ ', '~:type', type, '~:id', id])
+         })
+       };
+     } catch (e) {}
+   })();
+  </script>
+  <link rel="stylesheet" href="/css/blueprint-cljs/tokens.css" />
+  <link rel="stylesheet" href="/css/blueprint-cljs/core.css" />
+  <link rel="stylesheet" href="/css/blueprint-cljs/basics.css" />
+  <link rel="stylesheet" href="/css/blueprint-cljs/forms.css" />
+  <link rel="stylesheet" href="/css/blueprint-cljs/navigation.css" />
+  <link rel="stylesheet" href="/css/blueprint-cljs/overlays.css" />
+  <link rel="stylesheet" href="/css/blueprint-cljs/select.css" />
+  <link rel="stylesheet" href="/css/blueprint-cljs/datetime.css" />
+  <link rel="stylesheet" href="/css/blueprint-cljs/table.css" />
+  <link rel="stylesheet" href="/css/tokens.css" />
+  <link rel="stylesheet" href="/css/ui.css" />
+  <link rel="stylesheet" href="/css/layout.css" />
+  <link rel="stylesheet" href="/css/widgets.css" />
+  <link rel="stylesheet" href="/css/app-lineage.css" />
+  <link rel="stylesheet" href="/css/app-repository.css" />
+  <link rel="stylesheet" href="/css/app-atlas.css" />
+  <link rel="stylesheet" href="/css/app-ontology.css" />
+  <link rel="stylesheet" href="/css/app-explorer.css" />
+  <link rel="stylesheet" href="/css/app-data-connection.css" />
+  <link rel="stylesheet" href="/css/app-procurement.css" />
+  <link rel="stylesheet" href="/css/app-developer-apps.css" />
+  <link rel="stylesheet" href="/css/app-admin.css" />
+  <link rel="stylesheet" href="/css/app-assistant.css" />
+  <link rel="stylesheet" href="/css/app-evals.css" />
+  <link rel="stylesheet" href="/css/app-notebook.css" />
+  <link rel="stylesheet" href="/css/app-doc-intel.css" />
+  <link rel="stylesheet" href="/css/app-feedback.css" />
+  <link rel="stylesheet" href="/css/app-builder.css" />
+  <link rel="stylesheet" href="/css/reactflow-style.css" />
+  <style>
+    /* Boot placeholder + watchdog error pane — deliberately self-contained so
+       they stay legible even when the external stylesheets never arrive. */
+    #boot-status { padding: 2rem; font: 500 15px/1.5 system-ui, sans-serif; color: #555; }
+    .boot-error { max-width: 42rem; margin: 8vh auto; padding: 1.5rem 1.75rem;
+      font: 400 15px/1.6 system-ui, sans-serif; color: #1a1a1a;
+      border: 1px solid #e0b4b4; border-radius: 10px; background: #fff8f8; }
+    .boot-error h1 { margin: 0 0 .5rem; font-size: 1.15rem; color: #a12222; }
+    .boot-error code { padding: 0 .25em; background: #0000000d; border-radius: 4px; }
+    .boot-error .hint { color: #555; }
+    .boot-error pre { overflow-x: auto; padding: .75rem; margin: .75rem 0 0;
+      background: #f0f0f0; border-radius: 6px; font-size: 13px; }
+    .boot-error button { margin-top: 1rem; padding: .5rem 1rem; font-size: 14px;
+      cursor: pointer; border: 1px solid #ccc; border-radius: 6px; background: #fff; }
+    @media (prefers-color-scheme: dark) {
+      #boot-status { color: #aaa; }
+      .boot-error { color: #eee; border-color: #665533; background: #221a1a; }
+      .boot-error h1 { color: #ff7777; }
+      .boot-error .hint { color: #aaa; }
+      .boot-error pre { background: #111; }
+      .boot-error button { background: #222; color: #eee; border-color: #444; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"><div id="boot-status">Loading…</div></div>
+  <script>
+   (function () {
+     try {
+       var n = window.localStorage.getItem('sutra.platform-title');
+       if (!n) return;
+       document.title = n;
+       var b = document.getElementById('boot-status');
+       if (b) b.textContent = 'Loading ' + n + '…';
+     } catch (e) {}
+   })();
+  </script>
+  <script>
+   (function () {
+     var DEADLINE_MS = 10000, firstError = null;
+     var NAME = document.title && document.title !== '…' ? document.title : 'The user interface';
+     window.addEventListener('error', function (e) {
+       if (!firstError) firstError = (e && e.message) || (e && e.error && e.error.message) || null;
+     }, true);
+     function stuck() { return !!document.getElementById('boot-status'); }
+     function esc(s) { return String(s).replace(/[&<>]/g, function (c) {
+       return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
+     function fail(headline, hint) {
+       if (!stuck()) return;                       // app mounted after all — leave it
+       var app = document.getElementById('app');
+       if (!app) return;
+       app.innerHTML =
+         '<div class="boot-error" role="alert">'
+       +   '<h1>' + esc(NAME) + ' failed to start</h1>'
+       +   '<p>' + headline + '</p>'
+       +   '<p class="hint">' + hint + '</p>'
+       +   (firstError ? '<pre>' + esc(firstError) + '</pre>' : '')
+       +   '<button type="button" onclick="location.reload()">Reload</button>'
+       + '</div>';
+     }
+     window.__sutraBundleFailed = function () {
+       fail('The application bundle <code>/js/main.js</code> could not be loaded.',
+            'The backend or reverse proxy is likely unreachable, or the bundle 404’d. Check that the server is up, then reload.');
+     };
+     setTimeout(function () {
+       fail('The user interface did not start within ' + (DEADLINE_MS / 1000) + ' seconds.',
+            'The bundle loaded but initialization hung or threw. Open the browser console (F12) for the full error.');
+     }, DEADLINE_MS);
+   })();
+  </script>
+  <!-- sutra:modules -->
+</body>
+</html>

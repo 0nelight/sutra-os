@@ -1,0 +1,375 @@
+{:shapes
+ {:plugin/edn
+  [:map {:closed true} [:modules [:vector :qualified-symbol]]
+   [:roles-only {:optional true} :boolean]
+   [:connectors {:optional true} :boolean]]
+
+  :plugin/keys [:or [:set :qualified-keyword] [:sequential :qualified-keyword]]
+
+  :plugin/job
+  [:or
+   [:map {:closed true}
+    [:name {:optional true} :keyword]
+    [:start ifn?]
+    [:stop {:optional true} ifn?]
+    [:every {:optional true} [:or :string :keyword]]
+    [:default {:optional true} pos-int?]]
+   [:map {:closed true}
+    [:name :keyword]
+    [:tick ifn?]
+    [:every [:or :string :keyword]]
+    [:default {:optional true} pos-int?]
+    [:first-tick {:optional true} ifn?]]]
+
+  :plugin/module
+  [:map {:closed true}
+   [:name :keyword]
+   [:provides {:optional true} [:map-of :qualified-keyword any?]]
+   [:opens {:optional true} [:map-of :qualified-keyword ifn?]]
+   [:requires {:optional true} :plugin/keys]
+   [:wants {:optional true} :plugin/keys]
+   [:contributes {:optional true} [:map-of :qualified-keyword map?]]
+   [:jobs {:optional true} [:sequential :plugin/job]]]
+
+  :plugin/http-method [:enum :get :post :put :patch :delete :head :options]
+
+  :plugin/setting
+  [:map {:closed true}
+   [:key :string]
+   [:type [:enum :string :boolean :edn :base64]]
+   [:secret? {:optional true} :boolean]
+   [:input {:optional true} :keyword]
+   [:default {:optional true} any?]]
+
+  :identity/provider
+  [:map {:closed true}
+   [:label :string]
+   [:source :string]
+   [:settings [:map-of :keyword :plugin/setting]]
+   [:ready? [:=> [:cat map?] :boolean]]
+   [:password {:optional true} [:=> [:cat map? :string :string] [:maybe :string]]]
+   [:negotiate {:optional true}
+    [:=> [:cat map? :string]
+     [:maybe [:map [:complete? :boolean] [:subject {:optional true} [:maybe :string]]
+              [:out-token {:optional true} [:maybe :string]]]]]]
+   [:directory {:optional true} [:=> [:cat map?] map?]]
+   [:preview {:optional true} [:=> [:cat map? map? map?] map?]]]
+
+  :product/offer
+  [:map {:closed true}
+   [:name :string]
+   [:description :string]
+   [:version {:optional true} :string]
+   [:order {:optional true} int?]
+   [:requires {:optional true} [:vector :keyword]]
+   [:schema [:=> [:cat] map?]]]
+
+  :viz/layout
+  [:map {:closed true}
+   [:label :string]
+   [:layout [:=> [:cat [:sequential map?] [:sequential map?] map?] [:sequential map?]]]
+   [:doc {:optional true} :string]]
+
+  :foreign/profile
+  [:map {:closed true}
+   [:capabilities [:set [:enum :catalog :scan :write :invoke :token]]]
+   [:route [:set {:min 1} [:enum :direct :agent]]]
+   [:endpoint {:optional true} [:enum :host :jdbc-url :base-url]]
+   [:needs {:optional true} [:vector :keyword]]
+   [:paths? {:optional true} :boolean]
+   [:files? {:optional true} :boolean]
+   [:scan {:optional true}
+    [:map {:closed true}
+     [:preds [:map-of :keyword [:enum :exact :inexact]]]
+     [:project? {:optional true} :boolean]
+     [:page? {:optional true} :boolean]
+     [:compound? {:optional true} :boolean]]]]
+
+  :foreign/connector
+  [:map {:closed true}
+   [:profile :foreign/profile]
+   [:config {:optional true} any?]
+   [:form {:optional true} map?]
+   [:open [:=> [:cat map? map?] :any]]
+   [:close {:optional true} [:=> [:cat :any] :any]]
+   [:probe {:optional true} [:=> [:cat :any] :any]]
+   [:tables {:optional true} [:=> [:cat :any] [:sequential :string]]]
+   [:columns {:optional true} [:=> [:cat :any :string] [:sequential map?]]]
+   [:scan {:optional true} [:=> [:cat :any :string map?] [:sequential map?]]]
+   [:write {:optional true} [:=> [:cat :any map?] map?]]
+   [:invoke {:optional true} [:=> [:cat :any :keyword :any :any] :any]]
+   [:token {:optional true} [:=> [:cat :any :string] :any]]]}
+
+ :capabilities
+ {:store/db                  {:schema [:=> [:cat] :any]
+                              :doc "this process's store (sutra.store.api)"}
+  :datasets/db               {:schema [:=> [:cat :any] :any]
+                              :doc "(fn [lane]) the datasets subsystem on lane (nil: :control)"}
+  :datasets/restore-points   {:schema [:map {:closed true}
+                                       [:list [:=> [:cat] :any]]
+                                       [:take! [:=> [:cat :any] :any]]
+                                       [:roll-back! [:=> [:cat :any] :any]]]
+                              :doc "store-wide restore points: list, take one by label, roll back to one by id"}
+  :access/throttle           {:schema :any
+                              :doc "an atom: the failed sign-in attempts of this system, by key"}
+  :pg/ds                     {:schema [:=> [:cat [:maybe [:enum :control :build :auth]]] :any]
+                              :doc
+                              "(fn [lane]) this process's pg datasource of lane (nil: :control)"}
+  :coord/db                  {:schema [:=> [:cat] :any] :doc "the coordinator (sutra.coord.api)"}
+  :streams/db                {:schema [:=> [:cat :any] :any]
+                              :doc "(fn [lane]) the streams subsystem (sutra.streams.api)"}
+  :blobs/read-through        {:schema [:=> [:cat :any] :any]
+                              :doc "(fn [blob-store]) one reading a virtual item through to its source"}
+  :blobs/db                  {:schema [:=> [:cat] :any]
+                              :doc "the deployment's blob store (sutra.blobs.api)"}
+  :blobs/pg                  {:schema [:=> [:cat :any] :any]
+                              :doc "(fn [legacy-dir]) the pg blob store"}
+  :blobs/drain               {:schema [:=> [:cat :any] :any]
+                              :doc "(fn [blob-store]) legacy content moved into pg: {:copied n :corrupt [address]}"}
+  :git/dir                   {:schema [:=> [:cat] :any] :doc "the git projection's directory"}
+  :foreign/connect           {:schema [:=> [:cat] ifn?]
+                              :doc "the connector: (connect auth spec via? session?) → a foreign source"}
+  :foreign/export-rows       {:schema [:=> [:cat :any :any map?] :any]
+                              :doc "(fn [auth source {:table :rows :truncate? :markings}]) a declared export's write"}
+  :writeback/create          {:schema [:=> [:cat :any :any :any [:? map?]] :any]
+                              :doc "(fn [schema object-type values opts?]) a writeback insert"}
+  :writeback/update          {:schema [:=> [:cat :any :any :any map?] :any]
+                              :doc "(fn [schema object-type values opts]) a writeback update"}
+  :writeback/delete          {:schema [:=> [:cat :any :any :any [:? map?]] :any]
+                              :doc "(fn [schema object-type values opts?]) a writeback delete"}
+  :llm/complete              {:schema [:=> [:cat map?] :any]
+                              :doc "a kernel language-model call: {:request-id :message}"}
+  :llm/chat                  {:schema [:=> [:cat map?] :any]
+                              :doc "a chat request relayed for the egress agent"}
+  :llm/embed                 {:schema [:=> [:cat :any :any] :any]
+                              :doc "(fn [model text]) an embedding"}
+  :sql/explain               {:schema [:=> [:cat :any :any :any] :any]
+                              :doc "(fn [store schema transform]) whether a transform's SQL plans"}
+  :schema/array-cols         {:schema [:=> [:cat :any :any] :any]
+                              :doc "(fn [schema table-name]) a table's array columns"}
+  :rules/known-ops           {:schema [:=> [:cat] :any] :doc "the ops an action rule may name"}
+  :expr/field-refs           {:schema [:=> [:cat :any] :any]
+                              :doc "(fn [predicate]) the binding keys it reads — what an authored :when resolves against V"}
+  :expr/unknown-ops          {:schema [:=> [:cat :any] :any]
+                              :doc "(fn [predicate]) the ops in it the expression language would refuse"}
+  :auth/app-guard            {:schema [:map {:closed true}
+                                       [:guard [:=> [:cat :any :any :any :any] :any]]
+                                       [:record! [:=> [:cat :any :any :any :any :any :any] :any]]]
+                              :doc "a hosted app's request guard and its metric recorder"}
+  :watch/wake                {:schema [:=> [:cat] :any] :doc "wakes the scheduler"}
+  :stream/wake               {:schema [:=> [:cat] :any] :doc "wakes the stream indexer for a published record"}
+  :objects/reads             {:schema [:map [:query ifn?] [:resolve ifn?] [:connected ifn?]]
+                              :doc "How lower modules read objects: :query (fn [store schema spec]) the object
+                                    query views run; :resolve (fn [store schema rid raw]) {:object :problem};
+                                    :connected (fn [reader schema rid side ids]) {id [far-id]}"}
+  :schedules/around-write    {:schema [:=> [:cat :any :any :any :any ifn?] map?]
+                              :doc "(fn [store schema branch dataset write!]) runs write! and answers
+                                    {:result r :triggered-by [schedule-name]}: the schedules watching
+                                    dataset, when the write moved its signature"}
+  :builds/landing            {:schema [:map {:closed true}
+                                       [:run-fn [:=> [:cat :any map? ifn?] :any]]
+                                       [:announce-action! [:=> [:cat :any :any :any :any] :any]]
+                                       [:reset-consumer! ifn?]
+                                       [:guard-reset! [:=> [:cat :any :any ifn?] :any]]
+                                       [:reregister-link! [:=> [:cat :any :any :any] :any]]]
+                              :doc "What landing an action needs of builds: :run-fn (fn [store opts body-fn])
+                                    the run a staged or published commit lands in; :announce-action!
+                                    (fn [branch-store branch schema result]) the ledger, watchers and watch
+                                    told of a dispatched action; :reset-consumer! (fn [store rid branch?]);
+                                    :guard-reset! (fn [store writes f]) f under a build claim on writes;
+                                    :reregister-link! (fn [store schema conn-rid]) a link's produced rows
+                                    retracted"}
+  :functions/run-query       {:schema [:=> [:cat :any :any :keyword map?] :any]
+                              :doc "(fn [store schema fn-name args]) the rows a query Function answers."}
+  :objects/publish-index     {:schema [:=> [:cat :any :any [:sequential map?] map? :any] map?]
+                              :doc "(fn [store schema decls group cancel-check]) the planned changes of
+                                    one publish group (sutra.catalog.changes) written as :origin :index
+                                    commits on store's branch: {:interpret-ms …}"}
+  :foreign/datasources       {:schema [:map {:closed true}
+                                       [:cleared! [:=> [:cat :any [:maybe map?]] :any]]
+                                       [:path [:=> [:cat :any [:maybe map?] ifn?] :any]]
+                                       [:agent-reachable? ifn?]
+                                       [:read-rows ifn?]]
+                              :doc "What a build needs of a datasource beyond :foreign/connect: :read-rows (fn [spec query params]) the rows a query answers; :cleared!
+                                    (fn [auth spec]) spec, refused when auth is not cleared for it; :path
+                                    (fn [auth spec land]) the path a :datasource input reads, nil when
+                                    spec backs none; :agent-reachable? (fn []) every egress agent answers"}
+  :compute/runner            {:schema [:map {:closed true}
+                                       [:run-code! [:=> [:cat :any map? map?] :any]]
+                                       [:run-query! [:=> [:cat :any map?] [:sequential map?]]]
+                                       [:query-runnable? [:=> [:cat :any] :boolean]]
+                                       [:egress? [:=> [:cat :any] :boolean]]
+                                       [:prepare-inputs [:=> [:cat :any :any :any] :any]]
+                                       [:spans [:=> [:cat :any] map?]]]
+                              :doc "Running transform code: :run-code! (fn [language compute opts]) its
+                                    payload; :run-query! (fn [language {:query :inputs}]) a SQL
+                                    dialect's rows over inputs {alias {:columns :rows}};
+                                    :query-runnable? (fn [language]) whether its engine answers;
+                                    :egress? (fn [language]) whether it reaches external
+                                    systems; :spans (fn [log]) the spans, intermediates and plain
+                                    lines of a run's log; :prepare-inputs (fn [language resolved prev-rows])"}
+  :http/exchange             {:schema [:=> [:cat map?] map?]
+                              :doc "(fn [{:keys [method path headers body]}]) the HTTP API answered in
+                                    this process, bytes in and out: {:status :headers :body}"}
+  :llm/relay-embed           {:schema [:=> [:cat :any map?] :any]
+                              :doc "(fn [store {:keys [source model text caller run-id branch schema
+                                    timeout-ms]}]) text's embedding vector, nil when refused"}
+  :world/install             {:schema [:=> [:cat :any :string map? map?] :any]
+                              :doc "(fn [store branch world opts]) installs world on branch, release records included"}
+  :schema/install            {:schema [:=> [:cat :any map? map?] :any]
+                              :doc "(fn [store schema {:keys [project edge]}]) schema installed on store's branch under its write guard: {:schema}"}
+  :foreign/source-ops        {:schema [:map {:closed true}
+                                       [:invoke! ifn?]
+                                       [:close! [:=> [:cat :any] :any]]]
+                              :doc "What is done with a source :foreign/connect opened: :invoke! (fn [s op params] / [s op params opts]) one operation; :close! (fn [s])"}
+  :documents/records         {:schema [:map {:closed true}
+                                       [:list [:=> [:cat :any :any map?] :any]]
+                                       [:linking [:=> [:cat :any :any :keyword :any] :any]]
+                                       [:get [:=> [:cat :any :any :any :keyword] :any]]
+                                       [:save! [:=> [:cat :any :any map?] :any]]
+                                       [:delete! [:=> [:cat :any :any :any] :any]]]
+                              :doc "Documents as another module reads and writes them, as auth: :list (fn [store auth opts]), :linking (fn [store auth object-type id]), :get (fn [store auth id op]), :save! (fn [store auth doc]), :delete! (fn [store auth id])"}
+  :schedule/start           {:schema [:=> [:cat :any :string map?] map?]
+                              :doc "(fn [store branch {:schedule :parameters}]) a schedule's build started now — a parallelized one through its run setup: {:run-id :run-setup}"}
+  :objects/foreign-owned    {:schema [:=> [:cat :any :any] [:set :string]]
+                             :doc "(fn [store object-type]) ids of the type's objects a producer other than a build owns (a peer connection's): a build's sweep leaves them"}
+  :objects/direct-writes    {:schema [:=> [:cat :any :any] [:maybe map?]]
+                             :doc "(fn [store object-type]) nil, or how a direct datasource writes the type: {:origin :direct :stream rid :source-timestamp attr?} — its writes are the change feed's entries of that origin, beside :edit ones"}
+  :health/result-recorded   {:schema [:=> [:cat :any :string :string] :any]
+                             :doc "(fn [store branch check-id]) a check's newest result was recorded: its watchers are told when it just failed"}
+  :ops/commit                {:schema [:=> [:cat :any map? ifn?] :any]
+                              :doc "(fn [store {:branch} decide]) decides on a snapshot and commits its :tx, decided again while what it read moved; answers decide's :result (sutra.foundation.ops/run!)"}
+  :ops/dispatch              {:schema [:=> [:cat :any :string] :any]
+                              :doc "(fn [store branch]) the :after-commit reactions answer the events waiting on branch (sutra.store.access.events)"}
+  :jobs/tick                 {:schema [:map {:closed true} [:start ifn?] [:stop ifn?]]
+                              :doc "runs the modules' :tick jobs: (start job ms) arms one, (stop job) stops it"}
+  :cluster/check-message     {:schema [:=> [:cat :keyword :any] :any]
+                              :doc "(fn [topic message]) nil when message is what topic carries across generations (sutra.foundation.wire), else why not"}
+  :cluster/broadcast         {:schema [:=> [:cat :keyword :any] :boolean]
+                              :doc "(fn [topic message]) hands message to every other process of the deployment; false when it is too large to carry"}
+  :telemetry/samples         {:schema [:map {:closed true} [:publish! ifn?] [:recent ifn?]]
+                              :doc "each process's last resource sample: (publish! sample) keeps
+                                    this one's, (recent) every node's still heard of with :age-ms"}
+  :observe/reports           {:schema [:map {:closed true} [:publish! ifn?] [:recent ifn?]]
+                              :doc "what each process's armed tracers saw: (publish! report)
+                                    keeps this one's, (recent) every node's with :age-ms"}
+  :observe/recordings        {:schema [:map {:closed true} [:publish! ifn?] [:recent ifn?]]
+                              :doc "each process's last whole profile recording, asked for by
+                                    :observe/collect: (publish! rec) keeps it, (recent) all"}
+  :telemetry/store           {:schema [:=> [:cat map?] map?]
+                              :doc "(fn [{:keys [branches]}]) the store's own footprint: size,
+                                    settings, connections, relations, the schemas branches own"}
+  :code/introspect-clojure   {:schema [:=> [:cat map?] :any]
+                              :doc "(fn [transform]) a Clojure transform's declared spec"}
+  :code/introspect-python    {:schema [:=> [:cat map?] :any]
+                              :doc "(fn [transform]) a Python transform's declared spec"}}
+
+ :tables
+ {:watch/hooks              {:key :keyword
+                             :entry [:=> [:cat :any :any] :any]
+                             :doc "{name (fn [branch object-type])} what this process does when it learns that
+                                   objects of object-type changed on branch (sutra.store.access.watch) —
+                                   after the watchers are told; a hook that throws is skipped"}
+  :cluster/listeners        {:key :keyword
+                             :entry [:=> [:cat :any] :any]
+                             :doc "{topic (fn [message])} what this process does with a message another process broadcast"}
+  :kompass/movers             {:key :keyword
+                               :entry [:=> [:cat :any :any :any :any] :any]
+                               :doc "{node-kind (fn [store auth id project])} moves what the kompass
+                                   node of that kind stands for into project; nil when the asker
+                                   cannot read it"}
+  :kompass/file-rows          {:key :keyword
+                               :entry [:=> [:cat :any :string :string] :any]
+                               :doc "{file-kind (fn [store branch id])} the row of the file a ref
+                                   names (:project :home :created-by/:author), nil when none"}
+  :repos/riders             {:key :keyword
+                             :entry [:map [:upsert! ifn?] [:delete! ifn?]]
+                             :doc "{rider-kind {:upsert! (fn [store branch rider]) :delete! (fn [store branch id])}}
+                                   the module that keeps a kind of rider a code repository declares"}
+  :http/routes              {:key :keyword
+                             :entry [:map-of {:min 1} :plugin/http-method ifn?]
+                             :doc "{route-key {method handler}}"}
+  :blobs/roots              {:key :keyword
+                             :entry [:=> [:cat :any] :any]
+                             :doc "{name (fn [store])} → the blob hashes a module holds outside the branches'
+                                   datasets; the media sweep keeps them"}
+  :http/raw-handlers        {:key :keyword
+                             :entry [:=> [:cat map?] ifn?]
+                             :doc "(fn [opts]) a ring handler outside the router"}
+  :http/prefix-authority    {:key :string
+                             :entry [:map {:closed true}
+                                     [:auth :keyword] [:match [:enum :prefix :exact]]
+                                     [:reason :string]]
+                             :doc "{path {:auth :match :reason}} — how a path outside the router authenticates"}
+  :identity/providers       {:key :keyword
+                             :role true
+                             :entry :identity/provider
+                             :doc "{id provider} — who a person is, from outside. A provider
+                                   declares its :settings (sutra.types.settings) and gets them decoded; it
+                                   answers only what needs its system: :password (cfg user pw) → subject,
+                                   :negotiate (cfg token) → {:complete? :subject :out-token}, :directory
+                                   (cfg) → a sutra.types.directory snapshot, :preview (cfg snapshot
+                                   {subject user-id}) → what a sync would do. Subjects are principals of
+                                   the federated :source. The host owns storage, routes, sessions and
+                                   applying."}
+  :products/offers          {:key :keyword
+                             :role true
+                             :entry :product/offer
+                             :doc "{id offer} — a ready-made ontology a plugin offers to install (                                   products): its :name, :description, its release (:version), the
+                                   offers it builds on (:requires), its place in a listing (:order) and
+                                   (fn []) → the schema to install. The host lists them with their install
+                                   state, installs one through the ordinary staging door and upgrades an
+                                   installed one onto the next release."}
+  :llm/catalogues           {:key :keyword
+                             :role true
+                             :entry [:map {:closed true}
+                                     [:host :string] [:models-path :string]
+                                     [:parse [:=> [:cat map?] [:sequential map?]]]]
+                             :doc "{provider {:host :models-path :parse}} — a language-model provider's model
+                                   catalogue: the base-URL host it answers for, where its catalogue is, and
+                                   (fn [decoded-body]) → [{:id :in :out :currency}]. Calling a model, the
+                                   budget, the audit and the registry are the host's (sutra.llm.http)."}
+  :llm/wires                {:key :keyword
+                             :role true
+                             :entry [:map {:closed true}
+                                     [:hosts [:sequential :string]] [:chat-path :string]
+                                     [:models-path :string]
+                                     [:embed-path {:optional true} :string]
+                                     [:headers [:=> [:cat :any :any] :any]]
+                                     [:request [:=> [:cat map?] map?]]
+                                     [:response [:=> [:cat map?] map?]]]
+                             :doc "{wire {:hosts :chat-path :models-path :headers :request :response}} — a
+                                   language-model provider's dialect (sutra.llm.wire): the
+                                   hosts it answers for, where it takes a chat, embeds (OpenAI shape, optional)
+                                   and lists models, (fn [key body])
+                                   → its auth headers, and the platform's OpenAI-style chat request → its own
+                                   (string-keyed maps) and its answer → the platform's. A source names one with
+                                   :config {:wire …}. :openai-chat and :anthropic-messages are built in."}
+  :foreign/connectors       {:key :keyword
+                             :role true
+                             :entry :foreign/connector
+                             :doc "{type connector} — a foreign source :type a plugin brings:
+                                   its :profile (what it can, how it is routed, which spec fields it
+                                   needs), the Malli :config its spec must also hold, the :form a source
+                                   of it is entered with, and functions over a handle: :open (spec ctx)
+                                   → handle, :close, :probe, :tables, :columns (h table), :scan (h table
+                                   pushed) → rows, :write (h plan), :invoke (h op params opts), :token
+                                   (h table) → what stands for the table's rows now. The host owns
+                                   clearance, the guards, the scan split, the write plan, secrets and
+                                   routing; a type the platform already has is refused."}
+  :viz/layouts              {:key :keyword
+                             :role true
+                             :entry :viz/layout
+                             :doc
+                             "{name {:label :layout}} — a graph layout: its name in the declared
+                                   vocabulary (:layout :hierarchie), what to call it in a menu, and
+                                   (fn [nodes edges opts]) → the same nodes, each carrying :x :y
+                                   (top-left corner, px, origin anywhere). opts carries what the
+                                   declaration said beyond the name, :richtung among it. The host
+                                   owns reading the graph, the box of a node, the drawing and the
+                                   default (sutra.viz.layouts): a layout places, it never draws.
+                                   :hierarchie and :baum are the platform's own."}
+  :run/performers           {:key :keyword
+                             :entry [:=> [:cat map? map?] :any]
+                             :doc "(fn [request {:store :write-session :timeout-ms}]) answers a run's request of that :kind"}
+  :action/verbs             {:key :keyword :entry ifn? :doc "an action rule's verb"}}}

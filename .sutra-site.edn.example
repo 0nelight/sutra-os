@@ -1,0 +1,21 @@
+;; .sutra-site.edn — site-local configuration. Copy to `.sutra-site.edn`
+;; (untracked, see .gitignore) and set your own values.
+;;
+;; Read by `cli.site`. Everything here describes ONE deployment, not Sutra
+;; itself, so it stays out of tracked source: a hostname in a `def` is a
+;; published fact about the operator the moment the repo is shared.
+;;
+;; Override per-invocation with $SUTRA_PROD_URL. With neither the env var nor
+;; this file, the CLI targets the local sutra-solo (the port recorded in
+;; $SUTRA_HOME/instance.edn), else http://localhost:8030 — a checkout with no
+;; site config is a local box, not somebody's production.
+
+{;; The production backend. Default target for a bare `sutra <verb>`;
+ ;; also how `checkout`/`export` recognize a mirror as "prod" rather than
+ ;; filing it under the raw hostname.
+ :prod-url "https://ontology.example.com"
+
+ ;; Optional: `clone <project>/<repo>` without a dir goes to
+ ;; <clones-dir>/<host>/<repo>, and a clone already there is updated, not made anew.
+ ;; :clones-dir "~/dev/sutra-repos"
+ }

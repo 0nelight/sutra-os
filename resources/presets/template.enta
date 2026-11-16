@@ -1,0 +1,65 @@
+;; ════════════════════════════════════════════════════════════════════════════
+;; template.enta — Vorlage für eine App (Werft: Arbeitsaufträge)
+;; ════════════════════════════════════════════════════════════════════════════
+;; Eine App beginnt bei den OBJEKTEN, nicht bei Kennzahlen: eine Liste der
+;; Arbeitsaufträge, daneben der gewählte Arbeitsauftrag in SEINER Ansicht (mit seinen
+;; Handlungen darauf), und eine Seite zum Anlegen. Kein Armaturenbrett aus
+;; handverdrahteten Variablen — was ein Arbeitsauftrag zeigt und kann, steht einmal am
+;; Objekt (template.ent, template.entv) und sieht in jeder App gleich aus.
+;;
+;; Das ist die Vorlage zum NACHSCHLAGEN. Wer mit der App einen Ablauf abarbeitet
+;; (stellen → senden → nachfassen), nimmt template-ablauf.enta; die Regeln dazu
+;; stehen in DESIGN.md.
+;;
+;; Sie liegt als `apps/<name>.enta` in einem Code-Repo. Alle Schlüssel:
+;; grammar.enta.
+;;
+;; Nicht jede Tür braucht eine App: ein Workspace (`:workspaces` im `.ent`)
+;; bietet einen Objekttyp auch direkt an, neben den Apps —
+;;   :home [{:column :a :items [{:kind :app :app :arbeitsauftraege}]}
+;;          {:column :b :items [{:kind :object-type :object-type :betreiber}]}]
+;; öffnet die Betreiberliste und jede Betreiberansicht, ohne dass jemand sie baut.
+;; ════════════════════════════════════════════════════════════════════════════
+{:name         :arbeitsauftraege                ; die Kennung — ändert sich nie
+ :display-name "Arbeitsaufträge"                ; was auf der Kachel steht
+ :description  "Laufende Arbeitsaufträge sehen, weiterbringen und verrechnen."
+ :icon         "🛠"
+ :project      :werft                           ; wessen Freigabe entscheidet, wer sie öffnet
+
+ ;; Welche Objekte die App bekommt — die Nachbarn für die eingebettete Ansicht
+ ;; eingeschlossen.
+ :object-types [:arbeitsauftrag :betreiber :rechnung :zeitbuchung]
+
+ ;; Welche Handlungen sie absenden darf. Die Handlungen AM Objekt (`:on :arbeitsauftrag`
+ ;; im .ent) kommen mit dem Objekt — hier steht nur, was die App selbst anbietet:
+ ;; das Anlegen, denn dafür gibt es noch kein Objekt.
+ :actions [{:action :arbeitsauftrag-anlegen}]
+
+ :layout
+ {:kind   :pages                                ; oben eine Seitenleiste
+  :select {:var :seite}
+  ;; genau zwei Zustände: welche Seite, welcher Arbeitsauftrag
+  :vars   {:seite   {:type :keyword :default :liste :external-id :seite :in-url :when-visible}
+           ;; nicht `:arbeitsauftrag` — `{:from :arbeitsauftrag}` läse sonst die Auswahl statt aller Arbeitsaufträge
+           :gewaehlt {:default nil}
+           :offen   {:from :arbeitsauftrag :where [[:stand :not= "verrechnet"] [:stand :not= "storniert"]]}}
+  :pages
+  [{:id :liste :label "Arbeitsaufträge"
+    ;; Liste und gewählter Arbeitsauftrag nebeneinander; am Telefon wird der Arbeitsauftrag
+    ;; eine eigene Seite (`:detail`).
+    :body {:kind   :columns
+           :detail {:var :gewaehlt}
+           :items
+           [{:widget :object-table
+             :rows   {:val :offen}
+             ;; keine :cols — die Spalten sind das `:row` des Arbeitsauftrags, überall gleich
+             :sort   [[:freigabetermin :asc]]
+             :active {:var :gewaehlt}}             ; die gewählte Zeile
+            ;; der gewählte Arbeitsauftrag in SEINER Ansicht — Daten und Handlungen,
+            ;; genau wie auf seiner eigenen Seite
+            {:widget :object-view :object {:val :gewaehlt}}]}}
+
+   {:id :anlegen :label "Anlegen"
+    ;; das Formular kommt aus der Action; hier wird nichts nachgebaut
+    :body {:kind :section :title "Neuer Arbeitsauftrag"
+           :body {:widget :action-form :action :arbeitsauftrag-anlegen :label "Anlegen"}}}]}}

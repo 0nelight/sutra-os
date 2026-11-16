@@ -1,0 +1,364 @@
+{:lint-as {support.store/with-fresh-branch clojure.core/let
+           sutra.compute.cores/with-cores clojure.core/let
+           reagent.core/with-let              clojure.core/let
+           sutra.calx.fn.util/check           clojure.core/let
+           sutra.calx.fn.util/with-collected  clojure.core/let}
+ :linters {:binding-macro {:level :error}
+           :discouraged-var
+           {:level :error
+            sutra.store.access.scope/as-system
+            {:message "acting as the system widens st's authority — only in acts-as-system"}
+            sutra.store.access.scope/system-st
+            {:message "acting as the system widens st's authority — only in acts-as-system"}
+            sutra.catalog.grants/system-authority
+            {:message "acting as the system widens st's authority — only in acts-as-system"}}
+           :discouraged-namespace
+           {:level :error
+            sutra.wire.abort {:message "sutra.wire.* nur ueber sutra-ui.api"}
+            sutra.wire.api {:message "sutra.wire.* nur ueber sutra-ui.api"}
+            sutra.wire.codec {:message "sutra.wire.* nur ueber sutra-ui.api"}
+            sutra.wire.protocol {:message "sutra.wire.* nur ueber sutra-ui.api"}
+            sutra.wire.transport {:message "sutra.wire.* nur ueber sutra-ui.api"}
+            sutra-ui.api {:message "sutra-ui.api nur in state/events (Requests)"}
+            blueprint-cljs.alert {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.async-input {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.breadcrumbs {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.button {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.callout {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.card {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.checkbox {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.collapse {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.common {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.context-menu {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.control {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.control-card {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.control-group {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.core {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.date-input {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.date-picker {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.date-range-input {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.date-range-picker {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.date-shortcuts {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.date-utils {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.day-picker {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.dialog {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.divider {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.drawer {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.editable-text {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.entity-title {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.file-input {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.form-group {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.hotkeys {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.html {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.html-select {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.icon {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.icons.all {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.input-group {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.label {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.link {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.menu {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.multi-select {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.multi-slider {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.navbar {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.non-ideal-state {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.numeric-input {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.omnibar {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.overflow-list {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.overlay {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.panel-stack {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.popover {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.portal {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.progress-bar {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.query-list {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.radio {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.radio-group {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.range-slider {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.resize-sensor {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.section {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.segmented-control {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.select {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.skeleton {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.slider {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.spinner {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.suggest {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.switch {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.table {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.table.cells {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.table.clipboard {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.table.formats {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.table.headers {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.table.layout {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.table.regions {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.tabs {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.tag {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.tag-input {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.text {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.text-area {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.time-picker {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.timezone-select {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.toast {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.tooltip {:message "Blueprint nur in sutra-ui.ui.*"}
+            blueprint-cljs.tree {:message "Blueprint nur in sutra-ui.ui.*"}}
+
+           :line-length {:level :warning
+                         :max-line-length 100
+                         :exclude-urls true
+                         :exclude-pattern "\"(?:[^\"\\\\]|\\\\.){60,}\""}
+           :consistent-alias
+           {:level :warning
+            :aliases {sutra.store.control                  ctl
+                      sutra.store.control.tables           cc
+                      sutra.store.access.datasets                   dsets
+                      sutra.store.pg.dataset                 pgds
+                      sutra.store.pg.dataset-exec            pgexec
+                      sutra.store.pg.dataset-store           dstore
+                      sutra.store.pg.tables                  pg-tables
+                      sutra.store.access.row-shape                  row-shape
+                      sutra.store.access.run-log                    run-log
+                      sutra.automation.logic-events           logic-events
+                      sutra.automation.proposals              proposals
+                      sutra.automation.rules                  rules
+                      sutra.automation.runs                   autos
+                      sutra.blobs.api                         blobs
+                      sutra.blobs.conformance                 blobs-conf
+                      sutra.blobs.fs                          blobs-fs
+                      sutra.blobs.mem                         blobs-mem
+                      sutra.capps.catalog                     cat
+                      sutra.capps.derived                     cd
+                      sutra.capps.format                      fmt
+                      sutra.capps.intent                      ci
+                      sutra.capps.pdf-layers                  pdf-layers
+                      sutra.capps.table                       tbl
+                      sutra.capps.timeline-layers             timeline-layers
+                      sutra.capps.variables                   vars
+                      sutra.catalog.constraints               cstr
+                      sutra.catalog.lookup                            lookup
+                      sutra.catalog.grants                            grants
+                      sutra.catalog.system-datasets                   sysds
+                      sutra.catalog.kernel                    kernel
+                      sutra.catalog.llm-models                llm-models
+                      sutra.repos.checks               repo-checks
+                      sutra.catalog.shape                     shape
+                      sutra.change.server                     srv
+                      sutra.cli.contract                      contract
+                      sutra.cli.auth                          auth
+                      sutra.cli.dispatch                      dispatch
+                      sutra.cli.errors                        errors
+                      sutra.cli.live                          live
+                      sutra.cli.local                         local
+                      sutra.cli.out                           out
+                      sutra.cli.parse                         parse
+                      sutra.cli.sandbox                       sandbox
+                      sutra.cli.session                       session
+                      clojure.java.io                   io
+                      clojure.java.shell                sh
+                      clojure.pprint                    pprint
+                      clojure.set                       set
+                      clojure.string                    str
+                      clojure.tools.reader.reader-types rt
+                      sutra.actions.effects           action-effects
+                      sutra.authoring.install.findings.backing backing-findings
+                      sutra.authoring.install.findings.sql     sql-findings
+                      sutra.llm.media                llm-media
+                      sutra.authoring.preview                  preview
+                      sutra.foundation.encoding                   enc
+                      sutra.foundation.sql-trace                  sqltrace
+                      sutra.coord.api                         coord
+                      sutra.coord.conformance                 coord-conf
+                      sutra.builds.run.leader                      leader
+                      sutra.datasets.api                      datasets
+                      sutra.datasets.conformance              datasets-conf
+                      sutra.datasets.landing                  landing
+                      sutra.evals.suites                      evals
+                      sutra.objects.views                    views
+                      sutra.sources.datasources               ds
+                      sutra.compute.external        ext
+                      sutra.compute.render                    render
+                      sutra.builds.plan.preview                   transform-preview
+                      sutra.builds.run.stream-index              stream-index
+                      sutra.sources.writeback-dataset         wb
+                      sutra.kit.sql                           kit-sql
+                      sutra.lineage.graph                     lineage
+                      sutra.builds.ledger                        ledger
+                      sutra.llm.cost                      cost-log
+                      org.httpkit.server                http-kit
+                      sutra.parser.board                      board
+                      sutra.parser.ent                        ent
+                      sutra.parser.project-export             pe
+                      sutra.parser.resolve                    res
+                      sutra.parser.spec                       spec
+                      sutra.parser.sugar                      sugar
+                      platform-sdk.client               client
+                      platform-sdk.schema               schema
+                      sutra.apps.http.apps                         apps
+                      sutra.serve.rest.cas                          cas
+                      sutra.rest.git-http                     git-http
+                      sutra.branching.http.proposals                   governance
+                      sutra.authoring.http.mutation                     mutation
+                      sutra.http.responses                    responses
+                      sutra.sources.http                       source
+                      sutra.schedules.dispatch                dispatch
+                      sutra.schedules.schedules               schedules
+                      sutra.repos.objects               g
+                      sutra.store.pg.landing                   landing
+                      sutra.objects.saved-sets               temp-sets
+                      sutra.store.storage.pg                        pg
+                      sutra.store.storage.pool                      pool
+                      sutra.access.principals                pr
+                      sutra.store.api                         api
+                      sutra.store.conformance                 store-conf
+                      sutra.store.core                        core
+                      sutra.store.pg                          store-pg
+                      sutra.store.pg.sql                      sql
+                      sutra.streams.conformance               streams-conf
+                      sutra.ref.action                  ra
+                      sutra.ref.expr                    rexpr
+                      sutra.ref.install                 ri
+                      sutra.ref.kernel                  rk
+                      sutra.ref.objects                 ro
+                      sutra.ref.objectset               ros
+                      sutra.ref.params                  rp
+                      sutra.ref.sigma                   sigma
+                      sutra.ref.value                   rv
+                      sutra.types.coltype                     ctype
+                      sutra.types.column                      column
+                      sutra.types.ctx                         tctx
+                      sutra.types.decimal                     d
+                      sutra.types.entities                    ents
+                      sutra.types.lifecycle                   lifecycle
+                      sutra.types.llm-cost                    llm-cost
+                      sutra.types.llm-output                  llm-out
+                      sutra.types.llm-providers               llmp
+                      sutra.types.paths                       paths
+                      sutra.types.profile                     profile
+                      sutra.types.rid                         rid
+                      sutra.types.shape                       tshape
+                      sutra.types.submission                  csub
+                      sutra.wire.api                          api
+                      sutra.wire.creds                        creds
+                      sutra.wire.transport                    tx
+                      sutra-ui.ui.core                        ui
+                      sutra-ui.ui.busy                        busy
+                      sutra-ui.ui.display                     display
+                      sutra-ui.ui.filter                      ui-filter
+                      sutra-ui.ui.page                        page
+                      sutra-ui.ui.inputs                      inputs
+                      sutra-ui.ui.overlay                     overlay
+                      sutra-ui.ui.rule-icon                   rule-icon
+                      sutra-ui.ui.sel                         sel
+                      sutra-ui.ui.style                       style
+                      sutra-ui.ui.table                       table
+                      sutra-ui.ui.vendor                      vendor}}}
+ :ns-groups [{:pattern "sutra\\.ref\\..*" :name sutra-ref}
+             {:pattern "sutra\\.cli\\.verbs\\..*" :name cli-verbs}
+             {:pattern "sutra\\.(store|conductor)\\..*" :name acts-as-system}
+             {:pattern "(ontology|platform|scenario|apps|grammar|support|python)\\..*"
+              :name acts-as-system}
+             {:pattern "sutra\\.builds\\.import(\\..*)?" :name acts-as-system}
+             {:pattern "sutra\\.objects\\.views" :name acts-as-system}
+             {:pattern "sutra\\.health\\.checks" :name acts-as-system}
+             {:pattern "sutra\\.actions\\.(action|execution|operations|proposals|publish)"
+              :name acts-as-system}
+             {:pattern "sutra\\.access\\.(authority|http\\.auth|http\\.identity)"
+              :name acts-as-system}
+             {:pattern "sutra\\.serve\\.lifecycle" :name acts-as-system}
+             {:pattern "sutra\\.branching\\.access" :name acts-as-system}
+             {:pattern "sutra\\.peering\\.markings" :name acts-as-system}
+             {:pattern "sutra-ui\\.ui\\..*" :name ui-kit}
+             {:pattern "blueprint-cljs\\..*" :name ui-kit}
+             {:pattern "^(?!sutra-ui\\.).*$" :name wire-door}
+             {:pattern "^sutra-ui\\.api$" :name wire-door}
+             {:pattern "^sutra-ui\\.exact-number-smoke-test$" :name wire-door}
+             {:pattern "^sutra-ui\\.apps\\.lineage\\.lineage-smoke-test$" :name wire-door}
+             {:pattern "^sutra-ui\\.(api|state\\..*|.*\\.(events|model|requests))$"
+              :name api-door}
+             {:pattern "^sutra-ui\\.apps\\.admin-settings\\.events-smoke-test$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.assistant\\.evals-events$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.assistant\\.events-smoke-test$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.assistant\\.providers-events$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.assistant\\.studio-events$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.branching\\.events-smoke-test$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.doc-intel\\.events-smoke-test$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.enta-editor\\.events-smoke-test$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.evals\\.events-smoke-test$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.explorer\\.events-smoke-test$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.atlas\\.events-smoke-test$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.launcher\\.events-smoke-test$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.lineage\\.events-smoke-test$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.notebook\\.events-smoke-test$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.notebook\\.live$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.notebook\\.markup$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.notebook\\.sheet$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.notebook\\.use-case$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.object-view\\.events-smoke-test$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.ontology\\.events-smoke-test$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.operations\\.events-smoke-test$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.repository\\.events-smoke-test$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.source-manager\\.events-smoke-test$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apps\\.widget-sets\\.events-smoke-test$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.builder\\.events-smoke-test$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.client-log$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apphost\\.widgets\\.ai$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apphost\\.widgets\\.button$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apphost\\.charts$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apphost\\.client$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apphost\\.widgets\\.notebook$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apphost\\.widgets\\.spreadsheet$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.apphost\\.modules$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.shell\\.home-page$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.platform$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.builder\\.bottom-panel\\.events-smoke-test$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.credentials$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.shell\\.feedback\\.recording$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.health\\.watch$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.shell\\.instance-switcher$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.state\\.loading$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.shell\\.notifications$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.shell\\.notifications\\.settings$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.object\\.page$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.resource\\.ontology-selector$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.editor\\.rich-text\\.editor$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.shell\\.sessions$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.resource\\.versions$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.shell\\.view-notes$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.shell\\.consumer$" :name api-ausnahme}
+             {:pattern "^sutra-ui\\.shell\\.default-workspace$" :name api-ausnahme}]
+ :config-in-ns {acts-as-system {:linters {:discouraged-var {:level :off}}}
+                ui-kit {:linters {:discouraged-namespace {:level :off}}}
+                wire-door {:linters {:discouraged-namespace {sutra.wire.abort {:level :off}
+                                                       sutra.wire.api {:level :off}
+                                                       sutra.wire.codec {:level :off}
+                                                       sutra.wire.protocol {:level :off}
+                                                       sutra.wire.transport {:level :off}}}}
+                api-door {:linters {:discouraged-namespace {sutra-ui.api {:level :off}}}}
+                api-ausnahme
+                {:linters {:discouraged-namespace {sutra-ui.api {:level :off}}}}
+                cli-verbs {:linters {:discouraged-var
+                                     {clojure.core/println {:message "a verb answers with emit! (data + a render view) and speaks with say! — so --json stays one value"}
+                                      clojure.core/print   {:message "a verb answers with emit! (data + a render view) and speaks with say! — so --json stays one value"}
+                                      clojure.core/printf  {:message "a verb answers with emit! (data + a render view) and speaks with say! — so --json stays one value"}
+                                      clojure.core/prn     {:message "a verb answers with emit! (data + a render view) and speaks with say! — so --json stays one value"}
+                                      sutra.cli.out/show!  {:message "a verb answers with emit! (data + a render view) and speaks with say! — so --json stays one value"}}}}
+                sutra-ref {:linters {:consistent-alias {:aliases {sutra.ref.action    action
+                                                                  sutra.ref.expr      expr
+                                                                  sutra.ref.install   install
+                                                                  sutra.ref.kernel    k
+                                                                  sutra.ref.objects   obj
+                                                                  sutra.ref.objectset os
+                                                                  sutra.ref.params    p
+                                                                  sutra.ref.sigma     s
+                                                                  sutra.ref.value     v}}}}}
+ :hooks {:analyze-call
+         {storage.dataset/with-conn                         hooks.binding-macros/binds-first
+          sutra.store.pg.dataset/with-conn              hooks.binding-macros/binds-first
+          sutra.repos.objects/with-inserter        hooks.binding-macros/binds-first
+          sutra.repos.api/with-inserter            hooks.binding-macros/binds-first
+          sutra.builds.run/with-run!                     hooks.binding-macros/binds-first
+          sutra.builds.api/with-run!                     hooks.binding-macros/binds-first
+          sutra.sources.protocols/with-source            hooks.binding-macros/binds-first
+          sutra.sources.egress/with-tx                   hooks.binding-macros/binds-first
+          sutra.sources.jdbc/with-open-conn              hooks.binding-macros/binds-first
+          sutra.sources.jdbc/with-writable-conn          hooks.binding-macros/binds-first
+          sutra.sources.api/with-source                  hooks.binding-macros/binds-first
+          kaocha.plugin/defplugin                  hooks.binding-macros/defplugin
+          sutra.foundation.ops/defop               hooks.binding-macros/defop}}}

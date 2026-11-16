@@ -1,0 +1,49 @@
+;; The farm as bin/readme-media.clj seeds it. The sources, raw datasets and transforms
+;; in ingest.ent are declared for Data Lineage, not run: the seed writes the baler's
+;; counts itself, adds fields and buyers through their actions, and sells every bale
+;; through Sell hay, so the numbers are the server's own.
+{:steps
+ [[:dataset-write {:name :baling_log :mode :snapshot :key :cut
+                   :rows [{:values {:cut "North Meadow, 1st cut 2025" :bales 120}}
+                          {:values {:cut "North Meadow, 2nd cut 2025" :bales 90}}
+                          {:values {:cut "Long Acre, 1st cut 2025"    :bales 140}}
+                          {:values {:cut "River Bend, 2nd cut 2025"   :bales 75}}
+                          {:values {:cut "Mill Field, 3rd cut 2025"   :bales 48}}]}]
+  [:run-import {:only [:lot]}]
+  ;; The fields the lots were cut from, and the arable side of the farm.
+  [:action {:name :add-field :args {:field-id "north-meadow" :name "North Meadow" :crop "Hay"    :hectares 6.5 :cost-per-hectare 120}}]
+  [:action {:name :add-field :args {:field-id "long-acre"    :name "Long Acre"    :crop "Hay"    :hectares 8   :cost-per-hectare 120}}]
+  [:action {:name :add-field :args {:field-id "river-bend"   :name "River Bend"   :crop "Hay"    :hectares 4.2 :cost-per-hectare 120}}]
+  [:action {:name :add-field :args {:field-id "mill-field"   :name "Mill Field"   :crop "Hay"    :hectares 3   :cost-per-hectare 120}}]
+  [:action {:name :add-field :args {:field-id "hilltop"      :name "Hilltop"      :crop "Wheat"  :hectares 12  :cost-per-hectare 780}}]
+  [:action {:name :add-buyer :args {:buyer-id "valley-coop" :name "Valley co-op"}}]
+  [:action {:name :add-buyer :args {:buyer-id "stone-mill"  :name "Stone mill"}}]
+  [:action {:name :plant :args {:field "hilltop" :crop "Winter wheat" :harvest-id "h-2025-wheat"}}]
+  [:action {:name :record-harvest :args {:harvest "h-2025-wheat" :harvested-on "2025-07-28" :tonnes 86}}]
+  [:action {:name :sell-harvest :args {:harvest "h-2025-wheat" :buyer "stone-mill" :price-per-tonne 205
+                                       :delivery-note true :quality-tested true}}]
+  [:action {:name :record-payment :args {:harvest "h-2025-wheat"}}]
+  [:action {:name :plant :args {:field "hilltop" :crop "Spring barley" :harvest-id "h-2026-barley"}}]
+  [:action {:name :record-harvest :args {:harvest "h-2026-barley" :harvested-on "2026-07-21" :tonnes 64}}]
+  [:action {:name :sell-harvest :args {:harvest "h-2026-barley" :buyer "valley-coop" :price-per-tonne 182
+                                       :delivery-note true :quality-tested true}}]
+  [:action {:name :plant :args {:field "hilltop" :crop "Winter wheat" :harvest-id "h-2027-wheat"}}]
+  [:action {:name :sell-hay :args {:lot "North Meadow, 1st cut 2025" :sale-nr "S-2025-019" :buyer "Huber farm"
+                                   :bales 25 :price-per-bale 4.5 :sold-on "2025-11-20"}}]
+  [:action {:name :sell-hay :args {:lot "North Meadow, 1st cut 2025" :sale-nr "S-2026-002" :buyer "Riding stables"
+                                   :bales 40 :price-per-bale 5 :sold-on "2026-01-17"}}]
+  [:action {:name :sell-hay :args {:lot "North Meadow, 2nd cut 2025" :sale-nr "S-2025-021" :buyer "Riding stables"
+                                   :bales 50 :price-per-bale 4.5 :sold-on "2025-12-02"}}]
+  [:action {:name :sell-hay :args {:lot "North Meadow, 2nd cut 2025" :sale-nr "S-2026-004" :buyer "Huber farm"
+                                   :bales 40 :price-per-bale 5 :sold-on "2026-01-24"}}]
+  [:action {:name :sell-hay :args {:lot "Long Acre, 1st cut 2025" :sale-nr "S-2026-005" :buyer "Hofer dairy"
+                                   :bales 60 :price-per-bale 4.8 :sold-on "2026-01-30"}}]
+  [:action {:name :sell-hay :args {:lot "River Bend, 2nd cut 2025" :sale-nr "S-2025-023" :buyer "Riding stables"
+                                   :bales 30 :price-per-bale 4.5 :sold-on "2025-12-12"}}]
+  ;; Wednesday: Tom, the brother, sells thirty under his own login.
+  [:principals {:users [{:ref :tom :username "tom" :password :auto}]}]
+  [:action {:name :add-user :args {:id :tom :rolle "ontology-editor"}}]
+  [:login {:as :tom}]
+  [:action {:name :sell-hay :args {:lot "North Meadow, 1st cut 2025" :sale-nr "S-2026-007" :buyer "Huber farm"
+                                   :bales 30 :price-per-bale 5 :sold-on "2026-02-11"}}]
+  [:login {:as :admin}]]}

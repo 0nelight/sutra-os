@@ -1,0 +1,34 @@
+;; ════════════════════════════════════════════════════════════════════════════
+;; template.entp — Vorlage für eine Pipeline (Werft: Stunden je Arbeitsauftrag)
+;; ════════════════════════════════════════════════════════════════════════════
+;; Eine Pipeline bereitet Daten auf, BEVOR sie Objekte werden oder in einen
+;; Bericht gehen: säubern, zusammenführen, summieren — ohne Code, als Folge von
+;; Schritten (`:board`). Sie liegt als `pipelines/<name>.entp` in einem Code-Repo.
+;; Python-Code gehört nicht hierher, sondern als Transform in ein `.ent` des
+;; Code-Repos. Alle Schlüssel: grammar.entp.
+;; ════════════════════════════════════════════════════════════════════════════
+{:name        :stunden-je-arbeitsauftrag         ; die Kennung
+ :kind        :batch                             ; läuft als Build (nicht als Strom)
+ :description "Summiert die Zeitbuchungen je Arbeitsauftrag — für Nachkalkulation und Rechnung."
+
+ ;; In welchem Projekt und welchem Code-Repo sie steht — einmal hier.
+ :project     :werft
+ :repository  :werft-pipelines
+
+ ;; Was sie liest, ohne es selbst zu erzeugen: das Dataset aus der Zeiterfassung
+ ;; (template.ent, „Woher die Daten kommen").
+ :imports     [:zeitbuchungen_zeiterfassung]
+
+ ;; Was sie liefert.
+ :outputs     [:stunden_je_arbeitsauftrag]
+
+ :transforms
+ {:stunden-summieren
+  {:board  {:inputs {:z {:kind :dataset :dataset :zeitbuchungen_zeiterfassung}}
+            :ops    [{:op :from :input :z}
+                     ;; Stornobuchungen des Terminals zählen nicht
+                     {:op :filter :where [:> :stunden 0]}
+                     {:op :aggregate :group-by [:auftrag_ref]
+                      :aggs [{:name :stunden :fn :sum :col :stunden}]}]}
+   :output      {:kind :dataset :dataset :stunden_je_arbeitsauftrag}
+   :primary-key :auftrag_ref}}}                 ; bestimmt eine Ergebniszeile ganz: eine je Arbeitsauftrag

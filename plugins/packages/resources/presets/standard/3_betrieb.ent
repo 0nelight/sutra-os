@@ -1,0 +1,354 @@
+;; ════════════════════════════════════════════════════════════════════════════
+;; standard / 3 — ANWENDUNGSFAELLE: BETRIEB (KMU, Einzelunternehmen)
+;; ════════════════════════════════════════════════════════════════════════════
+;; Die Belegkette eines kleinen Betriebs auf denselben Basistypen wie der
+;; Haushalt: Kunde und Lieferant sind ROLLEN einer Organisation oder Person,
+;; keine eigenen Typen; Ausgangsrechnung ist ein :beleg wie die
+;; Eingangsrechnung; Zahlungseingang ist eine Bankbuchung mit Ausgleich.
+;; Mit 3_privat.ent zusammen installierbar (Einzelunternehmer).
+;;
+;;  1. Ich lege ein Angebot fuer ein Projekt an und verfolge es bis zur
+;;     Annahme.                                     Projekt, Angebot
+;;  2. Aus dem angenommenen Angebot wird ein Auftrag.   Auftrag
+;;  3. Mitarbeitende buchen Stunden auf Auftraege.      Anstellung, Zeitbuchung
+;;  4. Ich stelle Rechnungen und sehe, was offen ist.   Kunde, Ausgangsrechnung
+;;  5. Zahlungseingaenge gleiche ich mit Rechnungen ab. Ausgleich (Stufe 1)
+;;  6. Ueberfaelliges mahne ich -- Entwurf, Freigabe, Versand.   Mahnung + Kanal :mahnversand
+;;  7. Eingangsrechnungen bezahle ich wie der Haushalt.  Ueberweisung (Stufe 2)
+;;
+;; Die Kette: Kundenbeziehung -> Projekt -> Angebot -> Auftrag ->
+;; Ausgangsrechnung -> Ausgleich <- Bankbuchung. Das Projekt ist der Anker,
+;; den Angebot, Auftrag und Stunden gemeinsam haben.
+;;
+;; AUSGANG wie in Stufe 2: entwurf -> freigegeben (eigene Action) -> gesendet
+;; (Sende-Action, nur aus freigegeben, per :invoke-webhook VOR jeder Aenderung).
+;; Wohin eine Mahnung geht, steht ab dem Entwurf auf ihr -- freigegeben wird
+;; also genau das, was hinausgeht.
+;;
+;; KANAL :mahnversand traegt KEINE Zugangsdaten (`sutra source secret
+;; mahnversand`). `mahnversand.invalid` ist absichtlich unerreichbar: vor dem
+;; ersten Senden die Adresse des eigenen Versanddienstes (Mail oder Brief)
+;; eintragen.
+{:require ["2_abgeleitet.ent"]
+ :schema
+ {:objects
+  {:kundenbeziehung
+   {:symbol "🤝" :name "Kundenbeziehung" :plural "Kundenbeziehungen" :title :kundennummer
+    :description "Die ROLLE Kunde einer Organisation: Nummer und Standardkonditionen, die Angebot und Rechnung beim Anlegen uebernehmen."
+    :rationale "Eine Rolle, kein Kundentyp: dieselbe Firma kann Kunde und Lieferant sein, ohne doppelt angelegt zu werden."
+    :status :experimental
+    :primary-key :kundenbeziehung-id
+    :attributes [[:kundenbeziehung-id :string]
+                 [:kundennummer :string]
+                 [:zahlungsziel-tage :integer]
+                 [:skonto-prozent :decimal {:constraints {:min 0 :max 100}}]
+                 [:skonto-tage :integer]
+                 [:organisation-id :string]
+                 [:kunde-name :string {:derived {:rollup {:over :organisation :agg :one :pick :bezeichnung}}}]
+                 [:kunde-email :string {:derived {:rollup {:over :organisation :agg :one :pick :email}}}]]}
+
+   :projekt
+   {:symbol "📁" :name "Projekt" :plural "Projekte" :title :bezeichnung
+    :status :experimental
+    :implements [:vorgang]
+    :primary-key :projekt-id
+    :attributes [[:projekt-id :string] :bezeichnung :faellig-am :zustand :erledigt-am
+                 [:projektnummer :string]
+                 [:kundenbeziehung-id :string]
+                 [:ort-id :string]
+                 [:stunden :decimal {:derived {:rollup {:over :zeitbuchungen :agg :sum :of :stunden}}}]
+                 [:fakturiert :decimal {:derived {:rollup {:over :ausgangsrechnungen :agg :sum :of :betrag}}}]]}
+
+   :angebot
+   {:symbol "📝" :name "Angebot" :plural "Angebote" :title :angebotsnummer
+    :status :experimental
+    :primary-key :angebot-id
+    :attributes [[:angebot-id :string]
+                 [:angebotsnummer :string]
+                 [:datum :date]
+                 [:bindefrist :date]
+                 :betrag
+                 [:stand :string {:constraints {:one-of ["entwurf" "versendet" "angenommen" "abgelehnt" "verfallen"]}}]
+                 [:projekt-id :string]]}
+
+   :auftrag
+   {:symbol "🛠" :name "Auftrag" :plural "Auftraege" :title :auftragsnummer
+    :status :experimental
+    :implements [:vorgang]
+    :primary-key :auftrag-id
+    :attributes [[:auftrag-id :string] :bezeichnung :faellig-am :zustand :erledigt-am
+                 [:auftragsnummer :string]
+                 :betrag
+                 [:projekt-id :string]
+                 [:angebot-id :string]]}
+
+   :anstellung
+   {:symbol "🧑‍🔧" :name "Anstellung" :plural "Anstellungen" :title :bezeichnung
+    :description "Die ROLLE Mitarbeiter einer Person, mit Satz und Soll."
+    :status :experimental
+    :primary-key :anstellung-id
+    :attributes [[:anstellung-id :string] :bezeichnung
+                 [:stundensatz :betrag]
+                 [:wochenstunden :decimal]
+                 [:eintritt :date]
+                 [:austritt :date]
+                 [:person-id :string]]}
+
+   :zeitbuchung
+   {:symbol "⏱" :name "Zeitbuchung" :plural "Zeitbuchungen" :title :zeitbuchung-id
+    :status :experimental
+    :primary-key :zeitbuchung-id
+    :attributes [[:zeitbuchung-id :string]
+                 [:datum :date]
+                 [:stunden :decimal {:constraints {:min 0 :max 24}}]
+                 [:taetigkeit :string]
+                 [:anstellung-id :string]
+                 [:projekt-id :string]
+                 [:auftrag-ref :string]]}
+
+   :ausgangsrechnung
+   {:symbol "🧾" :name "Ausgangsrechnung" :plural "Ausgangsrechnungen" :title :belegnummer
+    :status :experimental
+    :implements [:beleg]
+    :primary-key :rechnung-id
+    :attributes [[:rechnung-id :string] :betrag :waehrung :faellig-am :belegnummer :belegdatum
+                 [:aussteller-id :string {:description "Die eigene Organisation."}]
+                 [:dokument-id :string]
+                 [:projekt-id :string]
+                 [:auftrag-ref :string]
+                 [:kundenbeziehung-id :string]
+                 [:kunde-name :string {:derived {:rollup {:over :kunde :agg :one :pick :kunde-name}}}]
+                 [:kunde-email :string {:derived {:rollup {:over :kunde :agg :one :pick :kunde-email}}}]
+                 [:beglichen :decimal {:derived {:rollup {:over :ausgleiche :agg :sum :of :betrag}}}]
+                 [:offen :decimal
+                  {:format {:kind :currency :currency "EUR" :decimals 2}
+                   :derived {:language :clojure :expression [:- [:get :betrag] [:get :beglichen]]
+                             :inputs [:betrag :beglichen]}}]]}
+
+   :mahnung
+   {:symbol "⏰" :name "Mahnung" :plural "Mahnungen" :title :auftrag-id
+    :status :experimental
+    :implements [:ausgehend]
+    :primary-key :auftrag-id
+    :attributes [:auftrag-id :auftragsstand :freigegeben-am :gesendet-am :fremd-referenz :antwort
+                 [:mahnstufe :integer {:constraints {:min 1 :max 3}}]
+                 [:mahnbetrag :betrag]
+                 :waehrung :belegnummer
+                 [:empfaenger :string]
+                 [:empfaenger-email :string {:constraints {:format :email}}]
+                 [:rechnung-id :string]]}}
+
+  :links
+  [[:kundenbeziehung-organisation :kundenbeziehung :organisation :many-to-one
+    {:forward-api-name :organisation :reverse-api-name :kundenbeziehungen :fk :organisation-id}]
+   [:projekt-kunde :projekt :kundenbeziehung :many-to-one
+    {:forward-api-name :kunde :reverse-api-name :projekte
+     :fk {:attribute :kundenbeziehung-id :on-null :skip :on-unresolved :skip}}]
+   [:projekt-ort :projekt :ort :many-to-one
+    {:forward-api-name :baustelle :reverse-api-name :projekte
+     :fk {:attribute :ort-id :on-null :skip :on-unresolved :skip}}]
+   [:angebot-projekt :angebot :projekt :many-to-one
+    {:forward-api-name :projekt :reverse-api-name :angebote :fk :projekt-id}]
+   [:auftrag-projekt :auftrag :projekt :many-to-one
+    {:forward-api-name :projekt :reverse-api-name :auftraege :fk :projekt-id}]
+   [:auftrag-angebot :auftrag :angebot :many-to-one
+    {:forward-api-name :angebot :reverse-api-name :auftraege
+     :fk {:attribute :angebot-id :on-null :skip :on-unresolved :skip}}]
+   [:anstellung-person :anstellung :person :many-to-one
+    {:forward-api-name :person :reverse-api-name :anstellungen :fk :person-id}]
+   [:zeitbuchung-anstellung :zeitbuchung :anstellung :many-to-one
+    {:forward-api-name :anstellung :reverse-api-name :zeitbuchungen :fk :anstellung-id}]
+   [:zeitbuchung-projekt :zeitbuchung :projekt :many-to-one
+    {:forward-api-name :projekt :reverse-api-name :zeitbuchungen :fk :projekt-id}]
+   [:ausgangsrechnung-aussteller :ausgangsrechnung :organisation :many-to-one
+    {:forward-api-name :aussteller :reverse-api-name :ausgangsrechnungen
+     :fk {:attribute :aussteller-id :on-null :skip :on-unresolved :skip}
+     :satisfies {:interface :beleg :constraint :aussteller}}]
+   [:ausgangsrechnung-original :ausgangsrechnung :dokument :many-to-one
+    {:forward-api-name :original :reverse-api-name :ausgangsrechnungen
+     :fk {:attribute :dokument-id :on-null :skip :on-unresolved :skip}
+     :satisfies {:interface :beleg :constraint :original}}]
+   [:ausgangsrechnung-projekt :ausgangsrechnung :projekt :many-to-one
+    {:forward-api-name :projekt :reverse-api-name :ausgangsrechnungen
+     :fk {:attribute :projekt-id :on-null :skip :on-unresolved :skip}}]
+   [:ausgangsrechnung-kunde :ausgangsrechnung :kundenbeziehung :many-to-one
+    {:forward-api-name :kunde :reverse-api-name :ausgangsrechnungen :fk :kundenbeziehung-id}]
+   [:ausgangsrechnung-ausgleiche :ausgangsrechnung :ausgleich :one-to-many
+    {:forward-api-name :ausgleiche :reverse-api-name :ausgangsrechnung
+     :fk {:attribute :beleg-id :on-null :skip :on-unresolved :skip}
+     :satisfies {:interface :beleg :constraint :ausgleiche}}]
+   [:mahnung-rechnung :mahnung :ausgangsrechnung :many-to-one
+    {:forward-api-name :rechnung :reverse-api-name :mahnungen :fk :rechnung-id}]]
+
+  :sources
+  {:mahnversand
+   {:type        :rest
+    :project     :kanaele
+    :description "Versanddienst fuer Mahnungen (Mail oder Brief). Nimmt die freigegebene Mahnung an und stellt sie zu."
+    :config      {:rest {:base-url "https://mahnversand.invalid"
+                         :auth     {:mode :bearer}}}
+    :egress      ["mahnversand.invalid:443"]
+    :access      :read-write
+    :webhooks    {:mahnung-zustellen
+                  {:method          :post
+                   :path-template   "/mahnungen"
+                   :params          [:auftrag-id :empfaenger :empfaenger-email :belegnummer :mahnstufe :mahnbetrag :waehrung]
+                   :idempotency-key "{auftrag-id}"
+                   :body-template   {:reference      "{auftrag-id}"
+                                     :recipient_name "{empfaenger}"
+                                     :recipient_email "{empfaenger-email}"
+                                     :invoice_number "{belegnummer}"
+                                     :level          "{mahnstufe}"
+                                     :amount         "{mahnbetrag}"
+                                     :currency       "{waehrung}"}}}}}
+
+  :actions
+  {;; Ohne diese zwei gab es im Betrieb keinen Weg zu einer Ausgangsrechnung --
+   ;; Objekte entstehen nur ueber Actions, und Mahnen setzt eine voraus.
+   :kunde-anlegen
+   {:display-name "Kunde anlegen"
+    :description  "Macht eine Organisation zum Kunden: Kundennummer und Zahlungsziel."
+    :status       :experimental
+    :action-log   true
+    :params       {:organisation       {:type :organisation :name "Organisation" :required true}
+                   :kundennummer       {:type :string :name "Kundennummer" :required true}
+                   :zahlungsziel-tage  {:type :integer :name "Zahlungsziel (Tage)" :default 14 :constraints {:min 0}}
+                   :kundenbeziehung-id {:type :string :exposure :hidden :prefill :uuid}}
+    :rules        [{:op :create :object-type :kundenbeziehung
+                    :values {:kundenbeziehung-id [:get :kundenbeziehung-id]
+                             :kundennummer       [:get :kundennummer]
+                             :zahlungsziel-tage  [:get :zahlungsziel-tage]
+                             :organisation-id    [:get :organisation :organisation-id]}}]}
+
+   :ausgangsrechnung-erfassen
+   {:display-name "Ausgangsrechnung erfassen"
+    :description  "Haelt eine gestellte Rechnung fest; was offen ist, folgt aus den Zahlungseingaengen."
+    :status       :experimental
+    :visibility   :prominent
+    :action-log   true
+    :params       {:kunde       {:type :kundenbeziehung :name "Kunde" :required true}
+                   :belegnummer {:type :string :name "Rechnungsnummer" :required true}
+                   :belegdatum  {:type :date :name "Datum" :required true :prefill :now}
+                   :betrag      {:type :number :name "Betrag" :required true :constraints {:min 0}}
+                   :faellig-am  {:type :date :name "Faellig am"}
+                   :rechnung-id {:type :string :exposure :hidden :prefill :uuid}}
+    :rules        [{:op :create :object-type :ausgangsrechnung
+                    :values {:rechnung-id        [:get :rechnung-id]
+                             :kundenbeziehung-id [:get :kunde :kundenbeziehung-id]
+                             :belegnummer        [:get :belegnummer]
+                             :belegdatum         [:get :belegdatum]
+                             :betrag             [:get :betrag]
+                             :waehrung           "EUR"
+                             :faellig-am         [:get :faellig-am]}}]}
+
+   :angebot-annehmen
+   {:display-name "Angebot annehmen"
+    :description  "Setzt das Angebot auf angenommen und legt den Auftrag an -- in einer Transaktion."
+    :status       :experimental
+    :visibility   :prominent
+    :action-log   true
+    :params       {:angebot        {:type :angebot :name "Angebot" :required true :prefill :current-object}
+                   :auftragsnummer {:type :string :name "Auftragsnummer" :required true}
+                   :vorgang-id     {:type :string :exposure :hidden :prefill :uuid}}
+    :submission-criteria [{:test {:s [:get :angebot :stand]} :pred [:= :s "versendet"] :message "Nur ein versendetes Angebot kann angenommen werden."}]
+    :rules        [{:op :update :object-type :angebot :target [:get :angebot :id]
+                    :values {:stand "angenommen"}}
+                   {:op :create :object-type :auftrag
+                    :values {:auftrag-id     [:get :vorgang-id]
+                             :auftragsnummer [:get :auftragsnummer]
+                             :bezeichnung    [:get :angebot :angebotsnummer]
+                             :zustand        "offen"
+                             :betrag         [:get :angebot :betrag]
+                             :projekt-id     [:get :angebot :projekt-id]
+                             :angebot-id     [:get :angebot :angebot-id]}}]}
+
+   :stunden-buchen
+   {:display-name "Stunden buchen"
+    :status       :experimental
+    :params       {:projekt    {:type :projekt :name "Projekt" :required true :prefill :current-object}
+                   :anstellung {:type :anstellung :name "Mitarbeiter" :required true}
+                   :datum      {:type :date :name "Datum" :required true :prefill :now}
+                   :stunden    {:type :number :name "Stunden" :required true :constraints {:min 0 :max 24}}
+                   :taetigkeit {:type :string :name "Taetigkeit"}
+                   :vorgang-id {:type :string :exposure :hidden :prefill :uuid}}
+    :rules        [{:op :create :object-type :zeitbuchung
+                    :values {:zeitbuchung-id [:get :vorgang-id]
+                             :datum          [:get :datum]
+                             :stunden        [:get :stunden]
+                             :taetigkeit     [:get :taetigkeit]
+                             :anstellung-id  [:get :anstellung :anstellung-id]
+                             :projekt-id     [:get :projekt :projekt-id]}}]}
+
+   :zahlungseingang-ausgleichen
+   {:display-name "Zahlungseingang zuordnen"
+    :description  "Dieser Eingang auf dem Bankkonto begleicht (einen Teil von) dieser Ausgangsrechnung."
+    :status       :experimental
+    :action-log   true
+    :params       {:rechnung   {:type :ausgangsrechnung :name "Rechnung" :required true :prefill :current-object}
+                   :buchung    {:type :bankbuchung :name "Eingang" :required true}
+                   :betrag     {:type :number :name "Betrag" :required true :constraints {:min 0}}
+                   :vorgang-id {:type :string :exposure :hidden :prefill :uuid}}
+    :submission-criteria [{:test {:o [:get :rechnung :offen]} :pred [:> :o 0] :message "Die Rechnung ist bereits beglichen."}
+                          {:test {:b [:get :betrag] :o [:get :rechnung :offen]} :pred [:<= :b :o]
+                           :message "Der Betrag ist hoeher als der offene Rest der Rechnung."}
+                          {:test {:b [:get :buchung :betrag]} :pred [:> :b 0] :message "Ein Zahlungseingang hat einen positiven Betrag."}]
+    :rules        [{:op :create :object-type :ausgleich
+                    :values {:ausgleich-id [:get :vorgang-id]
+                             :betrag       [:get :betrag]
+                             :bewegung-id  [:get :buchung :buchung-id]
+                             :beleg-id     [:get :rechnung :rechnung-id]
+                             :quelle       "hand"}}]}
+
+   :mahnung-entwerfen
+   {:display-name "Mahnen"
+    :description  "Legt eine Mahnung als Entwurf an; versendet wird erst nach Freigabe."
+    :status       :experimental
+    :action-log   true
+    :params       {:rechnung   {:type :ausgangsrechnung :name "Rechnung" :required true :prefill :current-object}
+                   :stufe      {:type :integer :name "Mahnstufe" :required true :default 1 :constraints {:min 1 :max 3}}
+                   :empfaenger {:type :string :name "An" :required true
+                                :default {:from :rechnung :property :kunde-name}}
+                   :email      {:type :string :name "E-Mail" :required true :constraints {:format :email}
+                                :default {:from :rechnung :property :kunde-email}}
+                   :vorgang-id {:type :string :exposure :hidden :prefill :uuid}}
+    :submission-criteria [{:test {:o [:get :rechnung :offen]} :pred [:> :o 0] :message "Die Rechnung ist bereits beglichen."}]
+    :rules        [{:op :create :object-type :mahnung
+                    :values {:auftrag-id       [:get :vorgang-id]
+                             :auftragsstand    "entwurf"
+                             :mahnstufe        [:get :stufe]
+                             :mahnbetrag       [:get :rechnung :offen]
+                             :waehrung         [:get :rechnung :waehrung]
+                             :belegnummer      [:get :rechnung :belegnummer]
+                             :empfaenger       [:get :empfaenger]
+                             :empfaenger-email [:get :email]
+                             :rechnung-id      [:get :rechnung :rechnung-id]}}]}
+
+   :mahnung-freigeben
+   {:display-name "Mahnung freigeben"
+    :description  "Gibt einen Mahnungsentwurf zum Versand frei. Es wird noch nichts gesendet."
+    :status       :experimental
+    :action-log   true
+    :params       {:mahnung {:type :mahnung :name "Mahnung" :required true :prefill :current-object}}
+    :submission-criteria [{:test {:s [:get :mahnung :auftragsstand]} :pred [:= :s "entwurf"] :message "Nur ein Entwurf kann freigegeben werden."}]
+    :rules        [{:op :update :object-type :mahnung :target [:get :mahnung :id]
+                    :values {:auftragsstand "freigegeben" :freigegeben-am [:now]}}]}
+
+   :mahnung-senden
+   {:display-name "Mahnung versenden"
+    :description  "Uebergibt eine freigegebene Mahnung dem Versanddienst. Scheitert der Versand, aendert sich nichts (Rueckschreiben zuerst)."
+    :status       :experimental
+    :action-log   true
+    :params       {:mahnung {:type :mahnung :name "Mahnung" :required true :prefill :current-object}}
+    :submission-criteria [{:test {:s [:get :mahnung :auftragsstand]} :pred [:= :s "freigegeben"] :message "Nur eine freigegebene Mahnung kann versendet werden -- einen Entwurf erst freigeben; eine gesendete ist schon unterwegs."}]
+    :rules        [{:op :invoke-webhook :phase :writeback :source :mahnversand :webhook :mahnung-zustellen :as :webhook-result
+                    :params {:auftrag-id       [:get :mahnung :auftrag-id]
+                             :empfaenger       [:get :mahnung :empfaenger]
+                             :empfaenger-email [:get :mahnung :empfaenger-email]
+                             :belegnummer      [:get :mahnung :belegnummer]
+                             :mahnstufe        [:get :mahnung :mahnstufe]
+                             :mahnbetrag       [:get :mahnung :mahnbetrag]
+                             :waehrung         [:get :mahnung :waehrung]}}
+                   {:op :update :object-type :mahnung :target [:get :mahnung :id]
+                    :values {:auftragsstand "gesendet"
+                             :gesendet-am   [:now]
+                             :antwort       [:get :webhook-result :body]}}]}}}}

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="transform-runtime" tests="8" failures="0" skipped="0">
+  <testcase classname="transform-runtime" name="manifests-valid"></testcase>
+  <testcase classname="transform-runtime" name="rows-run"></testcase>
+  <testcase classname="transform-runtime" name="wire-values"></testcase>
+  <testcase classname="transform-runtime" name="scalar-csv-run"></testcase>
+  <testcase classname="transform-runtime" name="stderr-structured"></testcase>
+  <testcase classname="transform-runtime" name="error-line"></testcase>
+  <testcase classname="transform-runtime" name="major-refused"></testcase>
+  <testcase classname="transform-runtime" name="minor-served"></testcase>
+</testsuite>

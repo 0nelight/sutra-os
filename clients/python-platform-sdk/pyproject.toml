@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sutra-platform-sdk"
+version = "0.2.0"
+description = "Typed Python client for the Sutra-OS ontology server."
+license = "AGPL-3.0-or-later"
+requires-python = ">=3.9"
+dependencies = [
+    "requests>=2.25",
+    # Transit codec (import name 'transit'). The SDK's _encode/_decode handle
+    # BOTH the py2-era 'transit-python' (text stream + a collections-ABC shim)
+    # and the 'transit-python3' fork (byte stream). Either works.
+    "transit-python",
+]
+
+[project.optional-dependencies]
+# OntologyFS — the PyFilesystem projection layer.
+fs = ["fs>=2.4"]
+dev = ["pytest>=7"]
+
+[project.scripts]
+sutra-platform-sdk = "sutra_platform_sdk.cli:main"
+
+[tool.setuptools]
+packages = ["sutra_platform_sdk"]
+
+[tool.setuptools.package-data]
+sutra_platform_sdk = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

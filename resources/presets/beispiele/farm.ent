@@ -1,0 +1,229 @@
+{:schema
+ {:projects {:farm {:description "Endless fields, and who is farming whom"}}
+  :objects
+  {:field
+   {:name "Field" :plural "Fields" :symbol "🌾"
+    :description "A piece of land, what grows on it, and what it really costs to grow it."
+    :primary-key :field-id :match-keys [:field-id]
+    :title      :name
+    :subtitle   :crop
+    :row        [:name :crop :hectares :income :hay-income :cost :margin]
+    :attributes
+    [[:field-id :string {:visibility :hidden}]
+     [:name :string {:name "Name" :required true}]
+     [:crop :string {:name "Crop"}]
+     [:hectares :decimal {:name "Hectares" :format {:suffix " ha" :decimals 2}}]
+     [:cost-per-hectare :decimal {:name "Cost / ha" :format {:prefix "€ " :decimals 2 :grouping true}}]
+     [:income :decimal
+      {:name "Paid for"
+       :format {:prefix "€ " :decimals 2 :grouping true}
+       :derived {:rollup {:over :harvests :agg :sum :of :revenue :where [:= :status "paid"]}}}]
+     [:hay-income :decimal
+      {:name "Hay sold"
+       :format {:prefix "€ " :decimals 2 :grouping true}
+       :derived {:rollup {:over :lots :agg :sum :of :revenue}}}]
+     [:cost :decimal
+      {:name "Cost to grow"
+       :format {:prefix "€ " :decimals 2 :grouping true}
+       :derived {:language :clojure
+                 :expression [:* [:get :hectares] [:get :cost-per-hectare]]
+                 :inputs [:hectares :cost-per-hectare]}}]
+     [:margin :decimal
+      {:name "Margin"
+       :format {:prefix "€ " :decimals 2 :grouping true}
+       :visibility :prominent
+       :conditional-format [{:when [:< [:get :margin] 0] :color "#fff" :background "#c62828"}]
+       :derived {:language :clojure
+                 :expression [:- [:+ [:get :income] [:get :hay-income]] [:get :cost]]
+                 :inputs [:income :hay-income :cost]}}]]}
+
+   :buyer
+   {:name "Buyer" :plural "Buyers" :symbol "🏭"
+    :description "Whoever takes the harvest and sets the price: a dairy, a co-op, a mill, a supermarket chain."
+    :primary-key :buyer-id :match-keys [:buyer-id]
+    :title      :name
+    :row        [:name :delivered :unpaid]
+    :attributes
+    [[:buyer-id :string {:visibility :hidden}]
+     [:name :string {:name "Name" :required true}]
+     [:delivered :integer
+      {:name "Deliveries"
+       :derived {:rollup {:over :harvests :agg :count}}}]
+     [:unpaid :decimal
+      {:name "Owed to you"
+       :format {:prefix "€ " :decimals 2 :grouping true}
+       :visibility :prominent
+       :conditional-format [{:when [:> [:get :unpaid] 0] :color "#c62828"}]
+       :derived {:rollup {:over :harvests :agg :sum :of :revenue :where [:= :status "delivered"]}}}]]}
+
+   :harvest
+   {:name "Harvest" :plural "Harvests" :symbol "🚜"
+    :description "One harvest from one field, from the ground to the money."
+    :primary-key :harvest-id :match-keys [:harvest-id]
+    :title      :crop
+    :subtitle   :harvested-on
+    :row        [:crop :harvested-on :tonnes :price-per-tonne :revenue :status]
+    :attributes
+    [[:harvest-id :string {:visibility :hidden}]
+     [:crop :string {:name "Crop" :required true}]
+     [:harvested-on :date {:name "Harvested on"}]
+     [:tonnes :decimal {:name "Tonnes" :format {:suffix " t" :decimals 2}}]
+     [:price-per-tonne :decimal {:name "Price / t" :format {:prefix "€ " :decimals 2 :grouping true}}]
+     [:revenue :decimal
+      {:name "Revenue"
+       :format {:prefix "€ " :decimals 2 :grouping true}
+       :derived {:language :clojure
+                 :expression [:* [:get :tonnes] [:get :price-per-tonne]]
+                 :inputs [:tonnes :price-per-tonne]}}]
+     [:delivery-note :boolean {:name "Delivery note signed"}]
+     [:quality-tested :boolean {:name "Quality tested"}]
+     [:status :string {:name "Status"}]
+     [:field-id :string {:visibility :hidden}]
+     [:buyer-id :string {:visibility :hidden}]]
+    :lifecycle
+    {:property    :status
+     :states      [:planted :harvested :delivered :paid]
+     :transitions [{:action :record-harvest :from [:planted]   :to :harvested}
+                   {:action :sell-harvest   :from [:harvested] :to :delivered}
+                   {:action :record-payment :from [:delivered] :to :paid}]}}
+   :lot
+   {:name "Hay lot" :plural "Hay lots" :symbol "🌾" :title :name
+    :primary-key :name :match-keys [:name]
+    :row        [:name :baled :sold :revenue :in-barn]
+    :attributes
+    [[:name    :string  {:name "Lot"}]
+     [:field   :string  {:visibility :hidden}]
+     [:baled   :integer {:name "Bales made" :constraints {:min 0}}]
+     [:sold    :integer {:name "Sold" :derived {:expression [:connected-sum :sales :bales]}}]
+     [:revenue :decimal {:name "Revenue" :format {:prefix "€ " :decimals 2 :grouping true}
+                         :derived {:expression [:connected-sum :sales :revenue]}}]
+     [:in-barn :integer
+      {:name "In the barn" :visibility :prominent
+       :derived {:language :clojure
+                 :expression [:- [:get :baled] [:get :sold]]
+                 :inputs [:baled :sold]}}]]}
+
+   :sale
+   {:name "Sale" :plural "Sales" :symbol "🤝" :title :sale-nr
+    :primary-key :sale-nr :match-keys [:sale-nr]
+    :row        [:sale-nr :buyer :bales :sold-on :sold-by]
+    :attributes
+    [[:sale-nr        :string  {:name "Sale"}]
+     [:lot            :string  {:name "Lot"}]
+     [:buyer          :string  {:name "Buyer"}]
+     [:bales          :integer {:name "Bales" :constraints {:min 1}}]
+     [:price-per-bale :decimal {:name "Price / bale"}]
+     [:revenue        :decimal {:name "Revenue" :format {:prefix "€ " :decimals 2 :grouping true}
+                                :derived {:language :clojure
+                                          :expression [:* [:get :bales] [:get :price-per-bale]]
+                                          :inputs [:bales :price-per-bale]}}]
+     [:sold-on        :date    {:name "Sold on"}]
+     [:sold-by        :string  {:name "Sold by"}]]}}
+
+  :links
+  [[:harvest-field :harvest :field :many-to-one
+    {:forward-api-name :field    :forward-name "Field"
+     :reverse-api-name :harvests :reverse-name "Harvests"
+     :fk :field-id}]
+   [:harvest-buyer :harvest :buyer :many-to-one
+    {:forward-api-name :buyer    :forward-name "Sold to"
+     :reverse-api-name :harvests :reverse-name "Harvests"
+     :fk :buyer-id}]
+   [:lot-field :lot :field :many-to-one
+    {:fk :field :forward-api-name :field :reverse-api-name :lots
+     :forward-name "Field" :reverse-name "Hay lots"}]
+   [:sale-lot :sale :lot :many-to-one
+    {:fk :lot :forward-api-name :lot :reverse-api-name :sales
+     :forward-name "Lot" :reverse-name "Sales"}]]
+
+  :actions
+  {:add-field
+   {:display-name "Add field"
+    :params {:name             {:type :string :name "Name" :required true}
+             :crop             {:type :string :name "Crop"}
+             :hectares         {:type :decimal :name "Hectares" :required true}
+             :cost-per-hectare {:type :decimal :name "Cost / ha" :required true}
+             :field-id         {:type :string :exposure :hidden :prefill :uuid}}
+    :rules [{:op :create :object-type :field :id [:get :field-id]
+             :values {:field-id         [:get :field-id]
+                      :name             [:get :name]
+                      :crop             [:get :crop]
+                      :hectares         [:get :hectares]
+                      :cost-per-hectare [:get :cost-per-hectare]}}]}
+
+   :add-buyer
+   {:display-name "Add buyer"
+    :params {:name     {:type :string :name "Name" :required true}
+             :buyer-id {:type :string :exposure :hidden :prefill :uuid}}
+    :rules [{:op :create :object-type :buyer :id [:get :buyer-id]
+             :values {:buyer-id [:get :buyer-id] :name [:get :name]}}]}
+
+   :plant
+   {:display-name "Plant"
+    :on     :field
+    :params {:field      {:type :field :name "Field" :required true}
+             :crop       {:type :string :name "Crop" :required true}
+             :harvest-id {:type :string :exposure :hidden :prefill :uuid}}
+    :rules
+    [{:op :create :object-type :harvest :id [:get :harvest-id]
+      :values {:harvest-id [:get :harvest-id]
+               :field-id   [:get :field :field-id]
+               :crop       [:get :crop]
+               :status     "planted"}}]}
+
+   :record-harvest
+   {:display-name "Record harvest"
+    :on     :harvest
+    :params {:harvest      {:type :harvest :name "Harvest" :required true}
+             :harvested-on {:type :date :name "Harvested on" :required true}
+             :tonnes       {:type :decimal :name "Tonnes" :required true}}
+    :rules [{:op :update :target [:get :harvest :id] :object-type :harvest
+             :values {:harvested-on [:get :harvested-on] :tonnes [:get :tonnes]}}]}
+
+   :sell-harvest
+   {:display-name "Sell harvest"
+    :on     :harvest
+    :params {:harvest         {:type :harvest :name "Harvest" :required true}
+             :buyer           {:type :buyer :name "Buyer" :required true}
+             :price-per-tonne {:type :decimal :name "Price / t" :required true}
+             :delivery-note   {:type :boolean :name "Delivery note signed" :default false}
+             :quality-tested  {:type :boolean :name "Quality tested" :default false}}
+    :submission-criteria
+    [{:test    {:d [:get :delivery-note]}
+      :pred    [:= :d true]
+      :message "No signed delivery note. Without one, the buyer decides later what you delivered."}
+     {:test    {:q [:get :quality-tested]}
+      :pred    [:= :q true]
+      :message "No quality test of your own. Without one, the buyer's lab decides your price."}]
+    :rules [{:op :update :target [:get :harvest :id] :object-type :harvest
+             :values {:buyer-id        [:get :buyer :buyer-id]
+                      :price-per-tonne [:get :price-per-tonne]
+                      :delivery-note   [:get :delivery-note]
+                      :quality-tested  [:get :quality-tested]}}]}
+
+   :record-payment
+   {:display-name "Record payment"
+    :on     :harvest
+    :params {:harvest {:type :harvest :name "Harvest" :required true}}}
+
+   :sell-hay
+   {:display-name "Sell hay"
+    :on     :lot
+    :params {:lot            {:type :lot :name "Lot" :required true}
+             :sale-nr        {:type :string :name "Sale no." :required true}
+             :buyer          {:type :string :name "Buyer" :required true}
+             :bales          {:type :integer :name "Bales" :required true
+                              :constraints {:min 1}}
+             :price-per-bale {:type :decimal :name "Price / bale"}
+             :sold-on        {:type :date :name "Sold on" :prefill :now}
+             :sold-by        {:type :string :exposure :hidden :prefill :current-user}}
+    :submission-criteria
+    [{:message "Not that many bales in the barn."
+      :test    {:want [:get :bales] :have [:get :lot :in-barn]}
+      :pred    [:<= :want :have]}]
+    :rules  [{:op :create :object-type :sale
+              :values {:sale-nr [:get :sale-nr] :lot [:get :lot :name]
+                       :buyer [:get :buyer] :bales [:get :bales]
+                       :price-per-bale [:get :price-per-bale]
+                       :sold-on [:get :sold-on] :sold-by [:get :sold-by]}}]
+    :edits  [{:object-type :sale}]}}}}

@@ -1,0 +1,92 @@
+{:object-types
+ "Was ein Ding der Wirklichkeit IST — einmal verbindlich, damit App, Ausdruck und Auswertung dieselbe Definition lesen."
+
+ :link-types
+ "Dass zwei Dinge zusammengehören, als reine Kante benannt — damit ein Weg durch den Graphen nicht als Join von Hand geschrieben wird."
+
+ :interfaces
+ "Ein Vertrag, den mehrere Typen erfüllen — damit ein Leser arbeiten kann, ohne zu wissen, welchen er vor sich hat."
+
+ :shared-properties
+ "Eine Eigenschaft, EINMAL definiert und von vielen Typen benutzt — damit ihre Bedeutung nicht auseinanderläuft."
+
+ :value-types
+ "Die Gestalt eines Wertes mit Namen, samt ihren Bedingungen — damit dieselbe Regel nicht an jedem Attribut wiederholt wird; beim Senken wird sie auf den Grundtyp aufgelöst."
+
+ :object-type-groups
+ "Welche Objekttypen für einen Leser zusammengehören — damit aus einer langen Liste ein kurzes Menü wird."
+
+ :actions
+ "Der einzige Weg, auf dem ein Benutzer Daten ändert: formgetrieben, mit Regel und Protokoll, statt eines freien Schreibzugriffs."
+
+ :object-sets
+ "Eine oft gestellte Frage über einem Wurzeltyp, unter Namen gespeichert — damit App, Action und Agent dieselbe Definition wiederverwenden statt jeder seinen eigenen Filter."
+
+ :datasets
+ "Wo Zeilen liegen — als Sync an einer Quelle oder als kuratierte Ausgabe eines Transforms —, damit die Frage nach der Herkunft eine Antwort hat."
+
+ :media-sets
+ "Wo unstrukturierte Dateien liegen und wer sie lesen darf: eine Medienreferenz zeigt in ein Set, und das Set — nicht die Zeile, die darauf zeigt — entscheidet \u00fcber die Bytes und dar\u00fcber, wie lange sie aufbewahrt werden."
+
+ :exports
+ "Welche Zeilen eine Quelle zur\u00fcckbekommt und in welchem Modus \u2014 eine eigene Ressource an der Quelle, mit eigenem Zeitplan und eigener Ausfuhrkontrolle, damit die Richtung hinaus nicht als Eigenschaft der Zeilen versteckt ist."
+
+ :sources
+ "Der angemeldete Zugang zu einem fremden System samt dem, was er darf — damit Zugangsdaten und Egress an einer Stelle stehen und nicht in jedem Transform."
+
+ :transforms
+ "Die Rechnung, die Zeilen erzeugt: in git, überprüfbar und vergleichbar — alles, was Form gibt, gehört hierher und nicht in einen Sync."
+
+ :functions
+ "Ein Programm, das Edits auf einem Zieltyp schreibt — Rechnung mit Schreibrecht, benannt und versioniert statt im Formular versteckt."
+
+ :pipelines
+ "Die Datenintegration, die der Builder öffnet, und die Einheit, auf die ein Build zielt."
+
+ :applications
+ "Eine App, die INNERHALB der Plattform läuft — die Fläche, auf der Leute mit den Objekten arbeiten."
+
+ :custom-applications
+ "Code, den du selbst betreibst und der die Plattform über einen eigenen Client liest — die andere Ebene als eine App im Studio."
+
+ :templates
+ "Der Bauplan eines Dokuments — einmal geprüft, damit jede Ausgabe gleich aussieht."
+
+ :agents
+ "Ein Sprachmodell-Arbeiter über der Ontologie: erklärte Werkzeuge, optionales Nachschlagen, und Schreibzugriff, der standardmäßig als Vorschlag im Gespräch landet."
+
+ :workspaces
+ "Die Ebene ÜBER den Apps: eine kuratierte Fläche je Personengruppe samt Landeseite — sie beantwortet „was sieht DIESE Gruppe“, nicht „welche Apps gibt es“."
+
+ :collections
+ "Die Überschrift im App-Portal, unter der eine beworbene App steht — damit das Portal kuratiert ist und keine alphabetische Halde."
+
+ :organizations
+ "Wer überhaupt herein darf — die Mauer, in der alles andere steht."
+
+ :spaces
+ "Der Bereich innerhalb einer Organisation, an dem Rechte hängen und von dem sie nach unten erben."
+
+ :roles
+ "Was jemand tun darf, als Name — damit Rechte an einer Rolle hängen und nicht an Personen."
+
+ :markings
+ "Welche Zeilen und Felder nur freigegebene Gruppen sehen — die Schranke, die sich nach dem Lesen nicht zurücknehmen lässt."
+
+ :projects
+ "Der Behälter, der Ressourcen zusammenfasst und den Zugriff schneidet — der eine Schnitt, den ein Leser wirklich braucht."
+
+ :eval-suites
+ "Ob die Technik richtig entscheidet: ein Ziel (Transform, Function, Agent oder Action), Testfälle — geschrieben oder aus einem Objekt-Set — und Evaluatoren, die je Fall urteilen. Wie Evals; deklariert, damit ein Test mit dem geprüft und gemergt wird, was er prüft."
+
+ :repositories
+ "Der Behälter für code-tragende Ressourcen samt ihren Abhängigkeiten — das, was git liest."
+
+ :projections
+ "Als welche Texte die Ontologie geschrieben wird, was jeder halten darf und wie fein ein Push mergt — Autorenschaft als Daten statt als Dateipfad im Code."
+
+ :graphs
+ "Eine gespeicherte Zeichnung über Modell und Herkunft, mit ihrem Knotenausschnitt und ihrem Layout — zum Denken, zum Reden und für den Bericht."
+
+ :llm-models
+ "Die Erlaubnisliste samt Kostentabelle für Modell-Ids — ein :language-model-Eingang darf nur nennen, was hier steht."}

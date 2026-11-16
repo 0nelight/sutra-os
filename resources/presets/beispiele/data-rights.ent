@@ -1,0 +1,102 @@
+{:schema
+ {:projects {:rights {:description "Who holds my data, and what I have asked them"}}
+  :objects
+  {:organisation
+   {:name "Organisation" :plural "Organisations" :symbol "🏢"
+    :description "Anyone who holds personal data about you: a bank, a platform, a broker, an agency."
+    :match-keys [:org-id]
+    :title      :name
+    :subtitle   :country
+    :row        [:name :country :open-requests :overdue-requests]
+    :attributes
+    [[:org-id :string {:visibility :hidden}]
+     [:name :string {:name "Name" :required true}]
+     [:country :string {:name "Country"}]
+     [:open-requests :integer
+      {:name "Awaiting an answer"
+       :derived {:rollup {:over :requests :agg :count :where [:= :status "sent"]}}}]
+     [:overdue-requests :integer
+      {:name "Past the legal deadline"
+       :visibility :prominent
+       :conditional-format [{:when [:> [:get :overdue-requests] 0]
+                             :color "#fff" :background "#c62828"}]
+       :derived {:rollup {:over :requests :agg :count :where [:= :status "overdue"]}}}]]}
+
+   :data-request
+   {:name "Data request" :plural "Data requests" :symbol "📨"
+    :description "A request under the GDPR: access (Art. 15), rectification (Art. 16), erasure (Art. 17), portability (Art. 20) or objection (Art. 21)."
+    :match-keys [:request-id]
+    :title      :kind
+    :subtitle   :sent-on
+    :row        [:kind :sent-on :deadline :status]
+    :attributes
+    [[:request-id :string {:visibility :hidden}]
+     [:kind :string {:name "Right exercised" :required true
+                     :constraints {:one-of ["access" "rectification" "erasure"
+                                            "portability" "objection"]}}]
+     [:sent-on :date {:name "Sent on" :required true}]
+     [:deadline :date {:name "Answer due by"}]
+     [:proof-of-delivery :boolean {:name "Proof of delivery"}]
+     [:status :string {:name "Status"
+                       :conditional-format [{:when [:= [:get :status] "overdue"] :color "#c62828" :icon "⏰"}
+                                            {:when [:= [:get :status] "answered"] :color "#2e7d32" :icon "✓"}]}]
+     [:org-id :string {:visibility :hidden}]]
+    :lifecycle
+    {:property    :status
+     :states      [:sent :answered :overdue :escalated]
+     :transitions [{:action :record-answer :from [:sent :overdue] :to :answered}
+                   {:action :mark-overdue  :from [:sent]          :to :overdue}
+                   {:action :escalate      :from [:overdue]       :to :escalated}]}}}
+
+  :links
+  [[:request-organisation :data-request :organisation :many-to-one
+    {:forward-api-name :organisation :forward-name "Addressed to"
+     :reverse-api-name :requests     :reverse-name "Requests"
+     :fk :org-id}]]
+
+  :actions
+  {:add-organisation
+   {:display-name "Add organisation"
+    :params {:name    {:type :string :name "Name" :required true}
+             :country {:type :string :name "Country"}
+             :org-id  {:type :string :exposure :hidden :prefill :uuid}}
+    :rules [{:op :create :object-type :organisation :id [:get :org-id]
+             :values {:org-id [:get :org-id] :name [:get :name] :country [:get :country]}}]}
+
+   :send-request
+   {:display-name "Send data request"
+    :on     :organisation
+    :params {:organisation      {:type :organisation :name "Organisation" :required true}
+             :kind              {:type :string :name "Right exercised" :required true}
+             :sent-on           {:type :date :name "Sent on" :required true}
+             :deadline          {:type :date :name "Answer due by"}
+             :proof-of-delivery {:type :boolean :name "Proof of delivery" :default false}
+             :request-id        {:type :string :exposure :hidden :prefill :uuid}}
+    :rules
+    [{:op :create :object-type :data-request :id [:get :request-id]
+      :values {:request-id        [:get :request-id]
+               :org-id            [:get :organisation :org-id]
+               :kind              [:get :kind]
+               :sent-on           [:get :sent-on]
+               :deadline          [:get :deadline]
+               :proof-of-delivery [:get :proof-of-delivery]
+               :status            "sent"}}]}
+
+   :record-answer
+   {:display-name "Record answer"
+    :on     :data-request
+    :params {:request {:type :data-request :name "Request" :required true}}}
+
+   :mark-overdue
+   {:display-name "Mark overdue"
+    :on     :data-request
+    :params {:request {:type :data-request :name "Request" :required true}}}
+
+   :escalate
+   {:display-name "Complain to the regulator"
+    :on     :data-request
+    :params {:request {:type :data-request :name "Request" :required true}}
+    :submission-criteria
+    [{:test    {:p [:get :request :proof-of-delivery]}
+      :pred    [:= :p true]
+      :message "No proof of delivery — the regulator will ask for it first. Resend the request by registered mail or keep the delivery receipt."}]}}}}

@@ -1,0 +1,11 @@
+{:paths ["src" "../sutra-change/src"]
+ :deps  {sutra/core {:local/root "../../libs/core"}}
+ :tasks
+ {enta {:doc "the app builder's flows, headless"
+        :requires ([enta.main])
+        :task (apply enta.main/-main *command-line-args*)}
+  test {:doc "run the client's tests"
+        :extra-paths ["test"]
+        :requires ([clojure.test :as t] [enta.flows-test])
+        :task (let [r (t/run-tests 'enta.flows-test)]
+                (System/exit (if (zero? (+ (:fail r) (:error r))) 0 1)))}}}

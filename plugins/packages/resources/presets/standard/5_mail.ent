@@ -1,0 +1,168 @@
+{:schema
+ {:projects
+  {:mail
+   {:description
+    "Das Postfach als Objekte: Mails und ihre Anhänge, über alle Ordner, zum Abfragen und Verbinden."}}
+
+  :datasets
+  {:postfach_mails
+   {:kind :standalone
+    :project :mail
+    :title "Postfach: Mails"
+    :description
+    "Jede Mail des Postfachs, ein Eintrag je Ordner-Kopie -- die Spalten der Tabelle messages eines IMAP-Connectors. Leer, bis ein Postfach verbunden ist: `sutra source adopt <quelle> messages --into postfach_mails`."
+    :columns
+    [{:attribute-name :key :attribute-type :string}
+     {:attribute-name :folder :attribute-type :string}
+     {:attribute-name :uidvalidity :attribute-type :long}
+     {:attribute-name :uid :attribute-type :long}
+     {:attribute-name :message_id :attribute-type :string}
+     {:attribute-name :in_reply_to :attribute-type :string}
+     {:attribute-name :date :attribute-type :timestamp}
+     {:attribute-name :sender :attribute-type :string}
+     {:attribute-name :recipients :attribute-type :string}
+     {:attribute-name :cc :attribute-type :string}
+     {:attribute-name :subject :attribute-type :string}
+     {:attribute-name :flags :attribute-type :string}
+     {:attribute-name :size :attribute-type :integer}
+     {:attribute-name :body_text :attribute-type :string}]}
+   :postfach_anhaenge
+   {:kind :standalone
+    :project :mail
+    :title "Postfach: Anhänge"
+    :description
+    "Jeder Anhang dieser Mails -- die Tabelle attachments eines IMAP-Connectors. Leer, bis ein Postfach verbunden ist: `sutra source adopt <quelle> attachments --into postfach_anhaenge`."
+    :columns
+    [{:attribute-name :key :attribute-type :string}
+     {:attribute-name :message_key :attribute-type :string}
+     {:attribute-name :folder :attribute-type :string}
+     {:attribute-name :message_id :attribute-type :string}
+     {:attribute-name :date :attribute-type :timestamp}
+     {:attribute-name :part :attribute-type :string}
+     {:attribute-name :filename :attribute-type :string}
+     {:attribute-name :mime_type :attribute-type :string}
+     {:attribute-name :size :attribute-type :integer}
+     {:attribute-name :sha256 :attribute-type :string}]}}
+
+  :objects
+  {:mail
+   {:project :mail
+    :name "Mail"
+    :plural "Mails"
+    :symbol "✉️"
+    :status :experimental
+    :title :betreff
+    :description
+    "Eine Mail des Postfachs, egal in welchem Ordner. Die Grundlage, an die alles andere anknüpft: Anhänge, Antworten, Belege, Personen."
+    :attributes
+    [[:mail-id :string
+      {:description "Die Message-ID ohne <>; eine Mail ohne eine trägt den IMAP-Schlüssel. Bleibt beim Verschieben gleich -- darum ist sie die Identität, nicht der Ordner."}]
+     [:betreff :string {:visibility :prominent}]
+     [:absender :string {:visibility :prominent}]
+     [:absender-adresse :string
+      {:description "Die Adresse allein, klein geschrieben -- zum Verbinden mit Personen und Organisationen."}]
+     [:absender-domain :string]
+     [:empfaenger :string]
+     [:cc :string]
+     [:gesendet-am :timestamp {:visibility :prominent}]
+     [:ordner :string
+      {:description "Der Ordner, in dem sie liegt; liegt sie in mehreren, der erste außer INBOX/Sent."}]
+     [:ordner-alle :string {:description "Alle Ordner, in denen eine Kopie liegt, mit Komma."}]
+     [:richtung :string {:constraints {:one-of ["eingang" "ausgang"]}
+                         :description "ausgang, wenn sie in einem Gesendet-Ordner liegt."}]
+     [:flags :string]
+     [:gelesen :boolean]
+     [:groesse :integer]
+     [:text :string {:description "Der Text der Mail." :visibility :hidden}]
+     [:antwort-auf-id :string {:description "Message-ID der Mail, auf die diese antwortet (In-Reply-To)."}]
+     [:imap-schluessel :string
+      {:description "uidvalidity:uid:ordner -- wie der Connector die Mail jetzt adressiert. Ändert sich beim Verschieben."
+       :visibility :hidden}]
+     [:anzahl-anhaenge :integer {:derived {:expression [:connected-count :anhaenge]}}]]}
+
+   :anhang
+   {:project :mail
+    :name "Anhang"
+    :plural "Anhänge"
+    :symbol "📎"
+    :status :experimental
+    :title :dateiname
+    :description "Eine Datei, die an einer Mail hing: Rechnung, Bestätigung, Foto, Scan."
+    :attributes
+    [[:anhang-id :string {:description "Der Schlüssel des Anhangs beim Connector (Mail#Abschnitt)."}]
+     [:mail-id :string]
+     [:dateiname :string {:visibility :prominent}]
+     [:mime-typ :string]
+     [:groesse :integer]
+     [:sha256 :string {:visibility :hidden}]]}}
+
+  :links
+  [[:anhang-mail :anhang :mail :many-to-one
+    {:fk {:attribute :mail-id :on-null :skip :on-unresolved :skip}
+     :forward-api-name :mail
+     :reverse-api-name :anhaenge}]
+   [:mail-antwort-auf :mail :mail :many-to-one
+    {:fk {:attribute :antwort-auf-id :on-null :skip :on-unresolved :skip}
+     :forward-api-name :antwort-auf
+     :reverse-api-name :antworten}]]
+
+  :transforms
+  {:shape-mail
+   {:project :mail
+    :description "postfach_mails -> :mail. Eine Mail je Message-ID, egal in wie vielen Ordnern eine Kopie liegt. Nur Formung, kein Modell."
+    :language :pg-sql
+    :inputs {:mails {:kind :dataset :dataset :postfach_mails}}
+    :output {:kind :object-type :object-type :mail}
+    :primary-key :mail-id
+    :semantic-version 1
+    :query
+    "WITH m AS (
+  SELECT k.*,
+         COALESCE(NULLIF(TRIM(BOTH '<>' FROM TRIM(k.message_id)), ''), k.key) AS mid,
+         LOWER(SUBSTRING(k.sender FROM '([^<>[:space:],;\"]+@[^<>[:space:],;\"]+)')) AS adresse
+    FROM mails k
+),
+ordner AS (
+  SELECT mid, STRING_AGG(DISTINCT folder, ', ') AS ordner_alle FROM m GROUP BY mid
+)
+SELECT DISTINCT ON (m.mid)
+       m.mid                                     AS mail_id,
+       m.subject                                 AS betreff,
+       m.sender                                  AS absender,
+       m.adresse                                 AS absender_adresse,
+       NULLIF(SPLIT_PART(m.adresse, '@', 2), '') AS absender_domain,
+       m.recipients                              AS empfaenger,
+       m.cc                                      AS cc,
+       m.date                                    AS gesendet_am,
+       m.folder                                  AS ordner,
+       o.ordner_alle                             AS ordner_alle,
+       CASE WHEN m.folder IN ('Sent', 'Gesendet', 'Sent Items', 'Gesendete Elemente')
+            THEN 'ausgang' ELSE 'eingang' END    AS richtung,
+       m.flags                                   AS flags,
+       POSITION('\\Seen' IN COALESCE(m.flags, '')) > 0 AS gelesen,
+       m.size                                    AS groesse,
+       m.body_text                               AS text,
+       NULLIF(TRIM(BOTH '<>' FROM TRIM(SPLIT_PART(TRIM(COALESCE(m.in_reply_to, '')), ' ', 1))), '') AS antwort_auf_id,
+       m.key                                     AS imap_schluessel
+  FROM m JOIN ordner o ON o.mid = m.mid
+ ORDER BY m.mid,
+          CASE WHEN m.folder IN ('INBOX', 'Sent', 'Archives') THEN 1 ELSE 0 END,
+          m.folder"}
+   :shape-anhang
+   {:project :mail
+    :description "postfach_anhaenge -> :anhang, je an ihrer Mail. Die Bytes legt erst ein eigener Schritt ins Blob-Archiv."
+    :language :pg-sql
+    :inputs {:anhaenge {:kind :dataset :dataset :postfach_anhaenge}}
+    :output {:kind :object-type :object-type :anhang}
+    :primary-key :anhang-id
+    :semantic-version 1
+    :query
+    "SELECT DISTINCT ON (a.key)
+       a.key                                                                         AS anhang_id,
+       COALESCE(NULLIF(TRIM(BOTH '<>' FROM TRIM(a.message_id)), ''), a.message_key) AS mail_id,
+       a.filename                                                                    AS dateiname,
+       a.mime_type                                                                   AS mime_typ,
+       a.size                                                                        AS groesse,
+       a.sha256                                                                      AS sha256
+  FROM anhaenge a
+ ORDER BY a.key"}}}}

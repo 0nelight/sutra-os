@@ -1,0 +1,1 @@
+{:modules [sutra.packages.standard/module] :roles-only true}

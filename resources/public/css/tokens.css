@@ -1,0 +1,133 @@
+
+
+:root {
+  color-scheme: light;
+  --c-primary:         var(--blue3);
+  --c-primary-strong:  var(--blue2);
+  --c-active-fg:       var(--blue1);
+  --c-primary-bg:      color-mix(in srgb, var(--blue3) 10%, var(--white));
+  --c-primary-bg-2:    color-mix(in srgb, var(--blue3) 20%, var(--white));
+  --c-active-bg:       color-mix(in srgb, var(--blue3) 15%, var(--white));
+  --c-text:            var(--dark-gray1);
+  --c-text-2:          var(--dark-gray5);
+  --c-muted:           var(--gray1);
+  --c-muted-2:         var(--gray3);
+  --c-muted-3:         var(--gray2);
+  --c-border:          var(--gray5);
+  --c-border-soft:     var(--light-gray2);
+  --c-border-line:     var(--light-gray4);
+  --c-surface:         var(--white);
+  --c-surface-soft:    var(--light-gray5);
+  --c-code-bg:         var(--black);
+  --c-code-fg:         var(--blue5);
+  --c-danger:          var(--red3);
+  --c-danger-strong:   var(--red2);
+  --c-danger-bg:       color-mix(in srgb, var(--red3) 10%, var(--white));
+  --c-danger-border:   var(--red5);
+  --c-success:         var(--green3);
+  --c-success-strong:  var(--green2);
+  --c-success-bg:      color-mix(in srgb, var(--green3) 10%, var(--white));
+  --c-warning:         var(--orange3);
+  --c-warning-strong:  var(--orange2);
+  --c-warning-accent:  var(--orange4);
+  --c-warning-bg:      color-mix(in srgb, var(--orange3) 10%, var(--white));
+  --c-hover:           color-mix(in srgb, var(--gray3) 15%, var(--white));
+  --c-page:            var(--light-gray5);
+  --c-on-accent:       var(--white);
+}
+
+:root {
+  --sp-0: calc(var(--pt-grid-size) * 0.2);
+  --sp-1: calc(var(--pt-grid-size) * 0.4);
+  --sp-2: calc(var(--pt-grid-size) * 0.6);
+  --sp-3: calc(var(--pt-grid-size) * 0.8);
+  --sp-4: calc(var(--pt-grid-size) * 1.2);
+  --sp-5: calc(var(--pt-grid-size) * 1.4);
+  --sp-6: calc(var(--pt-grid-size) * 1.6);
+  --sp-7: calc(var(--pt-grid-size) * 2);
+  --sp-8: calc(var(--pt-grid-size) * 2.4);
+  --sp-9: calc(var(--pt-grid-size) * 3.2);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: monospace;
+
+  --radius-sm: calc(var(--pt-border-radius) / 2);
+  --radius:    var(--pt-border-radius);
+  --radius-lg: calc(var(--pt-border-radius) * 2);
+  --radius-xl: calc(var(--pt-border-radius) * 3);
+
+  --fs-xs:      var(--bp-typography-size-body-x-small);
+  --fs-sm:      var(--pt-font-size-small);
+  --fs-md:      var(--pt-font-size);
+  --fs-lg:      var(--pt-font-size-large);
+  --fs-xl:      var(--bp-typography-size-heading-medium);
+  --fs-2xl:     var(--bp-typography-size-heading-large);
+  --fs-3xl:     var(--bp-typography-size-heading-x-large);
+  --fs-display: var(--bp-typography-size-heading-display);
+
+  --tabbar-h: calc(56px + env(safe-area-inset-bottom));
+}
+
+:root.bp-dark, .bp-dark.bp-dark {
+  color-scheme: dark;
+  --c-primary:         var(--blue4);
+  --c-primary-strong:  var(--blue3);
+  --c-active-fg:       var(--blue5);
+  --c-primary-bg:      color-mix(in srgb, var(--blue3) 20%, var(--dark-gray2));
+  --c-primary-bg-2:    color-mix(in srgb, var(--blue3) 35%, var(--dark-gray2));
+  --c-active-bg:       color-mix(in srgb, var(--blue3) 25%, var(--dark-gray2));
+  --c-text:            var(--light-gray5);
+  --c-text-2:          var(--light-gray1);
+  --c-muted:           var(--gray4);
+  --c-muted-2:         var(--gray3);
+  --c-muted-3:         var(--gray2);
+  --c-border:          var(--gray1);
+  --c-border-soft:     var(--dark-gray5);
+  --c-border-line:     var(--dark-gray4);
+  --c-surface:         var(--dark-gray2);
+  --c-surface-soft:    var(--dark-gray3);
+  --c-code-bg:         var(--black);
+  --c-code-fg:         var(--blue5);
+  --c-danger:          var(--red4);
+  --c-danger-strong:   var(--red5);
+  --c-danger-bg:       color-mix(in srgb, var(--red3) 20%, var(--dark-gray2));
+  --c-danger-border:   var(--red1);
+  --c-success:         var(--green4);
+  --c-success-strong:  var(--green5);
+  --c-success-bg:      color-mix(in srgb, var(--green3) 20%, var(--dark-gray2));
+  --c-warning:         var(--orange5);
+  --c-warning-strong:  var(--orange5);
+  --c-warning-accent:  var(--orange4);
+  --c-warning-bg:      color-mix(in srgb, var(--orange3) 20%, var(--dark-gray2));
+  --c-hover:           color-mix(in srgb, var(--gray3) 15%, var(--dark-gray2));
+  --c-page:            var(--dark-gray1);
+}
+
+:root {
+  --w-accent-fallback: #1f6e63;
+  --w-media-black: #000000;
+  --w-pdf-download-border: #cccccc;
+  --w-pdf-search-bg: #e8f5e9;
+  --w-pdf-search-border: #a5d6a7;
+  --w-pdf-search-color: #1b5e20;
+  --w-polygon-changed-stroke: #d97706;
+  --w-polygon-hover-stroke: #64748b;
+  --w-map-frame-plan-bg: #eef1f4;
+  --w-map-label-area-color: #a6611a;
+  --w-map-label-color: #334155;
+  --w-map-label-edge-color: #1f4e8c;
+  --w-map-label-measure-color: #0f172a;
+  --w-map-panel-value-bg: #f1f5f9;
+  --w-pdf-draft-x-fill: #1976d2;
+  --w-pdf-toggle-on-bg: #e3f2fd;
+  --w-pdf-toggle-on-color: #0d47a1;
+  --w-pivot-outlined-border-top: #888888;
+  --w-polygon-other-stroke: #94a3b8;
+  --w-polygon-plan-stroke: #cbd5e1;
+  --w-polygon-ring-kreuzt-stroke: #d64541;
+  --w-polygon-ring-stroke: #5b8def;
+  --w-sheet-anno-bg: #fbd06566;
+  --w-uploader-danger-border-color: #c62828;
+  --w-uploader-success-border-color: #2e7d32;
+  --w-uploader-warning-border-color: #b26a00;
+}

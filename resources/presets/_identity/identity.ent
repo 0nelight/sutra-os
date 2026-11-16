@@ -1,0 +1,16 @@
+;;   :user        — a principal; its `:rolle` keys into catalog.declare/standard-roles
+;;                  (:ontology-viewer | :ontology-editor | :ontology-owner | :consumer)
+;;   :marking     — a MAC classification (its `:name` is the marking keyword)
+;;   :cleared-for — the clearance grant: a :user is cleared for a :marking
+;;
+;; These are PLAIN ontology types (no :external-source) — instances are created
+;; in-platform via :create-user / :create-marking / :connect-cleared-for, not
+;; imported.
+{:schema
+ {:objects
+  {:user    {:symbol "👤" :plural "Benutzer" :primary-key :user-id
+             :attributes [[:user-id :string {:name "Benutzer-Id"}] [:rolle :string]]}
+   :marking {:symbol "🔒" :plural "Marken" :primary-key :name
+             :attributes [[:name :string]]}}
+  :links
+  [[:cleared-for :user :marking :many-to-many]]}}

@@ -1,0 +1,4 @@
+# Search tools (rg, ugrep --ignore-files, fd, ag) skip what is not this tree's source:
+# the public snapshot is its own repository, the worktrees are other checkouts of this one.
+/sutra-os/
+/.claude/worktrees/

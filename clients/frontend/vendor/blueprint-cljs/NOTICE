@@ -1,0 +1,12 @@
+blueprint-cljs
+A ClojureScript/Reagent re-implementation of the Blueprint UI toolkit.
+
+Design, styles, component APIs and icons are derived from Blueprint
+(https://github.com/palantir/blueprint), Copyright Palantir Technologies, Inc.,
+licensed under the Apache License, Version 2.0. Ported from commit
+f301ba5eed104576262090b9416fd6a4b91aab1b (@blueprintjs/core 6.22.0).
+
+scripts/css/vendor/react-day-picker/_style.scss is the stylesheet of react-day-picker
+8.10.1 (https://github.com/gpbl/react-day-picker), Copyright Giampaolo Bellavite and
+contributors, MIT license (scripts/css/vendor/react-day-picker/LICENSE); Blueprint's
+datetime SCSS imports it, so it is compiled into resources/blueprint_cljs/css/datetime.css.

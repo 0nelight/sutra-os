@@ -1,0 +1,1 @@
+{:modules [sutra.sso.ldap/module sutra.sso.spnego/module] :roles-only true}

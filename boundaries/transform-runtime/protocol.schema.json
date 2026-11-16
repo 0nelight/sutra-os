@@ -1,0 +1,391 @@
+{
+  "$defs": {
+    "environment": {
+      "description": "Environment variables the host sets; all optional but the version.",
+      "properties": {
+        "SUTRA_CPU_CORES": {
+          "description": "CPU cores the run may use.",
+          "type": "string"
+        },
+        "SUTRA_INCREMENTAL_RUN": {
+          "enum": [
+            "1"
+          ],
+          "type": "string"
+        },
+        "SUTRA_LM_SERVICE": {
+          "description": "JSON: how to reach the model relay.",
+          "type": "string"
+        },
+        "SUTRA_MEDIA_SPOOL": {
+          "description": "A writable directory for media too large to inline.",
+          "type": "string"
+        },
+        "SUTRA_OUTPUT_ENUMS": {
+          "description": "JSON: column → allowed values.",
+          "type": "string"
+        },
+        "SUTRA_PARAMETERS": {
+          "description": "JSON object of parameter values.",
+          "type": "string"
+        },
+        "SUTRA_PREVIOUS_OUTPUT": {
+          "description": "Path of the previous output rows.",
+          "type": "string"
+        },
+        "SUTRA_PROTOCOL_VERSION": {
+          "description": "The version the host speaks.",
+          "type": "string"
+        },
+        "SUTRA_REFUSE_CAP": {
+          "enum": [
+            "1"
+          ],
+          "type": "string"
+        },
+        "SUTRA_RUN_ID": {
+          "type": "string"
+        },
+        "SUTRA_SECRETS": {
+          "description": "Path of a JSON file: source → fields.",
+          "type": "string"
+        },
+        "SUTRA_TRACE": {
+          "enum": [
+            "1"
+          ],
+          "type": "string"
+        },
+        "SUTRA_TRANSFORM_NAME": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "SUTRA_PROTOCOL_VERSION"
+      ],
+      "title": "environment",
+      "type": "object"
+    },
+    "error-line": {
+      "description": "The last JSON line on stderr when the process exits 1.",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "traceback": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "where": {
+          "description": "file:line in function | source line",
+          "type": "string"
+        }
+      },
+      "required": [
+        "error"
+      ],
+      "title": "error line",
+      "type": "object"
+    },
+    "intermediate-line": {
+      "description": "A named value the transform reports.",
+      "properties": {
+        "sutra_intermediate": {
+          "type": "string"
+        },
+        "value": {}
+      },
+      "required": [
+        "sutra_intermediate",
+        "value"
+      ],
+      "title": "intermediate line",
+      "type": "object"
+    },
+    "manifest": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "scalar"
+                ],
+                "type": "string"
+              },
+              "value": {
+                "description": "A JSON value. A string starting with \"~\" is tagged: \"~f<digits>\" is an exact decimal (Python decimal.Decimal), \"~~…\" is the literal text \"~…\". Dates cross as ISO-8601 text (instants in UTC with Z)."
+              }
+            },
+            "required": [
+              "kind",
+              "value"
+            ],
+            "title": "scalar input",
+            "type": "object"
+          },
+          {
+            "description": "One media item by its address.",
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "kind": {
+                "enum": [
+                  "media"
+                ],
+                "type": "string"
+              },
+              "media-dir": {
+                "description": "A directory of <ref>.bin blobs, read-only.",
+                "type": "string"
+              },
+              "media-grants": {
+                "description": "Grants the media URL requires."
+              },
+              "media-refs": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "media-url": {
+                "description": "URL the process fetches media from.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind",
+              "address"
+            ],
+            "title": "media input",
+            "type": "object"
+          },
+          {
+            "description": "A model the process calls through the platform's relay.",
+            "properties": {
+              "base-url": {
+                "type": "string"
+              },
+              "kind": {
+                "enum": [
+                  "language-model"
+                ],
+                "type": "string"
+              },
+              "model": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "title": "language-model input",
+            "type": "object"
+          },
+          {
+            "description": "A directory the transform reads as a FileSystem.",
+            "properties": {
+              "kind": {
+                "enum": [
+                  "files"
+                ],
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind",
+              "path"
+            ],
+            "title": "files input",
+            "type": "object"
+          },
+          {
+            "description": "Rows in a file at :path: a JSON array of rows (csv: RFC 4180 text with a header, file: raw UTF-8 text).",
+            "properties": {
+              "aliases": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Column spellings the row also answers to.",
+                "type": "object"
+              },
+              "derived-names": {
+                "description": "Derived attributes a row refuses instead of None.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "kind": {
+                "description": "What the rows file holds; absent for a datasource input.",
+                "enum": [
+                  "transform",
+                  "object-type",
+                  "dataset",
+                  "datasource",
+                  "media-set",
+                  "media-set-items",
+                  "csv",
+                  "file"
+                ],
+                "type": "string"
+              },
+              "media-dir": {
+                "description": "A directory of <ref>.bin blobs, read-only.",
+                "type": "string"
+              },
+              "media-grants": {
+                "description": "Grants the media URL requires."
+              },
+              "media-refs": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "media-url": {
+                "description": "URL the process fetches media from.",
+                "type": "string"
+              },
+              "path": {
+                "description": "Absolute path inside the sandbox, read-only.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path"
+            ],
+            "title": "rows input",
+            "type": "object"
+          }
+        ]
+      },
+      "description": "The file passed as --inputs: input alias → entry. Written by the host, read once by the process.",
+      "title": "inputs manifest",
+      "type": "object"
+    },
+    "result": {
+      "description": "The one JSON object the process writes to stdout on exit 0. Exactly one of rows and outputs.",
+      "properties": {
+        "incremental-complete": {
+          "description": "false: the run deferred rows to a later run.",
+          "type": "boolean"
+        },
+        "media": {
+          "items": {
+            "description": "A blob the process produced (put_media_item): its bytes as b64, or a file of that name it wrote into SUTRA_MEDIA_SPOOL.",
+            "properties": {
+              "b64": {
+                "type": "string"
+              },
+              "hash": {
+                "type": "string"
+              },
+              "mime": {
+                "type": "string"
+              },
+              "size": {
+                "type": "integer"
+              },
+              "spool": {
+                "description": "A plain file name inside SUTRA_MEDIA_SPOOL.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "media_set_items": {
+          "items": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "outputs": {
+          "additionalProperties": {
+            "items": {
+              "additionalProperties": {
+                "description": "A JSON value. A string starting with \"~\" is tagged: \"~f<digits>\" is an exact decimal (Python decimal.Decimal), \"~~…\" is the literal text \"~…\". Dates cross as ISO-8601 text (instants in UTC with Z)."
+              },
+              "description": "One row: column name → wire value.",
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "description": "Output name → rows (a multi-output transform).",
+          "type": "object"
+        },
+        "pending-observed": {
+          "type": "integer"
+        },
+        "protocol_version": {
+          "description": "The version the process speaks.",
+          "type": "string"
+        },
+        "rows": {
+          "items": {
+            "additionalProperties": {
+              "description": "A JSON value. A string starting with \"~\" is tagged: \"~f<digits>\" is an exact decimal (Python decimal.Decimal), \"~~…\" is the literal text \"~…\". Dates cross as ISO-8601 text (instants in UTC with Z)."
+            },
+            "description": "One row: column name → wire value.",
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "trace": {
+          "items": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "title": "run result",
+      "type": "object"
+    },
+    "span-line": {
+      "description": "A JSON line on stderr: a span opens or closes.",
+      "properties": {
+        "at_ms": {
+          "type": "number"
+        },
+        "id": {},
+        "name": {
+          "type": "string"
+        },
+        "sutra_span": {
+          "enum": [
+            "open",
+            "close"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "sutra_span",
+        "id"
+      ],
+      "title": "span line",
+      "type": "object"
+    },
+    "wire-value": {
+      "description": "A JSON value. A string starting with \"~\" is tagged: \"~f<digits>\" is an exact decimal (Python decimal.Decimal), \"~~…\" is the literal text \"~…\". Dates cross as ISO-8601 text (instants in UTC with Z)."
+    }
+  },
+  "$id": "https:\/\/sutra.dev\/boundaries\/transform-runtime\/protocol.schema.json",
+  "$schema": "https:\/\/json-schema.org\/draft\/2020-12\/schema",
+  "description": "Host ↔ process protocol of a sandboxed transform run (B-6). Version 1.1.",
+  "title": "Sutra transform runtime protocol",
+  "version": "1.1"
+}

@@ -1,0 +1,203 @@
+;; Derived from cores.edn by grammar.module-databases-test — do not edit.
+{:tables
+ {access
+  [custom-app-metrics
+   login-log
+   oauth-clients
+   oauth-codes
+   principals
+   sessions],
+  actions [action-requests agent-proposals outbox-dead staged-actions],
+  agents [agent-checkouts agent-messages agent-threads],
+  apps [app-previews object-comments],
+  authoring
+  [package-installs
+   product-installs
+   products
+   projection-elements
+   projection-placements
+   releases],
+  automation
+  [automation-effects
+   automation-executions
+   automation-runs
+   automations
+   automation-subscriptions
+   logic-events],
+  builds
+  [build-claims
+   build-requests
+   build-slots
+   ledger-consumption
+   ledger-jobs
+   ledger-txns
+   retention-policies
+   runs
+   snapshot-requests],
+  canvas [color-schemes graph-defaults graph-layouts],
+  compute [container-images],
+  documents [document-live document-versions documents],
+  evals
+  [eval-case-results eval-jobs eval-results eval-runs eval-suites],
+  feedback [begleitung-ereignisse begleitungen],
+  governance
+  [access-requests
+   branch-governance
+   branch-roles
+   git-pending
+   link-backings
+   proposal-comments
+   proposal-merge-attempts
+   proposal-verdicts
+   proposals
+   transform-versions],
+  health
+  [health-check-groups
+   health-check-results
+   health-checks
+   health-group-subscriptions
+   health-snoozes
+   health-watches],
+  linter [linter-recommendations],
+  llm [llm-budget],
+  media [media-set-items],
+  notifications [notification-preferences notifications],
+  objects
+  [explorations explorer-dashboards explorer-views object-sets-temp],
+  peering
+  [peer-connections
+   peer-crosswalk
+   peer-jobs
+   peer-mappings
+   peer-media-mappings
+   peer-mesh-nodes
+   peer-offers
+   peer-outbox
+   peer-pending-links
+   peer-profiles
+   peer-shares],
+  projects
+  [atlas-annotations
+   atlas-nodes
+   collections
+   entity-crosswalk
+   entity-provenance
+   favorites
+   file-grants
+   files
+   import-plans
+   portfolios
+   project-settings
+   share-links],
+  repos [git-commits repo-anchor repo-checks repo-files repo-tags],
+  scenarios [scenarios],
+  schedules [build-schedules schedule-run-setups],
+  sources [egress-policies writeback-claims],
+  store
+  [container-policies
+   import-keys
+   index-times
+   instance-config
+   protections
+   retention-expiries
+   stream-cursors
+   stream-dead-letter],
+  widget-sets [widget-set-releases widget-sets]},
+ :cross-module-tx
+ [{:modules [actions lease world],
+   :why
+   "an action's edits, its request record and its outbox land in one fenced commit",
+   :where
+   [sutra.actions.action
+    sutra.actions.apply
+    sutra.actions.dispatch
+    sutra.actions.staged]}
+  {:modules [actions world],
+   :why
+   "an action's edits as the element changes of its step: no [:schema] fence, a stale change is refused itself",
+   :where [sutra.actions.action sutra.actions.staged]}
+  {:modules [actions builds lease world],
+   :why
+   "landing a staged batch commits its edits and the build ledger of that run",
+   :where [sutra.actions.landing sutra.builds.run]}
+  {:modules [builds lease world],
+   :why
+   "landing a staging branch of schema changes alone (no staged action row to retire)\n              commits its world and the build ledger of that run",
+   :where [sutra.actions.landing sutra.builds.run]}
+  {:modules [lease schedules],
+   :why
+   "an action's schedule-run effect records the run setup of the build it starts\n              under the fence of that action",
+   :where [sutra.schedules.dispatch sutra.actions.effects]}
+  {:modules [lease media],
+   :why
+   "a media-set sync records the items it lands under the fence of its build run",
+   :where [sutra.media.sets sutra.builds.run.media-sync]}
+  {:modules [automation lease world],
+   :why
+   "a rule's action and the automation's execution record are one commit",
+   :where [sutra.automation.rules sutra.actions.dispatch]}
+  {:modules [scenarios world],
+   :why "a scenario's state moves with the edits applied to it",
+   :where [sutra.scenarios.apply]}
+  {:modules [lease scenarios],
+   :why
+   "a scenario's state is written under the fence of the action that changes it",
+   :where [sutra.scenarios.state sutra.actions.dispatch]}
+  {:modules [lease sources],
+   :why
+   "a writeback claim is taken in the fenced commit of the action that writes back",
+   :where [sutra.actions.effects sutra.actions.execution]}
+  {:modules [governance lease],
+   :why
+   "a merge records its attempt under the fence of the landing it belongs to",
+   :where [sutra.governance.merge sutra.actions.landing]}
+  {:modules [governance lease world],
+   :why
+   "landing a proposal merges the world and records the verdict in one commit",
+   :where [sutra.branching.landing sutra.authoring.install.world]}
+  {:modules [authoring world],
+   :why
+   "an install commits the schema and its placements and releases together",
+   :where [sutra.authoring.install.world]}
+  {:modules [authoring lease world],
+   :why
+   "a schema change saved on a branch directly (a mutation, a rename) commits its\n              world and the release records it cuts under the fence of what it read",
+   :where [sutra.authoring.install.world sutra.authoring.mutation]}
+  {:modules [canvas world],
+   :why
+   "seen from the store itself, no platform caller on the stack: a canvas record\n              written in a world commit (a sweep or a branch commit)",
+   :where []}
+  {:modules [canvas store],
+   :why
+   "seen from the store itself: a canvas record committed with an event cursor\n              (a consumer that sweeps dropped graphs)",
+   :where []}
+  {:modules [builds lease],
+   :why "a build run writes its rows under the fence of its run lease",
+   :where
+   [sutra.builds.run.rows
+    sutra.builds.run
+    sutra.builds.import
+    sutra.builds.run.lock]}
+  {:modules [health lease],
+   :why
+   "a build records its expectations' results (:health/record-expectation) under the\n              fence of its run",
+   :where [sutra.builds.plan.expectations sutra.builds.import.phases]}
+  {:modules [lease projects],
+   :why
+   "a build that materializes nodes places them in the project map under its fence",
+   :where [sutra.projects.kompass sutra.builds.import.materialize]}
+  {:modules [canvas lease projects],
+   :why
+   "an action that drops objects sweeps their canvas graphs and project placements\n              in its own fenced commit (seen in the scenario tier)",
+   :where [sutra.actions.action sutra.actions.apply]}],
+ :raw-sql
+ {access [login-log principals sessions],
+  store
+  [container-policies
+   import-keys
+   index-times
+   instance-config
+   protections
+   retention-expiries
+   stream-cursors
+   stream-dead-letter]}}

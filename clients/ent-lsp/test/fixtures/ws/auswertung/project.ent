@@ -1,0 +1,4 @@
+{:schema
+ {:projects
+  {:auswertung {:description "Kennzahlen über Angebote"
+                :imports     [:verkauf]}}}}

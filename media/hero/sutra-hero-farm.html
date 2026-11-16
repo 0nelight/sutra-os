@@ -1,0 +1,145 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<meta name="hero-size" content="2000x1226">
+<!-- Source of media/sutra-hero-farm.png. The screenshots are real (media/screens/);
+     regenerate everything with clojure -M bin/readme-media.clj, or only this frame with bin/hero. -->
+<style>
+:root{--ink:#0f1a2e;--ink2:#3a465c;--mute:#6b778c;--line:#e2e7ef;--bg:#f6f8fb;
+ --acc:#2856c7;--acc-bg:#eaf0fc;--red:#b42318;--red-bg:#fdf0ef;--grn:#17663a;--grn-bg:#ecf7f0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:2000px;height:1226px;font-family:"Inter","Noto Sans","DejaVu Sans",sans-serif;
+ color:var(--ink);overflow:hidden;
+ background:radial-gradient(1400px 520px at 50% -120px,#e4ecfb 0%,rgba(228,236,251,0) 70%),var(--bg)}
+.eyebrow{text-align:center;margin-top:44px;font-size:15px;font-weight:700;letter-spacing:3px;
+ text-transform:uppercase;color:var(--acc)}
+h1{text-align:center;font-size:62px;font-weight:800;letter-spacing:-1.6px;margin-top:12px;line-height:1.1}
+h1 em{font-style:normal;color:var(--acc)}
+.sub{text-align:center;font-size:23px;color:var(--ink2);margin:16px auto 0;max-width:1320px;line-height:1.5}
+.sub b{color:var(--ink);font-weight:700}
+.row{display:flex;justify-content:center;align-items:center;gap:6px;font-size:16px;color:var(--ink2)}
+.row .lab{font-size:12.5px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;color:var(--mute);
+ margin-right:14px}
+.row span.c{background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 14px;font-weight:600}
+.row.top{margin-top:24px}
+.grid{width:1940px;margin:34px auto 0;display:grid;grid-template-columns:repeat(5,1fr);
+ grid-template-rows:310px 310px 196px;gap:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;
+ box-shadow:0 1px 2px rgba(15,26,46,.04),0 6px 18px rgba(15,26,46,.05)}
+.f{padding:22px 24px 20px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.f .t{font-size:20px;font-weight:750;display:flex;align-items:center;gap:12px;white-space:nowrap;letter-spacing:-.2px}
+.ic{width:34px;height:34px;border-radius:9px;background:var(--acc-bg);flex:none;display:flex;
+ align-items:center;justify-content:center}
+.ic svg{width:19px;height:19px;stroke:var(--acc);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.f .d{font-size:15.5px;color:var(--mute);line-height:1.5}
+.f .v{margin-top:auto;font-size:13.5px;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden}
+.n{background:#f3f5f9;border:1px solid var(--line);border-radius:6px;padding:4px 9px;font-weight:600;color:var(--ink2)}
+.n.ot{background:var(--acc);border-color:var(--acc);color:#fff}
+.n.ds{border-left:3px solid var(--mute)}
+.no{background:var(--red-bg);color:var(--red);border:1px solid #f4cfcb;border-radius:6px;padding:4px 9px;font-weight:700}
+.prop{background:var(--acc-bg);color:var(--acc);border:1px dashed #a9bfea;border-radius:6px;padding:4px 9px;font-weight:600}
+.ok{background:var(--grn-bg);color:var(--grn);border:1px solid #c6e4d1;border-radius:6px;padding:4px 9px;font-weight:700}
+.ar{color:#a8b2c2;font-weight:700}
+code{font-family:"JetBrains Mono","DejaVu Sans Mono",monospace;font-size:13px;background:#131b2b;color:#d6deeb;
+ border-radius:6px;padding:6px 10px}
+code .k{color:#8db4f7}code .s{color:#a3d9a5}
+.win{grid-column:2/5;grid-row:1/3;overflow:hidden;display:flex;flex-direction:column;
+ box-shadow:0 2px 4px rgba(15,26,46,.05),0 22px 48px rgba(15,26,46,.12)}
+.win .bar{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line);
+ font-size:15px;background:#fbfcfe}
+.dots{display:flex;gap:7px}.dots i{width:11px;height:11px;border-radius:50%;background:#d5dbe5}
+.win .nm{font-weight:700}.win .c{color:var(--mute)}
+.win .map{flex:1;background:#fafafa url(../screens/model-farm.png) center/contain no-repeat}
+.win .three{display:flex;border-top:1px solid var(--line);background:#fbfcfe}
+.win .three div{flex:1;padding:12px 18px;font-size:14.5px;color:var(--mute)}
+.win .three div+div{border-left:1px solid var(--line)}
+.win .three b{color:var(--ink);font-size:15px;margin-right:7px}
+.row.bot{margin-top:26px}
+.foot{text-align:center;font-size:15px;color:var(--mute);margin-top:18px;letter-spacing:.2px}
+.foot b{color:var(--ink2);font-weight:600}
+</style></head><body>
+<div class="eyebrow">Open-source ontology platform · self-hosted</div>
+<h1>Your <em>ontology</em>. Your <em>digital twin</em>.</h1>
+<div class="sub">Your data, wherever it lives, becomes <b>one model</b> of your
+organisation, practice or household. Every change is a <b>decision</b>, every rule is
+<b>enforced by the server</b>, every number <b>traces back to its source</b>.</div>
+
+<div class="grid">
+ <div class="card f" style="grid-column:1;grid-row:1">
+  <div class="t"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span>One door for every write</div>
+  <div class="d">No “update row”, only actions with typed inputs and rules the server
+  enforces. Every client gets the same answer.</div>
+  <div class="v"><span class="n">Pay € 12,400</span><span class="ar">→</span>
+   <span class="no">✕ Over budget.</span></div>
+ </div>
+ <div class="card f" style="grid-column:1;grid-row:2">
+  <div class="t"><span class="ic"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span>Deciding is not doing</div>
+  <div class="d">Every change is written down first and applied only when approved.
+  Ask “would this work?” at any time.</div>
+  <div class="v"><span class="prop">+1 Payment · € 4,980</span>
+   <span class="ar">→</span><span class="ok">✓ approve</span></div>
+ </div>
+ <div class="card f" style="grid-column:1;grid-row:3">
+  <div class="t"><span class="ic"><svg viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4v4M9.5 13h.01M14.5 13h.01"/></svg></span>AI agents only propose</div>
+  <div class="d">Only the tools you name. A proposal, never the change.</div>
+  <div class="v"><code><span class="k">:writes</span> <span class="s">:propose</span></code></div>
+ </div>
+
+ <div class="card win">
+  <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="nm">Data Lineage</span>
+   <span class="c">· the example farm: sources, datasets and transforms feeding object types, their links and actions</span></div>
+  <div class="map"></div>
+  <div class="three">
+   <div><b>Object types</b>what is there</div>
+   <div><b>Link types</b>who belongs to whom</div>
+   <div><b>Action types</b>what may change, and when not</div>
+  </div>
+ </div>
+
+ <div class="card f" style="grid-column:5;grid-row:1">
+  <div class="t"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span>Every number has a past</div>
+  <div class="d">Lineage runs from each object back through transforms and datasets to
+  the source record it came from.</div>
+  <div class="v"><span class="n">source</span><span class="ar">→</span>
+   <span class="n ds">invoices_raw</span><span class="ar">→</span><span class="n ot">Invoice</span></div>
+ </div>
+ <div class="card f" style="grid-column:5;grid-row:2">
+  <div class="t"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="6" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="8" r="2"/><path d="M6 7v10M18 10c0 4-6 3-12 7"/></svg></span>Model and data on branches</div>
+  <div class="d">Versioned like code: stage, commit, propose, see who consumes what you
+  touched, merge after review.</div>
+  <div class="v"><span class="n">branch</span><span class="ar">→</span><span class="n">propose</span>
+   <span class="ar">→</span><span class="ok">merge</span></div>
+ </div>
+ <div class="card f" style="grid-column:5;grid-row:3">
+  <div class="t"><span class="ic"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span>Access control in the server</div>
+  <div class="d">Markings, enforced on every read, count and total.</div>
+  <div class="v"><span class="n">finance</span><span class="n">HR</span>
+   <span class="no">confidential</span></div>
+ </div>
+
+ <div class="card f" style="grid-column:2;grid-row:3">
+  <div class="t"><span class="ic"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg></span>The model is the API</div>
+  <div class="d">A typed client generated from your ontology. Queries run on the server.</div>
+  <div class="v"><code>Invoice.<span class="k">aggregate</span>(sum_(I.amount))</code></div>
+ </div>
+ <div class="card f" style="grid-column:3;grid-row:3">
+  <div class="t"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/></svg></span>Credentials out of reach</div>
+  <div class="d">A separate egress agent holds every secret. Your code never sees one.</div>
+  <div class="v"><span class="n">transform</span><span class="ar">→</span>
+   <span class="n">egress agent</span><span class="ar">→</span><span class="n">API</span></div>
+ </div>
+ <div class="card f" style="grid-column:4;grid-row:3">
+  <div class="t"><span class="ic"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span>Writer, Calc, Visio</div>
+  <div class="d">Documents, sheets and diagrams on the model, co-edited live.</div>
+  <div class="v"><span class="n">Writer</span><span class="n">Calc</span><span class="n">Visio</span>
+   <span class="ar">→</span><span class="n">PDF</span></div>
+ </div>
+</div>
+
+<div class="row bot">
+ <span class="lab">Clients · same rules</span>
+ <span class="c">Web apps</span><span class="c">Python SDK</span>
+ <span class="c">CLI</span><span class="c">REST API</span>
+ <span class="c">AI agents</span><span class="c">Git</span>
+</div>
+<div class="foot"><b>Sutra-OS</b> · open source under AGPL-3.0 · runs on your own infrastructure</div>
+</body></html>

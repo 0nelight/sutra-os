@@ -1,0 +1,42 @@
+;; ════════════════════════════════════════════════════════════════════════════
+;; template.entt — Vorlage für ein Dokument (Werft: die Rechnung als PDF)
+;; ════════════════════════════════════════════════════════════════════════════
+;; Eine Dokumentvorlage sagt, WAS in ein Dokument kommt (die Parameter) und wie
+;; es gedruckt wird (die Seite). Der Text selbst steht daneben in einer eigenen
+;; Datei mit {{ }}-Platzhaltern (jinja2), damit man ihn im Diff als Text liest:
+;;     doc-templates/rechnung.entt       diese Datei
+;;     doc-templates/rechnung.html.j2    der Rumpf
+;; Der Rumpf sieht NUR die Parameter — er fragt nichts selbst ab. Alle
+;; Schlüssel: grammar.entt.
+;; ════════════════════════════════════════════════════════════════════════════
+{:name        :rechnung                          ; die Kennung; die Datei heißt danach
+ :project     :werft                             ; in welchem Projekt sie steht
+ :repository  :werft-dokumente                   ; in welchem Code-Repo sie liegt
+
+ :title       "Rechnung"                         ; so heißt sie in den Dokumenten
+ :description "Die Rechnung zu einem Arbeitsauftrag, mit den geleisteten Stunden."
+ :format      :html
+ :source-file "doc-templates/rechnung.html.j2"
+
+ ;; Was man beim Erzeugen übergibt — oder was die Vorlage selbst findet.
+ :parameters
+ {;; das Objekt, um das es geht; `:object-type` sagt, welche Attribute der Rumpf lesen darf
+  :rechnung {:type :object :object-type :rechnung :required true
+             :description "Die Rechnung, die gedruckt wird."}
+  ;; über Beziehungen GEGANGEN, nicht übergeben: Rechnung → Arbeitsauftrag → Zeitbuchungen
+  ;; (die Seitennamen aus template.ent, 2. Beziehungen)
+  :zeiten   {:type :object-set :object-type :zeitbuchung
+             :search-around [:arbeitsauftrag :zeitbuchungen] :of :rechnung
+             :description "Die Stunden am Arbeitsauftrag dieser Rechnung."}
+  :mit-stunden {:type :boolean :default true     ; eine Wahl beim Erzeugen, mit Vorgabe
+                :description "Stundenaufstellung anhängen?"}}
+
+ ;; Wie gedruckt wird.
+ :page    {:size :a4 :orientation :portrait :margin "20mm 18mm"
+           :footer "Werft Muster · Hangarstraße 1 · 1234 Musterdorf"}
+ :targets [:html :pdf]                           ; was man davon verlangen darf
+
+ ;; :published = man darf daraus erzeugen; die Version friert den Stand ein, gegen
+ ;; den ein erzeugtes Dokument entstand.
+ :status  :published
+ :version "1.0.0"}

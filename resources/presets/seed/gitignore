@@ -1,0 +1,17 @@
+# Editor and linter caches — local state, not repository content.
+.clj-kondo/
+.lsp/
+.cpcache/
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# The Sutra-OS CLI caches credentials and session state here. Never commit it.
+.run/
+
+# OS
+.DS_Store

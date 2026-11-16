@@ -1,0 +1,22 @@
+.admin-label { min-width: 200px; }
+.admin-label--m { min-width: 160px; }
+.admin-label--s { min-width: 80px; }
+.admin-field { max-width: 260px; }
+.admin-num { max-width: 110px; }
+.admin-num--s { max-width: 90px; }
+.admin-nowrap { white-space: nowrap; }
+.admin-bar { min-width: 120px; }
+.admin-url { display: flex; flex: 1; min-width: 260px; }
+.admin-center { align-items: center; }
+.admin-done { opacity: 0.6; }
+.admin-hidden { display: none; }
+.admin-list { margin: 0; padding-left: var(--sp-7); }
+
+.admin-logo { width: 150px; text-align: center; border: 1px solid var(--c-border-soft);
+              border-radius: var(--radius); padding: var(--pt-grid-size); background: var(--c-surface); }
+.admin-logo__stage { height: 56px; display: flex; align-items: center; justify-content: center; }
+.admin-logo__img { max-height: 56px; max-width: 120px; }
+.admin-logo__actions { justify-content: center; }
+.admin-favicon { width: 16px; height: 16px; }
+.admin-preview-bar { position: static; }
+.admin-preview-mark { background: var(--c-primary); }

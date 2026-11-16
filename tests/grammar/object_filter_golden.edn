@@ -1,0 +1,613 @@
+{[:and :contains :null]
+ {:matches
+  {:alpha false,
+   :beta false,
+   :blank false,
+   :both false,
+   :metrics false,
+   :strkeys false},
+  :where
+  {:own {:and [{:s {:contains-ci "LP"}} {:s {:nil? true}}]},
+   :hops nil}},
+ [:and :is-one :range]
+ {:matches
+  {:alpha true,
+   :beta false,
+   :blank false,
+   :both false,
+   :metrics false,
+   :strkeys true},
+  :where
+  {:own {:and [{:s {:= "alpha"}} {:and [{:n {:>= 2}} {:n {:<= 5}}]}]},
+   :hops nil}},
+ [:and :keyword-or :is-two]
+ {:matches
+  {:alpha true,
+   :beta false,
+   :blank false,
+   :both false,
+   :metrics false,
+   :strkeys true},
+  :where
+  {:own
+   {:and
+    [{:or [{:s {:contains-ci "alpha"}} {:s {:contains-ci "gamma"}}]}
+     {:or [{:s {:= "alpha"}} {:s {:= "beta"}}]}]},
+   :hops nil}},
+ [:and :link-has :link-null]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops {:kunde {:s {:nil? true}}}}},
+ [:and :link-is :is-one]
+ {:matches
+  {:alpha true,
+   :beta false,
+   :blank false,
+   :both false,
+   :metrics false,
+   :strkeys true},
+  :where {:own {:s {:= "alpha"}}, :hops {:kunde {:s {:= "alpha"}}}}},
+ [:and :typed :foreign-prop]
+ {:matches
+  {:alpha false,
+   :beta false,
+   :blank false,
+   :both false,
+   :metrics false,
+   :strkeys false},
+  :where {:own {:s {:= "alpha"}}, :hops nil}},
+ [:contains false]
+ {:matches
+  {:alpha true,
+   :beta false,
+   :blank false,
+   :both true,
+   :metrics false,
+   :strkeys true},
+  :where {:own {:s {:contains-ci "LP"}}, :hops nil}},
+ [:contains true]
+ {:matches
+  {:alpha false,
+   :beta true,
+   :blank true,
+   :both false,
+   :metrics true,
+   :strkeys false},
+  :where [:refused :refusal.object-filter/no-not-over-text]},
+ [:contains-open false]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops nil}},
+ [:contains-open true]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops nil}},
+ [:foreign-prop false]
+ {:matches
+  {:alpha false,
+   :beta false,
+   :blank false,
+   :both false,
+   :metrics false,
+   :strkeys false},
+  :where {:own nil, :hops nil}},
+ [:foreign-prop true]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops nil}},
+ [:is-nil false]
+ {:matches
+  {:alpha false,
+   :beta false,
+   :blank true,
+   :both false,
+   :metrics false,
+   :strkeys false},
+  :where {:own {:s {:nil? true}}, :hops nil}},
+ [:is-nil true]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank false,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own {:or [{:s {:not= nil}} {:s {:nil? true}}]}, :hops nil}},
+ [:is-one false]
+ {:matches
+  {:alpha true,
+   :beta false,
+   :blank false,
+   :both false,
+   :metrics false,
+   :strkeys true},
+  :where {:own {:s {:= "alpha"}}, :hops nil}},
+ [:is-one true]
+ {:matches
+  {:alpha false,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys false},
+  :where
+  {:own {:or [{:s {:not= "alpha"}} {:s {:nil? true}}]}, :hops nil}},
+ [:is-open false]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops nil}},
+ [:is-open true]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops nil}},
+ [:is-two false]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank false,
+   :both false,
+   :metrics false,
+   :strkeys true},
+  :where {:own {:or [{:s {:= "alpha"}} {:s {:= "beta"}}]}, :hops nil}},
+ [:is-two true]
+ {:matches
+  {:alpha false,
+   :beta false,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys false},
+  :where
+  {:own
+   {:and
+    [{:or [{:s {:not= "alpha"}} {:s {:nil? true}}]}
+     {:or [{:s {:not= "beta"}} {:s {:nil? true}}]}]},
+   :hops nil}},
+ [:keyword false]
+ {:matches
+  {:alpha true,
+   :beta false,
+   :blank false,
+   :both true,
+   :metrics false,
+   :strkeys true},
+  :where {:own {:s {:contains-ci "alp"}}, :hops nil}},
+ [:keyword true]
+ {:matches
+  {:alpha false,
+   :beta true,
+   :blank true,
+   :both false,
+   :metrics true,
+   :strkeys false},
+  :where {:own {:s {:contains-ci "alp"}}, :hops nil}},
+ [:keyword-and false]
+ {:matches
+  {:alpha false,
+   :beta false,
+   :blank false,
+   :both true,
+   :metrics false,
+   :strkeys false},
+  :where
+  {:own
+   {:and [{:s {:contains-ci "alpha"}} {:s {:contains-ci "beta"}}]},
+   :hops nil}},
+ [:keyword-and true]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both false,
+   :metrics true,
+   :strkeys true},
+  :where
+  {:own
+   {:and [{:s {:contains-ci "alpha"}} {:s {:contains-ci "beta"}}]},
+   :hops nil}},
+ [:keyword-field false]
+ {:matches
+  {:alpha true,
+   :beta false,
+   :blank false,
+   :both true,
+   :metrics false,
+   :strkeys true},
+  :where {:own {:s {:contains-ci "alp"}}, :hops nil}},
+ [:keyword-field true]
+ {:matches
+  {:alpha false,
+   :beta true,
+   :blank true,
+   :both false,
+   :metrics true,
+   :strkeys false},
+  :where {:own {:s {:contains-ci "alp"}}, :hops nil}},
+ [:keyword-not false]
+ {:matches
+  {:alpha true,
+   :beta false,
+   :blank false,
+   :both false,
+   :metrics false,
+   :strkeys true},
+  :where [:refused :refusal.object-filter/no-not-over-text]},
+ [:keyword-not true]
+ {:matches
+  {:alpha false,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys false},
+  :where [:refused :refusal.object-filter/no-not-over-text]},
+ [:keyword-open false]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops nil}},
+ [:keyword-open true]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops nil}},
+ [:keyword-or false]
+ {:matches
+  {:alpha true,
+   :beta false,
+   :blank false,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where
+  {:own
+   {:or [{:s {:contains-ci "alpha"}} {:s {:contains-ci "gamma"}}]},
+   :hops nil}},
+ [:keyword-or true]
+ {:matches
+  {:alpha false,
+   :beta true,
+   :blank true,
+   :both false,
+   :metrics false,
+   :strkeys false},
+  :where
+  {:own
+   {:or [{:s {:contains-ci "alpha"}} {:s {:contains-ci "gamma"}}]},
+   :hops nil}},
+ [:link-contains false]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops {:kunde {:s {:contains-ci "lp"}}}}},
+ [:link-contains true]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops {:kunde {:s {:contains-ci "lp"}}}}},
+ [:link-has false]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops {:kunde {}}}},
+ [:link-has true]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops {:kunde {}}}},
+ [:link-is false]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops {:kunde {:s {:= "alpha"}}}}},
+ [:link-is true]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops {:kunde {:s {:= "alpha"}}}}},
+ [:link-is-two false]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where [:refused :refusal.object-filter/linked-one-value]},
+ [:link-is-two true]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where [:refused :refusal.object-filter/linked-one-value]},
+ [:link-null false]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops {:kunde {:s {:nil? true}}}}},
+ [:link-null true]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops {:kunde {:s {:nil? true}}}}},
+ [:link-range false]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops {:kunde {:n {:>= 1, :<= 3}}}}},
+ [:link-range true]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops {:kunde {:n {:>= 1, :<= 3}}}}},
+ [:link-unknown false]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops {:kunde {}}}},
+ [:link-unknown true]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops {:kunde {}}}},
+ [:null false]
+ {:matches
+  {:alpha false,
+   :beta false,
+   :blank true,
+   :both false,
+   :metrics false,
+   :strkeys false},
+  :where {:own {:s {:nil? true}}, :hops nil}},
+ [:null true]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank false,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own {:s {:nil? false}}, :hops nil}},
+ [:or :contains :null]
+ {:matches
+  {:alpha true,
+   :beta false,
+   :blank true,
+   :both true,
+   :metrics false,
+   :strkeys true},
+  :where
+  {:own {:or [{:s {:contains-ci "LP"}} {:s {:nil? true}}]},
+   :hops nil}},
+ [:or :is-one :range]
+ {:matches
+  {:alpha true,
+   :beta false,
+   :blank true,
+   :both false,
+   :metrics true,
+   :strkeys true},
+  :where
+  {:own {:or [{:s {:= "alpha"}} {:and [{:n {:>= 2}} {:n {:<= 5}}]}]},
+   :hops nil}},
+ [:or :keyword-or :is-two]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank false,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where
+  {:own
+   {:or
+    [{:or [{:s {:contains-ci "alpha"}} {:s {:contains-ci "gamma"}}]}
+     {:or [{:s {:= "alpha"}} {:s {:= "beta"}}]}]},
+   :hops nil}},
+ [:or :link-has :link-null]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where [:refused :refusal.object-filter/linked-or]},
+ [:or :link-is :is-one]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where [:refused :refusal.object-filter/linked-or]},
+ [:or :typed :foreign-prop]
+ {:matches
+  {:alpha true,
+   :beta false,
+   :blank false,
+   :both false,
+   :metrics false,
+   :strkeys true},
+  :where {:own {:s {:= "alpha"}}, :hops nil}},
+ [:range false]
+ {:matches
+  {:alpha true,
+   :beta false,
+   :blank true,
+   :both false,
+   :metrics true,
+   :strkeys true},
+  :where {:own {:and [{:n {:>= 2}} {:n {:<= 5}}]}, :hops nil}},
+ [:range true]
+ {:matches
+  {:alpha false,
+   :beta true,
+   :blank false,
+   :both true,
+   :metrics false,
+   :strkeys false},
+  :where [:refused :refusal.object-filter/negated-range]},
+ [:range-min false]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both false,
+   :metrics true,
+   :strkeys true},
+  :where {:own {:n {:>= 2}}, :hops nil}},
+ [:range-min true]
+ {:matches
+  {:alpha false,
+   :beta false,
+   :blank false,
+   :both true,
+   :metrics false,
+   :strkeys false},
+  :where [:refused :refusal.object-filter/negated-range]},
+ [:range-open false]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops nil}},
+ [:range-open true]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops nil}},
+ [:typed false]
+ {:matches
+  {:alpha true,
+   :beta false,
+   :blank false,
+   :both false,
+   :metrics false,
+   :strkeys true},
+  :where {:own {:s {:= "alpha"}}, :hops nil}},
+ [:typed true]
+ {:matches
+  {:alpha false,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where
+  {:own {:or [{:s {:not= "alpha"}} {:s {:nil? true}}]}, :hops nil}},
+ [:unknown-op false]
+ {:matches
+  {:alpha true,
+   :beta true,
+   :blank true,
+   :both true,
+   :metrics true,
+   :strkeys true},
+  :where {:own nil, :hops nil}},
+ [:unknown-op true]
+ {:matches
+  {:alpha false,
+   :beta false,
+   :blank false,
+   :both false,
+   :metrics false,
+   :strkeys false},
+  :where {:own nil, :hops nil}}}

@@ -1,0 +1,13 @@
+{:schema
+ {:objects
+  {:angebot {:project    :verkauf
+             :title      :bezeichnung
+             :backing    {:dataset :ang_raw :primary-key :angebot-id}
+             :attributes [[:angebot-id :string]
+                          [:bezeichnung :string]
+                          [:partner-id :string]]}}
+  :links
+  [[:angebot-partner :angebot :partner :many-to-one
+    {:project :verkauf :fk {:attribute :partner-id}}]
+   [:angebot-intern :angebot :intern :many-to-one {:project :verkauf}]
+   [:angebot-lieferung :angebot :lieferung :many-to-one {:project :verkauf}]]}}

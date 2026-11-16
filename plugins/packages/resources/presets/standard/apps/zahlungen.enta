@@ -1,0 +1,75 @@
+;; Zahlungen — "Ich pruefe vorbereitete Ueberweisungen und gebe sie frei."
+;;
+{:name         :zahlungen
+ :display-name "Zahlungsfreigabe"
+ :description  "Vorbereitete Ueberweisungen pruefen und freigeben."
+ :icon         "📤"
+ :promoted     true
+ :collection   :alltag
+ :project      :anwendungen
+ :repository   :startanwendungen
+ :object-types [:ueberweisung :bankkonto :eingangsrechnung]
+ :actions      [{:action :ueberweisung-freigeben} {:action :ueberweisung-senden}]
+ :layout
+ {:kind  :rows
+  :title "Zahlungen"
+  :vars  {:ansicht    {:type :keyword :default :entwurf}
+          :entwuerfe  {:from :ueberweisung :where [[:auftragsstand := "entwurf"]]}
+          :freigegeben {:from :ueberweisung :where [[:auftragsstand := "freigegeben"]]}
+          :gesendet   {:from :ueberweisung :where [[:auftragsstand :not= "entwurf"]
+                                                     [:auftragsstand :not= "freigegeben"]]}
+          :summe      {:agg [:sum :betrag] :of :entwuerfe}
+          :anzahl     {:agg [:count :auftrag-id] :of :entwuerfe}
+          :auftrag    {:default nil}
+          :auftrag-id {:object-property :id :of :auftrag :type :string}}
+  :items
+  [{:widget :kpi-row
+    :items  [{:label "Zur Freigabe" :value {:val :summe} :fmt :eur}
+             {:label "Entwuerfe" :value {:val :anzahl} :fmt :int}]}
+   {:kind   :columns
+    :detail {:var :auftrag}
+    :items
+    [{:kind   :tabs
+      :select {:var :ansicht}
+      :tabs   [{:id    :entwurf
+                :label "Zur Freigabe"
+                :body  {:widget :object-table
+                        :rows   {:val :entwuerfe}
+                        :cols   [{:prop :verwendungszweck} {:prop :empfaenger}
+                                 {:prop :betrag}]
+                        :active {:var :auftrag}}}
+               {:id    :freigegeben
+                :label "Freigegeben"
+                :body  {:widget :object-table
+                        :rows   {:val :freigegeben}
+                        :cols   [{:prop :verwendungszweck} {:prop :freigegeben-am}
+                                 {:prop :betrag}]
+                        :active {:var :auftrag}}}
+               {:id    :gesendet
+                :label "Gesendet"
+                :body  {:widget :object-table
+                        :rows   {:val :gesendet}
+                        :cols   [{:prop :verwendungszweck} {:prop :gesendet-am}
+                                 {:prop :auftragsstand} {:prop :betrag}]
+                        :sort   [[:gesendet-am :desc]]
+                        :active {:var :auftrag}}}]}
+     {:kind :rows
+      :items
+      [{:widget         :property-list
+        :object         {:val :auftrag}
+        :props          [{:prop :verwendungszweck :label "Ueberweisung"} {:prop :betrag :label "Betrag" :fmt :eur}
+                         {:prop :empfaenger :label "An"} {:prop :empfaenger-iban :label "An IBAN"} {:prop :auftragsstand :label "Stand"}]
+        :label-position :below
+        :columns        2}
+       {:kind  :section
+        :title "1. Freigeben"
+        :body  {:widget   :action-form
+                :action   :ueberweisung-freigeben
+                :label    "Freigeben"
+                :defaults {:ueberweisung {:val :auftrag-id}}}}
+       {:kind  :section
+        :title "2. Einreichen"
+        :body  {:widget   :action-form
+                :action   :ueberweisung-senden
+                :label    "Einreichen"
+                :defaults {:ueberweisung {:val :auftrag-id}}}}]}]}]}}

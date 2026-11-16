@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Vendors blueprint-cljs into the frontend at a named
+# commit: sources to vendor/blueprint-cljs/src, stylesheets to
+# resources/public/css/blueprint-cljs/. The deploy ships only this repo, so the library
+# lives here as files; VERSION names the commit they came from.
+#
+#   clients/frontend/sync-blueprint-cljs [<ref>]   (default origin/main)
+#   BLUEPRINT_CLJS_REPO=<checkout>                 (default ~/dev/blueprint-cljs)
+set -euo pipefail
+here="$(cd "$(dirname "$0")" && pwd)"
+repo="${BLUEPRINT_CLJS_REPO:-$HOME/dev/blueprint-cljs}"
+ref="${1:-origin/main}"
+
+timeout 30 git -C "$repo" fetch -q origin
+sha="$(git -C "$repo" rev-parse --verify "$ref^{commit}")"
+
+vendor="$here/vendor/blueprint-cljs"
+css="$here/../../resources/public/css/blueprint-cljs"
+rm -rf "$vendor" "$css"
+mkdir -p "$vendor" "$css"
+
+git -C "$repo" archive "$sha" src/blueprint_cljs LICENSE NOTICE | tar -x -C "$vendor"
+git -C "$repo" archive "$sha" resources/blueprint_cljs/css \
+  | tar -x -C "$css" --strip-components=3
+echo "$sha" > "$vendor/VERSION"
+echo "blueprint-cljs $sha → $vendor, $css"

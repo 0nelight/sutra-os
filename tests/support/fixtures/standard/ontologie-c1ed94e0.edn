@@ -1,0 +1,63 @@
+{:description
+ "Die ganze Ontologie, wie sie geschrieben wurde: zentrale Texte, Projekte, Objekt-Ansichten.",
+ :filename
+ {:zentral
+  {:language :edn,
+   :envelope [:schema],
+   :name ["ontology.ent"],
+   :home-for [:*],
+   :order 0,
+   :description
+   "Was keinem Projekt gehört, und alles, was sonst keinen Ort hat."},
+  :transform
+  {:language :edn,
+   :envelope [:schema],
+   :name ["transform.ent"],
+   :home-for [:sources :datasets],
+   :order 0,
+   :description
+   "Quellen und Datasets, die keinem einzelnen Projekt gehören."},
+  :projekt-ordner
+  {:language :edn,
+   :envelope [:schema],
+   :name ["projekte/*/ontology.ent"],
+   :owner [:declared],
+   :order 0,
+   :description
+   "Ein Projekt als Ordner: der Text deklariert genau ein Projekt."},
+  :ent-projekt
+  {:language :edn,
+   :envelope [:schema],
+   :name ["*.ent"],
+   :owner [:declared],
+   :order 20,
+   :description
+   "Ein Projekt als Text; das Projekt steht unter :projects."},
+  :ent-dateiname
+  {:language :edn,
+   :envelope [:schema],
+   :name ["*.ent"],
+   :owner [:facet :file-name],
+   :order 20,
+   :description
+   "Ein Projekt als Text; der Name sagt das Projekt (<projekt>.ent, <projekt>.<facette>.ent)."},
+  :ent-kompakt
+  {:language :edn,
+   :name ["*.ent"],
+   :owner [:declared :facet :file-name],
+   :order 10,
+   :description
+   "Wie ent-dateiname, ohne :schema-Hülle: der Text IST der Schema-Körper."},
+  :yaml
+  {:language :yaml,
+   :name ["*.ent.yaml"],
+   :owner [:declared :facet :file-name],
+   :order 10,
+   :description "Das Objektmodell in YAML."},
+  :objekt-ansichten
+  {:language :edn,
+   :name ["object-views/*.entv"],
+   :kind :view,
+   :order 0,
+   :description
+   "Die Ansicht eines Object-Types: Panel und Vollansicht."}}}

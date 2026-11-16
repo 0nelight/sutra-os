@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+
+if [[ "${1:-}" == "change" ]]; then
+  shift
+  exec "$ROOT/bin/change" "$@"
+fi
+
+export SUTRA_CALLER_PWD="$PWD"
+cd "$ROOT"
+
+# bb carries its own CA list; the instances' certificates come from a LAN CA the system
+# trusts. Java's view of the system list (ca-certificates-java) holds it.
+TRUST="${SUTRA_TRUSTSTORE:-/etc/ssl/certs/java/cacerts}"
+BB_OPTS=()
+if [[ -r "$TRUST" ]]; then
+  BB_OPTS+=("-Djavax.net.ssl.trustStore=$TRUST")
+fi
+
+if [[ "${1:-}" == "git-credential" ]]; then
+  shift
+  exec bb ${BB_OPTS[@]+"${BB_OPTS[@]}"} --config "$ROOT/clients/sutra-cli/bb.edn" -m sutra.cli.credential "$@"
+fi
+
+if [[ $# -eq 0 && -t 0 ]] && command -v rlwrap >/dev/null 2>&1; then
+  exec rlwrap -a -H "$ROOT/.run/sutra-history" \
+       bb ${BB_OPTS[@]+"${BB_OPTS[@]}"} --config "$ROOT/clients/sutra-cli/bb.edn" -m sutra.cli.main
+fi
+
+exec bb ${BB_OPTS[@]+"${BB_OPTS[@]}"} --config "$ROOT/clients/sutra-cli/bb.edn" -m sutra.cli.main "$@"

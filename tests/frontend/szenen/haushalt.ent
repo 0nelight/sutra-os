@@ -1,0 +1,142 @@
+{:schema
+ {:projects {:home {:description "Our household budget"}}
+  :objects
+  {:household
+   {:name "Household" :plural "Households" :symbol "🏠"
+    :description "The people under one roof and the money that leaves every month."
+    :match-keys [:household-id]
+    :title      :name
+    :row        [:name :take-home-pay :monthly-commitments :left-over]
+    :attributes
+    [[:household-id :string {:visibility :hidden}]
+     [:name :string {:name "Name" :required true}]
+     [:take-home-pay :decimal {:format {:prefix "$" :decimals 2 :grouping true} :name "Take-home pay / month" :visibility :prominent}]
+     [:monthly-commitments :decimal
+      {:name "Committed every month"
+       :format {:prefix "$" :decimals 2 :grouping true}
+       :visibility :prominent
+       :derived {:rollup {:over :commitments :agg :sum :of :monthly-cost
+                          :where [:= :status "active"]}}}]
+     [:left-over :decimal
+      {:name "Left over"
+       :conditional-format [{:when [:< [:get :left-over] 600] :color "#fff" :background "#c62828"}]
+       :format {:prefix "$" :decimals 2 :grouping true}
+       :visibility :prominent
+       :derived {:language :clojure
+                 :expression [:- [:get :take-home-pay] [:get :monthly-commitments]]
+                 :inputs [:take-home-pay :monthly-commitments]}}]
+     [:active-commitments :integer
+      {:name "Active commitments"
+       :derived {:rollup {:over :commitments :agg :count
+                          :where [:= :status "active"]}}}]]}
+
+   :commitment
+   {:name "Commitment" :plural "Commitments" :symbol "🔁"
+    :description "Anything that takes money every month until someone stops it: a subscription, a plan, an installment."
+    :match-keys [:commitment-id]
+    :title      :name
+    :subtitle   :provider
+    :row        [:name :kind :monthly-cost :renews-on :status]
+    :attributes
+    [[:commitment-id :string {:visibility :hidden}]
+     [:name :string {:name "Name" :required true}]
+     [:monthly-cost :decimal {:format {:prefix "$" :decimals 2 :grouping true} :name "Monthly cost" :visibility :prominent}]
+     [:provider :string {:name "Provider"}]
+     [:kind :string {:name "Kind"
+                     :conditional-format [{:when [:= [:get :kind] "pay-later"] :color "#7a4b00" :background "#ffe0a3" :icon "⚠"}]
+                     :constraints {:one-of ["streaming" "phone" "insurance" "fitness"
+                                            "software" "food" "pay-later" "housing" "loan"]}}]
+     [:renews-on :date {:name "Next charge"}]
+     [:locked-until :date {:name "Locked in until"}]
+     [:locked :boolean {:name "Locked in"}]
+     [:status :string {:name "Status"
+                       :conditional-format [{:when [:= [:get :status] "stopped"] :color "#2e7d32" :icon "✓"}]}]
+     [:paid-so-far :decimal
+      {:name "Paid so far"
+       :format {:prefix "$" :decimals 2 :grouping true}
+      
+       :derived {:rollup {:over :payments :agg :sum :of :amount}}}]
+     [:household-id :string {:visibility :hidden}]]
+    :lifecycle
+    {:property    :status
+     :states      [:active :stopped]
+     :transitions [{:action :stop-commitment :from [:active] :to :stopped}]}}
+
+   :payment
+   {:name "Payment" :plural "Payments" :symbol "💵"
+    :match-keys [:payment-id]
+    :title      :paid-on
+    :row        [:paid-on :amount]
+    :attributes
+    [[:payment-id :string {:visibility :hidden}]
+     [:paid-on :date {:name "Paid on" :required true}]
+     [:amount :decimal {:format {:prefix "$" :decimals 2 :grouping true} :name "Amount" :required true}]
+     [:commitment-id :string {:visibility :hidden}]]}}
+
+  :links
+  [[:commitment-household :commitment :household :many-to-one
+    {:forward-api-name :household :forward-name "Household"
+     :reverse-api-name :commitments :reverse-name "Monthly commitments"
+     :fk :household-id}]
+   [:payment-commitment :payment :commitment :many-to-one
+    {:forward-api-name :commitment :forward-name "Commitment"
+     :reverse-api-name :payments :reverse-name "Payments"
+     :fk :commitment-id}]]
+
+  :actions
+  {:add-household
+   {:display-name "Add household"
+    :params {:name          {:type :string :name "Name" :required true}
+             :take-home-pay {:type :decimal :name "Take-home pay / month" :required true}
+             :household-id  {:type :string :exposure :hidden :prefill :uuid}}
+    :rules [{:op :create :object-type :household :id [:get :household-id]
+             :values {:household-id [:get :household-id] :name [:get :name]
+                      :take-home-pay [:get :take-home-pay]}}]}
+
+   :add-commitment
+   {:display-name "Add commitment"
+    :on     :household
+    :params {:household     {:type :household :name "Household" :required true}
+             :name          {:type :string :name "Name" :required true}
+             :provider      {:type :string :name "Provider"}
+             :kind          {:type :string :name "Kind" :required true}
+             :monthly-cost  {:type :decimal :name "Monthly cost" :required true}
+             :renews-on     {:type :date :name "Next charge"}
+             :locked        {:type :boolean :name "Locked in" :default false}
+             :locked-until  {:type :date :name "Locked in until"}
+             :commitment-id {:type :string :exposure :hidden :prefill :uuid}}
+    :rules
+    [{:op :create :object-type :commitment :id [:get :commitment-id]
+      :values {:commitment-id [:get :commitment-id]
+               :household-id  [:get :household :household-id]
+               :name          [:get :name]
+               :provider      [:get :provider]
+               :kind          [:get :kind]
+               :monthly-cost  [:get :monthly-cost]
+               :renews-on     [:get :renews-on]
+               :locked        [:get :locked]
+               :locked-until  [:get :locked-until]
+               :status        "active"}}]}
+
+   :log-payment
+   {:display-name "Log payment"
+    :on     :commitment
+    :params {:commitment {:type :commitment :name "Commitment" :required true}
+             :paid-on    {:type :date :name "Paid on" :required true}
+             :amount     {:type :decimal :name "Amount" :required true}
+             :payment-id {:type :string :exposure :hidden :prefill :uuid}}
+    :rules
+    [{:op :create :object-type :payment :id [:get :payment-id]
+      :values {:payment-id    [:get :payment-id]
+               :commitment-id [:get :commitment :commitment-id]
+               :paid-on       [:get :paid-on]
+               :amount        [:get :amount]}}]}
+
+   :stop-commitment
+   {:display-name "Stop paying"
+    :on     :commitment
+    :params {:commitment {:type :commitment :name "Commitment" :required true}}
+    :submission-criteria
+    [{:test    {:l [:get :commitment :locked]}
+      :pred    [:not= :l true]
+      :message "Locked in — stopping now would trigger an early-termination fee. Set a reminder for the end of the term instead."}]}}}}

@@ -1,0 +1,129 @@
+{"components":
+ {"securitySchemes":
+  {"sidecarToken":
+   {"description":"SUTRA_CONNECTOR_SIDECAR_TOKEN_FILE's token.",
+    "scheme":"bearer",
+    "type":"http"}}},
+ "info":
+ {"description":
+  "Boundary B-8: what an egress agent sends a connector sidecar, a process in any language that implements connector types. Generated from src/sutra/sources/egress_protocol.clj; do not edit by hand.",
+  "license":{"identifier":"Apache-2.0", "name":"Apache-2.0"},
+  "title":"Sutra connector sidecar protocol",
+  "version":"1.1.0"},
+ "openapi":"3.1.0",
+ "paths":
+ {"/describe":
+  {"post":
+   {"operationId":"describe",
+    "requestBody":
+    {"content":
+     {"application/json":
+      {"schema":{"properties":{}, "type":"object"}}},
+     "required":true},
+    "responses":
+    {"200":
+     {"content":
+      {"application/json":
+       {"schema":
+        {"oneOf":
+         [{"properties":
+           {"result":
+            {"properties":
+             {"types":
+              {"additionalProperties":
+               {"properties":
+                {"form":{"properties":{}, "type":"object"},
+                 "profile":
+                 {"properties":
+                  {"capabilities":
+                   {"items":
+                    {"anyOf":[{"type":"string"}, {"type":"string"}]},
+                    "type":"array"},
+                   "endpoint":
+                   {"anyOf":[{"type":"string"}, {"type":"string"}]},
+                   "needs":
+                   {"items":
+                    {"anyOf":[{"type":"string"}, {"type":"string"}]},
+                    "type":"array"},
+                   "route":
+                   {"items":
+                    {"anyOf":[{"type":"string"}, {"type":"string"}]},
+                    "type":"array"},
+                   "scan":
+                   {"properties":
+                    {"compound?":{"type":"boolean"},
+                     "page?":{"type":"boolean"},
+                     "preds":
+                     {"additionalProperties":
+                      {"enum":
+                       ["exact", "inexact", "exact", "inexact"]},
+                      "type":"object"},
+                     "project?":{"type":"boolean"}},
+                    "required":["preds"],
+                    "type":"object"}},
+                  "required":["capabilities"],
+                  "type":"object"}},
+                "required":["profile"],
+                "type":"object"},
+               "type":"object"}},
+             "required":["types"],
+             "type":"object"}},
+           "required":["result"],
+           "type":"object"},
+          {"properties":
+           {"error":
+            {"properties":
+             {"code":{"type":"string"}, "message":{"type":"string"}},
+             "required":["code", "message"],
+             "type":"object"}},
+           "required":["error"],
+           "type":"object"}]}}},
+      "description":"{result \u2026} or {error {code message}}."}},
+    "summary":
+    "The connector types this sidecar serves, their capabilities and form."}},
+  "/op":
+  {"post":
+   {"operationId":"op",
+    "requestBody":
+    {"content":
+     {"application/json":
+      {"schema":
+       {"properties":
+        {"op":
+         {"enum":
+          ["probe", "tables", "columns", "scan-profile", "scan",
+           "write", "invoke", "token"],
+          "type":"string"},
+         "opts":{"properties":{}, "type":"object"},
+         "params":{},
+         "plan":{"properties":{}, "type":"object"},
+         "scan":{"properties":{}, "type":"object"},
+         "spec":{"properties":{}, "type":"object"},
+         "table":{"anyOf":[{"type":"string"}, {"type":"string"}]},
+         "type":{"anyOf":[{"type":"string"}, {"type":"string"}]},
+         "webhook-id":
+         {"anyOf":[{"type":"string"}, {"type":"string"}]}},
+        "required":["op", "type", "spec"],
+        "type":"object"}}},
+     "required":true},
+    "responses":
+    {"200":
+     {"content":
+      {"application/json":
+       {"schema":
+        {"oneOf":
+         [{"properties":{"result":{}},
+           "required":["result"],
+           "type":"object"},
+          {"properties":
+           {"error":
+            {"properties":
+             {"code":{"type":"string"}, "message":{"type":"string"}},
+             "required":["code", "message"],
+             "type":"object"}},
+           "required":["error"],
+           "type":"object"}]}}},
+      "description":"{result \u2026} or {error {code message}}."}},
+    "summary":
+    "One connector operation on the inline source spec (credentials decrypted)."}}},
+ "security":[{"sidecarToken":[]}]}

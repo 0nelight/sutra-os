@@ -1,0 +1,380 @@
+{:scan  ["libs/kernel/src" "libs/world/src" "libs/commits/src" "libs/service/src" "libs/dialect/src"
+         "libs/core/src" "libs/lib/src"
+         "libs/store/src" "libs/store-pg/src" "src"
+         "plugins"
+         "clients/sutra-cli/src" "clients/sutra-change/src" "clients/sutra-enta/src"
+         "clients/sutra-deploy/src"
+         "distributions/sutra-solo/src"
+         "clients/sutra-desktop/src" "clients/frontend/src"
+         ]
+ :ours  ["sutra." "platform-sdk."]
+
+ :cores
+ {:kernel
+  {:doc   "The interpreter of actions, lowering, install §8 and object sets. Reads through Σ, writes as values."
+   :roots ["libs/kernel/src"]}
+  :world
+  {:doc   "The reimplemented core: the world as a db value, element deltas, indexes, derivations and gates stepped by what a delta touched."
+   :roots ["libs/world/src"]}
+  :commits
+  {:doc        "A commit as the store keeps it (one version per resource) read as the world's element changes."
+   :namespaces [sutra.commits.log]}
+  :service
+  {:doc        "The reimplementation's service layer: what a request asks of the world beyond one step — the one merge of two sides at the nodes their deltas touched, and who may do what, each reading only its slice."
+   :namespaces [sutra.service.merge sutra.service.rights sutra.service.access]}
+  :dialect {:doc   "The language: grammar, desugaring, resolution, spec, value types."
+            :roots ["libs/dialect/src"]}
+  :core
+  {:doc   "Authoring and projections, lint, impact, apps and views shared with the frontend."
+   :roots ["libs/core/src"]}
+
+  :store
+  {:doc        "The store's contract and semantics: questions and transactions as data, the rules a store applies, scans and plans, over an engine's primitives (sutra.store.spi). sutra.store.core assembles them over an engine and is not one of them."
+   :namespaces [sutra.port sutra.store.api sutra.store.spi sutra.store.lib sutra.store.semantics
+                sutra.store.scan sutra.store.plan sutra.store.shapes sutra.store.derived
+                sutra.store.memo sutra.types.world-rules sutra.store.tx-vector
+                sutra.store.model sutra.store.kv-plan sutra.store.judge
+                sutra.blobs.api sutra.coord.api sutra.datasets.api sutra.streams.api]}
+
+  :catalog
+  {:doc        "What the installed world declares, read from the world value: declarations, shapes, signatures, lookups, grants, system datasets and the platform's contracts."
+   :namespaces [sutra.catalog.values sutra.catalog.interfaces sutra.catalog.outputs
+                sutra.catalog.structure sutra.catalog.actions sutra.catalog.functions
+                sutra.catalog.transforms sutra.catalog.backing sutra.catalog.problems
+                sutra.catalog.retirement sutra.catalog.shape
+                sutra.catalog.signature
+                sutra.repos.edn-patch sutra.catalog.llm-models
+                sutra.catalog.object-ref
+                sutra.catalog.lookup sutra.catalog.grants sutra.catalog.system-datasets
+                sutra.catalog.nodes
+                sutra.foundation.contracts sutra.foundation.encoding]}
+
+  :install-planning
+  {:doc        "An install decided as a value: the planned world, its findings, the migration it needs, the program it compiles to."
+   :namespaces [sutra.authoring.install.findings sutra.authoring.install.findings.*
+                sutra.authoring.install.plan
+                sutra.authoring.install.migration
+                sutra.catalog.program sutra.catalog.backing-checks
+                sutra.llm.media]}
+
+  :commit-planning
+  {:doc        "A staging branch's commit into its parent decided as a value: the store commit and the effects that follow it."
+   :namespaces [sutra.governance.merge-plan]}
+
+  :policy
+  {:doc        "Branch governance decided from values: policies, lifecycle and retention, ownership, proposal state and verdicts, landing and write refusals, side-effect verdicts."
+   :namespaces [sutra.catalog.branch-policy]}
+
+  :cli-view
+  {:doc        "What the CLI shows, shaped from the answers it got: overviews, describe views, rows, lineage graphs."
+   :namespaces [sutra.cli.view]}
+
+  :build-planning
+  {:doc        "What a build runs, in which order and over which inputs; when a schedule is due; how a query is planned."
+   :namespaces [sutra.builds.plan sutra.builds.ledger.facts
+                sutra.builds.plan.outputs sutra.builds.plan.jobspec
+                sutra.builds.import.coerce sutra.schedules.cron
+                sutra.objects.planner sutra.objects.knn]}
+
+  :foreign-dialect
+  {:doc        "How a foreign source is spoken to: its SQL dialect, its connector contract, what egress allows."
+   :namespaces [sutra.sources.protocols sutra.sources.dialect
+                sutra.sources.policy]}
+
+  :presentation
+  {:doc        "Answers shaped for a client: response bodies, project maps and scopes."
+   :namespaces [sutra.http.responses sutra.projects.map
+                sutra.catalog.project-scope]}}
+
+ :edges
+ {sutra.ref.clock
+  "The host's clock, uuids and zone, handed to the kernel as Σ entries."
+  sutra.store.world            "World and branch reads and branch ops through st's store (a protocol call the reader cannot see)."
+  sutra.store.access.substrate "Reads through st's store under an authority."
+  sutra.parser.ent-file        "sutra.parser.ent/load-ent over the file system."
+  sutra.tooling.git-hooks      "Writes the git hooks of a checkout (CLI, sutra-change)."
+  sutra.tooling.platform-files
+  "Writes a checkout's platform files and git excludes (CLI, sutra-change)."
+  sutra.i18n.core              "The locale a process or a session speaks and the platform title it shows, both ambient. No core requires it: what takes its locale as an argument is sutra.i18n.catalog/text, and that is what a refusal asks."
+  sutra.capps.warn             "Console or stderr for the client's own diagnostics. No core requires it: the app layer returns its problems as data (capps.table/fmt-problem, capps.variables/join-problem, object-view-problems) and the client decides whether anyone is told."
+  sutra.kit.noted              "Best-effort work whose failure is told on stderr. No core requires it: a core's failure is its caller's to tell (sutra.kit.attempt/or-answer)."
+  sutra.wire.transport         "The HTTP client of the frontend and the CLI."
+  sutra.wire.api               "The platform's endpoints, called through sutra.wire.transport."
+  platform-sdk.client          "The SDK's HTTP client and its schema cache."
+  platform-sdk.package         "Writes a generated SDK to disk."
+  platform-sdk.wire            "The SDK's calls, through platform-sdk.client."
+  platform-sdk.objects         "Object reads of the SDK, through platform-sdk.client."
+  platform-sdk.objectset       "Object-set reads of the SDK, through platform-sdk.client."
+  platform-sdk.watch           "Object-set subscriptions of the SDK over a WebSocket."}
+
+ :seams
+ {sutra.kit.decisions "The decisions being recorded and the time of each, kept while recording is on (start!/stop!). Recording never changes a decision, which is why a core may decide through it. Gone when a recorder is handed to decide in cx."
+  sutra.kit.system   "The process's plugin registry, wired once at boot (sutra.parser.spec reads its kinds). Gone when the registry is a value in cx."
+  sutra.foundation.ops "The process's operation bodies, bound as their namespaces load (defop), and the call meter. Gone when the topology compiles the bodies into a value in cx."
+  sutra.i18n.inline  "The i18n bundles of the platform and of every app, read from the classpath once as it loads (inlined into the frontend when it compiles); the apps' bundles are found by listing a directory. Gone when the bundles are named in a resource instead of discovered."
+  sutra.foundation.profile "The process's profiler recording, marked by the response encoder (:Encode) where only it knows what the encoding cost. Observation never changes the answer, which is why a core may mark. Gone when the encoder takes its marker from the render context instead of reading a global."}
+
+ :memo
+ {sutra.types.column         "Column specs per attribute, bounded."
+  sutra.parser.sugar         "The raised slice of an action per slice: an unchanged action of the next revision is a hit."
+  sutra.parser.checkout      "The bases of recently rendered bodies, keyed by identity."
+  sutra.parser.project-export "A text's reading and its print, values of the text and of the body."
+  sutra.foundation.contracts "Validators and explainers compiled per contract schema."}
+
+ :modules
+ {:tiers [[kit] [foundation] [catalog] [store] [http]
+          [access llm media repos projects feedback]
+          [sources compute objects governance notifications]
+          [actions] [authoring]
+          [builds scenarios] [schedules] [branching]
+          [lineage health canvas]
+          [agents apps automation checkouts linter peering]
+          [evals documents widget-sets]
+          [serve]]
+  :open [kit foundation catalog store http]
+  :about
+  {kit           "The backend's own small effects: a side-effect queue and an in-process pub/sub."
+   foundation    "What every module may use: contracts, the operation language, wire codecs,
+                 egress, cron, media types and the process's common helpers."
+   catalog       "The ontology as values: lookups, outputs, backings, grants, kernel steps and
+                 the program compiler — pure functions over the schema."
+   store         "The store behind every module: access scopes, control tables, storage
+                 engines, seats, the run boundary and event delivery."
+   http          "The HTTP tool of every handler: endpoints, requests, responses, refusals."
+   access        "Who may do what: principals, sessions, authority and access requests."
+   llm           "Language models: the model relay, budgets, rates, cost and forecasts."
+   media         "Media sets and blobs: landing files, their grants and their input entries."
+   repos         "Code repositories: their objects, records, riders, custody and the projection
+                 of the ontology into texts."
+   projects      "Projects and the kompass: folders, placements and the project map."
+   feedback    "Feedback sessions: what a user reports while working, and what is still open
+                 per object type and app."
+   sources       "Data connection: datasources, connectors, egress agents, syncs and writeback."
+   compute       "Running transform code: Clojure and external runtimes, sandboxed renders."
+   objects       "Reading objects: queries, views, planners, saved sets and nearest neighbours."
+   governance    "The rules of branches: guards, branch state, protection, roles and the pure
+                 merge of two schemas."
+   actions       "Writing objects: actions applied, staged and published, their effects, and
+                 landing a staged batch."
+   authoring     "Changing the ontology: installs, mutations, previews, projections and the
+                 placement of resources in texts."
+   builds        "Building datasets and objects: planning, running, importing and the ledger of
+                 what was built from what."
+   scenarios     "Scenarios: branches applied as what-ifs, their state and their seal."
+   schedules     "When builds run: schedules, triggers, listeners and the poller."
+   branching     "Proposals and landing: merging branches, rebasing, and the git push that
+                 becomes a change."
+   notifications "Telling people: the inbox and its delivery."
+   lineage       "Data lineage: the graph of what feeds what, its facts, status and drawings."
+   health        "Data health: checks per lineage node and their results."
+   canvas        "Graphs and explorer views as canvases: layouts, color schemes, side data."
+   agents        "Agents: builders and runtimes that use the platform's commands as tools."
+   apps          "Applications: hosted apps, their views, sessions, workspaces and delivery."
+   linter        "The Linter: rules over the platform's own state, their sweep and the
+                 recommendations it keeps."
+   peering       "Peering between instances: peer connections, object type mappings, the
+                 jobs that send source and action data and the queue that resends them."
+   checkouts     "A checkout by node: one pull and one push across texts and code, and the renames
+                 whose code follows them."
+   automation    "Automations: rules on events and schedules, their runs, executions and
+                 proposals."
+   evals         "Evaluations: suites, cases, evaluators and their jobs."
+   documents     "Notebook documents: records, widgets, sheets and diagrams from the live
+                 ontology."
+   widget-sets   "Widget sets: custom widgets an app shows, their releases and their code."
+   serve         "The composition root: the server, its lifecycle, workers and instance."}
+  :tables
+  {access        [custom-app-metrics login-log oauth-clients oauth-codes principals sessions]
+   actions       [action-requests agent-proposals outbox-dead staged-actions]
+   agents        [agent-checkouts agent-messages agent-threads]
+   apps          [app-previews object-comments]
+   authoring     [package-installs product-installs products projection-elements
+                  projection-placements releases]
+   automation    [automation-effects automation-executions automation-runs automations
+                  automation-subscriptions logic-events]
+   builds        [build-claims build-requests build-slots ledger-consumption ledger-jobs
+                  ledger-txns retention-policies runs snapshot-requests]
+   canvas        [color-schemes graph-defaults graph-layouts]
+   compute       [container-images]
+   documents     [document-live document-versions documents]
+   evals         [eval-case-results eval-jobs eval-results eval-runs eval-suites]
+   feedback      [begleitung-ereignisse begleitungen]
+   governance    [access-requests branch-governance branch-roles git-pending link-backings
+                  proposal-comments proposal-merge-attempts proposal-verdicts proposals
+                  transform-versions]
+   health        [health-check-groups health-check-results health-checks
+                  health-group-subscriptions health-snoozes health-watches]
+   llm           [llm-budget]
+   media         [media-set-items]
+   notifications [notification-preferences notifications]
+   objects       [explorations explorer-dashboards explorer-views object-sets-temp]
+   peering       [peer-connections peer-crosswalk peer-jobs peer-mappings peer-media-mappings
+                  peer-mesh-nodes peer-offers peer-outbox peer-pending-links peer-profiles
+                  peer-shares]
+   projects      [atlas-annotations atlas-nodes collections entity-crosswalk entity-provenance
+                  favorites file-grants files import-plans portfolios project-settings
+                  share-links]
+   repos         [git-commits repo-anchor repo-checks repo-files repo-tags]
+   scenarios     [scenarios]
+   schedules     [build-schedules schedule-run-setups]
+   linter        [linter-recommendations]
+   sources       [egress-policies writeback-claims]
+   store         [container-policies import-keys index-times instance-config protections
+                  retention-expiries stream-cursors stream-dead-letter]
+   widget-sets   [widget-set-releases widget-sets]}
+  :table-allow
+  []
+  :cross-module-tx
+  [{:modules [actions lease world]
+    :why     "an action's edits, its request record and its outbox land in one fenced commit"
+    :where   [sutra.actions.action sutra.actions.apply sutra.actions.dispatch
+              sutra.actions.staged]}
+   {:modules [actions world]
+    :why     "an action's edits as the element changes of its step: no [:schema] fence, a stale change is refused itself"
+    :where   [sutra.actions.action sutra.actions.staged]}
+   {:modules [actions builds lease world]
+    :why     "landing a staged batch commits its edits and the build ledger of that run"
+    :where   [sutra.actions.landing sutra.builds.run]}
+   {:modules [builds lease world]
+    :why     "landing a staging branch of schema changes alone (no staged action row to retire)
+              commits its world and the build ledger of that run"
+    :where   [sutra.actions.landing sutra.builds.run]}
+   {:modules [lease schedules]
+    :why     "an action's schedule-run effect records the run setup of the build it starts
+              under the fence of that action"
+    :where   [sutra.schedules.dispatch sutra.actions.effects]}
+   {:modules [lease media]
+    :why     "a media-set sync records the items it lands under the fence of its build run"
+    :where   [sutra.media.sets sutra.builds.run.media-sync]}
+   {:modules [automation lease world]
+    :why     "a rule's action and the automation's execution record are one commit"
+    :where   [sutra.automation.rules sutra.actions.dispatch]}
+   {:modules [scenarios world]
+    :why     "a scenario's state moves with the edits applied to it"
+    :where   [sutra.scenarios.apply]}
+   {:modules [lease scenarios]
+    :why     "a scenario's state is written under the fence of the action that changes it"
+    :where   [sutra.scenarios.state sutra.actions.dispatch]}
+   {:modules [lease sources]
+    :why     "a writeback claim is taken in the fenced commit of the action that writes back"
+    :where   [sutra.actions.effects sutra.actions.execution]}
+   {:modules [governance lease]
+    :why     "a merge records its attempt under the fence of the landing it belongs to"
+    :where   [sutra.governance.merge sutra.actions.landing]}
+   {:modules [governance lease world]
+    :why     "landing a proposal merges the world and records the verdict in one commit"
+    :where   [sutra.branching.landing sutra.authoring.install.world]}
+   {:modules [authoring world]
+    :why     "an install commits the schema and its placements and releases together"
+    :where   [sutra.authoring.install.world]}
+   {:modules [authoring lease world]
+    :why     "a schema change saved on a branch directly (a mutation, a rename) commits its
+              world and the release records it cuts under the fence of what it read"
+    :where   [sutra.authoring.install.world sutra.authoring.mutation]}
+   {:modules [canvas world]
+    :why     "seen from the store itself, no platform caller on the stack: a canvas record
+              written in a world commit (a sweep or a branch commit)"
+    :where   []}
+   {:modules [canvas store]
+    :why     "seen from the store itself: a canvas record committed with an event cursor
+              (a consumer that sweeps dropped graphs)"
+    :where   []}
+   {:modules [builds lease]
+    :why     "a build run writes its rows under the fence of its run lease"
+    :where   [sutra.builds.run.rows sutra.builds.run sutra.builds.import sutra.builds.run.lock]}
+   {:modules [health lease]
+    :why     "a build records its expectations' results (:health/record-expectation) under the
+              fence of its run"
+    :where   [sutra.builds.plan.expectations sutra.builds.import.phases]}
+   {:modules [lease projects]
+    :why     "a build that materializes nodes places them in the project map under its fence"
+    :where   [sutra.projects.kompass sutra.builds.import.materialize]}
+   {:modules [canvas lease projects]
+    :why     "an action that drops objects sweeps their canvas graphs and project placements
+              in its own fenced commit (seen in the scenario tier)"
+    :where   [sutra.actions.action sutra.actions.apply]}]}
+
+ :layers
+ [
+  {:why        "A role answers from its arguments: a plugin contributes an entry to a table and is asked. It never reaches into the store, a module of the host or the server — those stay the host's, which is what makes a contributed entry safe to accept."
+   :from-roots ["plugins"]
+   :to         [sutra.catalog.* sutra.store.* sutra.http.* sutra.serve.*
+                sutra.access.* sutra.llm.* sutra.media.* sutra.repos.* sutra.projects.*
+                sutra.sources.* sutra.compute.* sutra.objects.* sutra.governance.*
+                sutra.actions.* sutra.authoring.* sutra.builds.* sutra.scenarios.*
+                sutra.schedules.* sutra.notifications.* sutra.lineage.* sutra.health.*
+                sutra.canvas.* sutra.agents.* sutra.apps.* sutra.automation.* sutra.evals.*
+                sutra.documents.* sutra.branching.* sutra.feedback.*]}
+
+  {:why
+   "The language knows no runtime: it is read by the frontend, the CLI and the server alike."
+   :from-roots ["libs/kernel/src" "libs/dialect/src" "libs/core/src"]
+   :to         [sutra.catalog.* sutra.store.* sutra.http.* sutra.serve.*
+                sutra.access.* sutra.llm.* sutra.media.* sutra.repos.* sutra.projects.*
+                sutra.sources.* sutra.compute.* sutra.objects.* sutra.governance.*
+                sutra.actions.* sutra.authoring.* sutra.builds.* sutra.scenarios.*
+                sutra.schedules.* sutra.notifications.* sutra.lineage.* sutra.health.*
+                sutra.canvas.* sutra.agents.* sutra.apps.* sutra.automation.* sutra.evals.*
+                sutra.documents.* sutra.branching.* sutra.feedback.*]}
+
+  {:why        "The kern knows the kernel's registers and its refusal catalog, nothing else of the platform: the old implementation is its oracle, never its dependency."
+   :from-roots ["libs/world/src"]
+   :to         [sutra.*]
+   :except-to  [sutra.world.* sutra.types.entities sutra.types.kinds sutra.types.refs
+                sutra.types.table sutra.types.nested sutra.ref.err]}
+
+  {:why   "Inside the kern a namespace requires only those of earlier groups: the store cycle of KW46 (store.protection → store.control → store.records → store.world) grew between namespaces of one module, where no rule looked."
+   :order [[sutra.world.delta sutra.world.index sutra.world.schema]
+           [sutra.world.db]
+           [sutra.world.view sutra.world.instance]
+           [sutra.world.gate.base sutra.world.policy]
+           [sutra.world.gate.space sutra.world.gate.media sutra.world.gate.stream
+            sutra.world.gate.marking sutra.world.gate.near]
+           [sutra.world.gate.lint]
+           [sutra.world.gate]
+           [sutra.world.install]]}
+
+  {:why        "The store layer of the reimplementation reads the store's log and steps the kern's db; it knows nothing else of the platform."
+   :from-roots ["libs/commits/src"]
+   :to         [sutra.*]
+   :except-to  [sutra.commits.* sutra.world.* sutra.store.core.* sutra.store.memo]}
+
+  {:why        "What the store layer stands on never reaches up into it: the store is its oracle, the kern its model."
+   :from-roots ["libs/kernel/src" "libs/world/src" "libs/dialect/src" "libs/core/src"
+                "libs/store/src"]
+   :to         [sutra.commits.*]}
+
+  {:why   "Inside the store layer a namespace requires only those of earlier groups."
+   :order [[sutra.commits.log]
+           [sutra.commits.loader]
+           [sutra.commits.schatten sutra.commits.branches]]}
+
+  {:why        "The service layer of the reimplementation stands on the kern and the dialect's tree; it knows nothing else of the platform, and the policy it answers stays sutra.types.authority, its oracle."
+   :from-roots ["libs/service/src"]
+   :to         [sutra.*]
+   :except-to  [sutra.service.* sutra.world.* sutra.types.tree sutra.types.rid
+                sutra.types.entities]}
+
+  {:why        "What the service layer stands on never reaches up into it: the store does not know who may do what, so no cycle runs through authority (KW46: authority ↔ world)."
+   :from-roots ["libs/kernel/src" "libs/world/src" "libs/commits/src" "libs/dialect/src"
+                "libs/core/src"
+                "libs/store/src"]
+   :to         [sutra.service.*]}
+
+  {:why   "Inside the service layer a namespace requires only those of earlier groups."
+   :order [[sutra.service.merge sutra.service.rights] [sutra.service.access]]}
+
+  {:why        "A handler is the edge of its module: only the composition root and other handlers reach it, and what it calls never calls back into it."
+   :from-roots ["src"]
+   :except     [sutra.*.http sutra.*.http.* sutra.serve.*]
+   :to         [sutra.*.http sutra.*.http.*]}
+
+  {:why   "Background work runs through the store and its own planning, not through the commands of a request."
+   :from  [sutra.builds.* sutra.schedules.*]
+   :to    [sutra.actions.* sutra.authoring.*]}
+
+  {:why       "A build reaches foreign sources through the port :foreign/connect (sutra.store.access.scope) and what sources and compute provide (:foreign/datasources, :compute/runner), and reads a source by the contract sutra.sources.api — never their implementation."
+   :from      [sutra.builds.*]
+   :except    [sutra.*.http sutra.*.http.*]
+   :to        [sutra.sources.* sutra.compute.*]
+   :except-to [sutra.sources.api]}]}

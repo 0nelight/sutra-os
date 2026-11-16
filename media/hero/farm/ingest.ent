@@ -1,0 +1,34 @@
+;; Where the farm's data comes from: three CSV exports, each a source, each synced as-is
+;; into a raw dataset. Cleaning and typing happen in the transforms (*.sql), not here.
+;; bin/readme-media.clj declares all of it for Data Lineage but runs none of it: it fills
+;; in {{inbox}}, pushes this as the farm's ingest text, and the seed writes the rows.
+{:schema
+ {:sources
+  {:baler          {:type :csv :project :farm :access :read-only
+                    :path "{{inbox}}/baling_log.csv"
+                    :description "The baler's log: one row per cut, with its bale count"}
+   :field-register {:type :csv :project :farm :access :read-only
+                    :path "{{inbox}}/field_register.csv"
+                    :description "The farm office's field register"}
+   :buyer-list     {:type :csv :project :farm :access :read-only
+                    :path "{{inbox}}/buyer_list.csv"
+                    :description "The farm office's list of grain buyers"}}
+  :datasets
+  {:baling_log
+   {:title "Baling log" :kind :standalone :project :farm
+    :columns [{:attribute-name :cut :attribute-type :string}
+              {:attribute-name :bales :attribute-type :integer}]
+    :external-source {:datasource :baler :table "csv" :primary-key :cut}}
+   :field_register
+   {:title "Field register" :kind :standalone :project :farm
+    :columns [{:attribute-name :field_id :attribute-type :string}
+              {:attribute-name :name :attribute-type :string}
+              {:attribute-name :crop :attribute-type :string}
+              {:attribute-name :hectares :attribute-type :string}
+              {:attribute-name :cost_per_hectare :attribute-type :string}]
+    :external-source {:datasource :field-register :table "csv" :primary-key :field_id}}
+   :buyer_list
+   {:title "Buyer list" :kind :standalone :project :farm
+    :columns [{:attribute-name :buyer_id :attribute-type :string}
+              {:attribute-name :name :attribute-type :string}]
+    :external-source {:datasource :buyer-list :table "csv" :primary-key :buyer_id}}}}}

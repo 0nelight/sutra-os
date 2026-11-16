@@ -1,0 +1,503 @@
+;; ════════════════════════════════════════════════════════════════════════════
+;; standard / 2 — ABGELEITETE TYPEN
+;; ════════════════════════════════════════════════════════════════════════════
+;; Konkrete Typen, die Privatperson UND Betrieb gleichermassen haben. Jeder
+;; implementiert Interfaces aus Stufe 1 und bringt, was seine Datenquelle
+;; zusaetzlich weiss (Kennzeichen, Sparte, Polizzennummer ...).
+;;
+;;   Bankkonto          :geldkonto
+;;   Bankbuchung        :kontobewegung        (Kontoauszug-Import, nie von Hand)
+;;   Eingangsrechnung   :beleg                (Mail-Anhang, Scan, Upload)
+;;   Versicherung       :vertrag :wiederkehrend
+;;   Dauervertrag       :vertrag :wiederkehrend  (Miete, Strom, Handy, Abo)
+;;   Fahrzeug           :besitz :befristet    (gueltig-bis = Pickerl/HU)
+;;   Geraet             :besitz :befristet    (gueltig-bis = Garantie)
+;;   Ueberweisung       :ausgehend            (Auftrag an die Bank)
+;;   Beitrag            :ausgehend            (Post auf X, Mastodon ...)
+;;   Kategorie          -- Referenz: Haushaltsbudget wie Aufwandskonto
+;;
+;; Wer hier einen Typ ergaenzt, implementiert die Interfaces, statt ihre
+;; Eigenschaften neu zu erfinden -- dann erscheint er ohne weiteres in jeder
+;; Anwendung, die das Interface liest (Fristen, Belegabgleich, Ausgang).
+;;
+;; Auch die ARBEIT, die Haushalt und Betrieb gleich tun, steht hier und nicht
+;; doppelt in Stufe 3: Vertraege und Versicherungen anlegen, Kuendigung
+;; vermerken, eine Eingangsrechnung bezahlen (entwurf -> freigegeben ->
+;; eingereicht, Kanal :zahlungsdienst). Eine Action wandert nach unten, sobald
+;; beide Anwendungsfaelle sie brauchen; ihr Name bleibt, damit eine installierte
+;; Instanz sie beim naechsten Einspielen wiedererkennt.
+;;
+{:require ["1_basis.ent"]
+ :schema
+ {;; Die Portal-Ueberschrift der Startanwendungen unter apps/ -- sie arbeiten
+  ;; auf den Typen dieser Stufe, also steht sie hier und nicht in Stufe 3.
+  :collections
+  {:alltag {:name        "Alltag"
+            :description "Rechnungen, Zahlungen, Vertraege und Fristen -- was jede Woche anfaellt."
+            :icon        "🗂"
+            :order       1}}
+
+  :projects
+  {:kanaele {:name        "Kanaele"
+             :description "Die Wege hinaus: Zahlungsdienst, Versand, soziale Netze. Wer hier schreiben darf, darf im Namen des Haushalts oder Betriebs zahlen, mahnen und posten."}
+   ;; Die Startanwendungen liegen wie jede App in einem Source-Repository -- sonst
+   ;; stuenden sie in keinem Klon und liessen sich nur per Verb aendern.
+   :anwendungen {:name        "Anwendungen"
+                 :description "Die Startanwendungen des Pakets (apps/), zum Oeffnen, Umbauen und Weglassen wie jede andere App."}}
+
+  :repositories
+  {:startanwendungen {:description "Rechnungen, Zahlungen, Vertraege, Konten, Mahnungen."
+                      :type        :applications
+                      :project     :anwendungen}}
+
+  :sources
+  {:zahlungsdienst
+   {:type        :rest
+    :project     :kanaele
+    :description "Zahlungsausloesedienst (PSD2 PIS). Nimmt den Auftrag an; die Freigabe geschieht in der Bank-App."
+    :config      {:rest {:base-url "https://zahlungsdienst.invalid"
+                         :auth     {:mode :bearer}}}
+    :egress      ["zahlungsdienst.invalid:443"]
+    :access      :read-write
+    :webhooks    {:zahlung-einreichen
+                  {:method          :post
+                   :path-template   "/payments"
+                   :params          [:auftrag-id :betrag :waehrung :empfaenger :empfaenger-iban :verwendungszweck :ausfuehren-am]
+                   :idempotency-key "{auftrag-id}"
+                   :body-template   {:end_to_end_id "{auftrag-id}"
+                                     :amount        "{betrag}"
+                                     :currency      "{waehrung}"
+                                     :creditor_name "{empfaenger}"
+                                     :creditor_iban "{empfaenger-iban}"
+                                     :remittance    "{verwendungszweck}"
+                                     :execution_date "{ausfuehren-am}"}}}}}
+
+  :objects
+  {:kategorie
+   {:symbol "🏷" :name "Kategorie" :plural "Kategorien" :title :bezeichnung
+    :description "Wofuer Geld ausgegeben oder eingenommen wurde. Im Haushalt die Budgetzeile, im Betrieb das Aufwands- oder Ertragskonto."
+    :status :experimental
+    :primary-key :kategorie-id
+    :attributes [[:kategorie-id :string] :bezeichnung
+                 [:richtung :string {:constraints {:one-of ["ausgabe" "einnahme" "umbuchung"]}}]
+                 [:oberkategorie-id :string]]}
+
+   :bankkonto
+   {:symbol "🏦" :name "Bankkonto" :plural "Bankkonten" :title :bezeichnung
+    :status :experimental
+    :implements [:geldkonto]
+    :primary-key :bankkonto-id
+    :attributes [[:bankkonto-id :string] :bezeichnung :iban :waehrung
+                 [:art :string {:constraints {:one-of ["giro" "spar" "kreditkarte" "kassa" "depot"]}}]
+                 [:inhaber-person-id :string]
+                 [:inhaber-organisation-id :string]
+                 [:saldo :decimal
+                  {:description "Summe aller importierten Bewegungen -- stimmt mit der Bank, sobald der Import lueckenlos ist."
+                   :format {:kind :currency :currency "EUR" :decimals 2 :grouping true}
+                   :derived {:rollup {:over :bewegungen :agg :sum :of :betrag}}}]]}
+
+   :bankbuchung
+   {:symbol "💸" :name "Bankbuchung" :plural "Bankbuchungen" :title :verwendungszweck
+    :description "Eine Zeile des Kontoauszugs. Kommt aus dem Import und wird nie von Hand geaendert; Einordnen und Abgleichen sind eigene Objekte bzw. Fremdschluessel."
+    :status :experimental
+    :implements [:kontobewegung]
+    :primary-key :buchung-id
+    :attributes [[:buchung-id :string {:description "Aus Konto, Datum, Betrag und Bankreferenz gebildet, damit ein ueberlappender zweiter Import nichts verdoppelt."}]
+                 :betrag :waehrung :buchungsdatum :verwendungszweck :gegenpartei :gegen-iban
+                 [:bankreferenz :string]
+                 [:bankkonto-id :string]
+                 [:kategorie-id :string]
+                 [:abgeglichen :decimal
+                  {:derived {:rollup {:over :ausgleiche :agg :sum :of :betrag}}}]]}
+
+   :eingangsrechnung
+   {:symbol "🧾" :name "Eingangsrechnung" :plural "Eingangsrechnungen" :title :belegnummer
+    :description "Was jemand von mir will: Rechnung, Vorschreibung, Zahlschein."
+    :status :experimental
+    :implements [:beleg]
+    :primary-key :rechnung-id
+    :attributes [[:rechnung-id :string] :betrag :waehrung :faellig-am :belegnummer :belegdatum
+                 [:aussteller-id :string]
+                 [:aussteller-name :string
+                  {:description "Der Name des Ausstellers, zur Lesezeit ueber den Link gelesen -- nicht kopiert. Aus ihm fuellt `ueberweisung-vorbereiten` den Empfaenger vor."
+                   :derived {:rollup {:over :aussteller :agg :one :pick :bezeichnung}}}]
+                 [:dokument-id :string]
+                 [:kategorie-id :string]
+                 [:beglichen :decimal
+                  {:derived {:rollup {:over :ausgleiche :agg :sum :of :betrag}}}]
+                 [:offen :decimal
+                  {:description "Betrag minus Beglichenes. Ein Zustand 'bezahlt' wird nicht gespeichert, er folgt hieraus."
+                   :format {:kind :currency :currency "EUR" :decimals 2}
+                   :derived {:language :clojure :expression [:- [:get :betrag] [:get :beglichen]]
+                             :inputs [:betrag :beglichen]}}]]}
+
+   :versicherung
+   {:symbol "🛡" :name "Versicherung" :plural "Versicherungen" :title :bezeichnung
+    :status :experimental
+    :implements [:vertrag :wiederkehrend]
+    :primary-key :versicherung-id
+    :attributes [[:versicherung-id :string] :bezeichnung
+                 :vertragsnummer :beginn :kuendigungsfrist-monate :gekuendigt-am
+                 :gueltig-bis :vorlauf-tage
+                 :betrag :takt :naechste-faelligkeit
+                 [:sparte :string {:constraints {:one-of ["haushalt" "haftpflicht" "kfz" "rechtsschutz" "unfall" "leben" "kranken" "betrieb" "sonstige"]}}]
+                 [:versicherungssumme :betrag]
+                 [:partner-id :string]]}
+
+   :dauervertrag
+   {:symbol "📑" :name "Dauervertrag" :plural "Dauervertraege" :title :bezeichnung
+    :description "Miete, Strom, Gas, Handy, Internet, Streaming, Leasing -- alles, was monatlich abbucht und gekuendigt werden kann."
+    :status :experimental
+    :implements [:vertrag :wiederkehrend]
+    :primary-key :dauervertrag-id
+    :attributes [[:dauervertrag-id :string] :bezeichnung
+                 :vertragsnummer :beginn :kuendigungsfrist-monate :gekuendigt-am
+                 :gueltig-bis :vorlauf-tage
+                 :betrag :takt :naechste-faelligkeit
+                 [:art :string {:constraints {:one-of ["miete" "energie" "telekom" "abo" "leasing" "kredit" "sonstige"]}}]
+                 [:partner-id :string]
+                 [:kategorie-id :string]]}
+
+   :fahrzeug
+   {:symbol "🚗" :name "Fahrzeug" :plural "Fahrzeuge" :title :kennzeichen
+    :status :experimental
+    :implements [:besitz :befristet]
+    :primary-key :fahrzeug-id
+    :attributes [[:fahrzeug-id :string] :bezeichnung :seriennummer :angeschafft-am :anschaffungspreis
+                 :gueltig-bis :vorlauf-tage
+                 [:kennzeichen :string]
+                 [:km-stand :integer]
+                 [:eigentuemer-id :string]
+                 [:ort-id :string]]}
+
+   :geraet
+   {:symbol "🔌" :name "Geraet" :plural "Geraete" :title :bezeichnung
+    :description "Waschmaschine, Laptop, Heizung, Maschine -- mit Garantieende als Frist."
+    :status :experimental
+    :implements [:besitz :befristet]
+    :primary-key :geraet-id
+    :attributes [[:geraet-id :string] :bezeichnung :seriennummer :angeschafft-am :anschaffungspreis
+                 :gueltig-bis :vorlauf-tage
+                 [:eigentuemer-id :string]
+                 [:ort-id :string]
+                 [:kaufbeleg-id :string]]}
+
+   :ueberweisung
+   {:symbol "📤" :name "Ueberweisung" :plural "Ueberweisungen" :title :verwendungszweck
+    :description "Ein Zahlungsauftrag. Die Bank verlangt eine zweite Freigabe (TAN/App) -- Sutra-OS reicht den Auftrag ein, der Mensch bestaetigt bei der Bank, und die spaetere Bankbuchung schliesst den Kreis."
+    :status :experimental
+    :implements [:ausgehend]
+    :primary-key :auftrag-id
+    :attributes [:auftrag-id :auftragsstand :freigegeben-am :gesendet-am :fremd-referenz :antwort
+                 :betrag :waehrung
+                 [:empfaenger :string]
+                 [:empfaenger-iban :iban-nr]
+                 :verwendungszweck
+                 [:ausfuehren-am :date]
+                 [:bankkonto-id :string]
+                 [:rechnung-id :string]]}
+
+   :beitrag
+   {:symbol "📣" :name "Beitrag" :plural "Beitraege" :title :text
+    :description "Ein Post auf einem sozialen Kanal."
+    :status :experimental
+    :implements [:ausgehend]
+    :primary-key :auftrag-id
+    :attributes [:auftrag-id :auftragsstand :freigegeben-am :gesendet-am :fremd-referenz :antwort
+                 [:kanal :string {:constraints {:one-of ["x" "mastodon" "linkedin" "bluesky"]}}]
+                 [:text :string {:constraints {:max-length 280}}]
+                 [:bild :media-reference]
+                 [:geplant-fuer :timestamp]]}}
+
+  :links
+  [[:ort-teil-von :ort :ort :many-to-one
+    {:forward-api-name :teil-von :reverse-api-name :teile
+     :forward-name "Teil von" :reverse-name "Teile"
+     :fk {:attribute :teil-von-id :on-null :skip :on-unresolved :skip}}]
+   [:person-organisation :person :organisation :many-to-one
+    {:forward-api-name :organisation :reverse-api-name :personen
+     :description "Arbeitet fuer / ist Ansprechpartner bei."
+     :fk {:attribute :organisation-id :on-null :skip :on-unresolved :skip}}]
+   [:partei-anschrift-person :person :ort :many-to-one
+    {:forward-api-name :anschrift :reverse-api-name :bewohner
+     :fk {:attribute :anschrift-id :on-null :skip :on-unresolved :skip}}]
+   [:partei-anschrift-organisation :organisation :ort :many-to-one
+    {:forward-api-name :anschrift :reverse-api-name :organisationen
+     :fk {:attribute :anschrift-id :on-null :skip :on-unresolved :skip}}]
+   [:kategorie-ober :kategorie :kategorie :many-to-one
+    {:forward-api-name :oberkategorie :reverse-api-name :unterkategorien :fk :oberkategorie-id}]
+
+   [:bankkonto-inhaber-person :bankkonto :person :many-to-one
+    {:forward-api-name :inhaber-person :reverse-api-name :bankkonten
+     :fk {:attribute :inhaber-person-id :on-null :skip :on-unresolved :skip}
+     :satisfies {:interface :geldkonto :constraint :inhaber}}]
+   [:bankkonto-inhaber-organisation :bankkonto :organisation :many-to-one
+    {:forward-api-name :inhaber-organisation :reverse-api-name :bankkonten
+     :fk {:attribute :inhaber-organisation-id :on-null :skip :on-unresolved :skip}
+     :satisfies {:interface :geldkonto :constraint :inhaber}}]
+
+   [:bankbuchung-konto :bankbuchung :bankkonto :many-to-one
+    {:forward-api-name :konto :reverse-api-name :bewegungen :fk :bankkonto-id
+     :satisfies {:interface :kontobewegung :constraint :konto}}]
+   [:bankbuchung-kategorie :bankbuchung :kategorie :many-to-one
+    {:forward-api-name :kategorie :reverse-api-name :bankbuchungen
+     :fk {:attribute :kategorie-id :on-null :skip :on-unresolved :skip}}]
+   [:bankbuchung-ausgleiche :bankbuchung :ausgleich :one-to-many
+    {:forward-api-name :ausgleiche :reverse-api-name :bankbuchung
+     :fk {:attribute :bewegung-id :on-null :skip :on-unresolved :skip}
+     :satisfies {:interface :kontobewegung :constraint :ausgleiche}}]
+
+   [:eingangsrechnung-aussteller :eingangsrechnung :organisation :many-to-one
+    {:forward-api-name :aussteller :reverse-api-name :eingangsrechnungen
+     :fk {:attribute :aussteller-id :on-null :skip :on-unresolved :skip}
+     :satisfies {:interface :beleg :constraint :aussteller}}]
+   [:eingangsrechnung-original :eingangsrechnung :dokument :many-to-one
+    {:forward-api-name :original :reverse-api-name :eingangsrechnungen
+     :fk {:attribute :dokument-id :on-null :skip :on-unresolved :skip}
+     :satisfies {:interface :beleg :constraint :original}}]
+   [:eingangsrechnung-kategorie :eingangsrechnung :kategorie :many-to-one
+    {:forward-api-name :kategorie :reverse-api-name :eingangsrechnungen
+     :fk {:attribute :kategorie-id :on-null :skip :on-unresolved :skip}}]
+   [:eingangsrechnung-ausgleiche :eingangsrechnung :ausgleich :one-to-many
+    {:forward-api-name :ausgleiche :reverse-api-name :eingangsrechnung
+     :fk {:attribute :beleg-id :on-null :skip :on-unresolved :skip}
+     :satisfies {:interface :beleg :constraint :ausgleiche}}]
+
+   [:versicherung-partner :versicherung :organisation :many-to-one
+    {:forward-api-name :vertragspartner :reverse-api-name :versicherungen :fk :partner-id
+     :satisfies {:interface :vertrag :constraint :vertragspartner}}]
+   [:dauervertrag-partner :dauervertrag :organisation :many-to-one
+    {:forward-api-name :vertragspartner :reverse-api-name :dauervertraege :fk :partner-id
+     :satisfies {:interface :vertrag :constraint :vertragspartner}}]
+   [:dauervertrag-kategorie :dauervertrag :kategorie :many-to-one
+    {:forward-api-name :kategorie :reverse-api-name :dauervertraege
+     :fk {:attribute :kategorie-id :on-null :skip :on-unresolved :skip}}]
+
+   [:fahrzeug-eigentuemer :fahrzeug :person :many-to-one
+    {:forward-api-name :eigentuemer :reverse-api-name :fahrzeuge
+     :fk {:attribute :eigentuemer-id :on-null :skip :on-unresolved :skip}
+     :satisfies {:interface :besitz :constraint :eigentuemer}}]
+   [:fahrzeug-standort :fahrzeug :ort :many-to-one
+    {:forward-api-name :standort :reverse-api-name :fahrzeuge
+     :fk {:attribute :ort-id :on-null :skip :on-unresolved :skip}
+     :satisfies {:interface :besitz :constraint :standort}}]
+   [:geraet-eigentuemer :geraet :person :many-to-one
+    {:forward-api-name :eigentuemer :reverse-api-name :geraete
+     :fk {:attribute :eigentuemer-id :on-null :skip :on-unresolved :skip}
+     :satisfies {:interface :besitz :constraint :eigentuemer}}]
+   [:geraet-standort :geraet :ort :many-to-one
+    {:forward-api-name :standort :reverse-api-name :geraete
+     :fk {:attribute :ort-id :on-null :skip :on-unresolved :skip}
+     :satisfies {:interface :besitz :constraint :standort}}]
+   [:geraet-kaufbeleg :geraet :eingangsrechnung :many-to-one
+    {:forward-api-name :kaufbeleg :reverse-api-name :gekaufte-geraete
+     :fk {:attribute :kaufbeleg-id :on-null :skip :on-unresolved :skip}}]
+
+   [:ueberweisung-konto :ueberweisung :bankkonto :many-to-one
+    {:forward-api-name :von-konto :reverse-api-name :ueberweisungen :fk :bankkonto-id}]
+   [:ueberweisung-rechnung :ueberweisung :eingangsrechnung :many-to-one
+    {:forward-api-name :bezahlt-rechnung :reverse-api-name :ueberweisungen
+     :fk {:attribute :rechnung-id :on-null :skip :on-unresolved :skip}}]]
+
+  :actions
+  {
+   :bankkonto-anlegen
+   {:display-name "Konto anlegen" :status :experimental
+    :params {:bezeichnung  {:type :string :name "Bezeichnung" :required true}
+             :iban         {:type :string :name "IBAN" :constraints {:format :iban}}
+             :art          {:type :string :name "Art" :required true :default "giro"}
+             :waehrung     {:type :string :name "Waehrung" :required true :default "EUR"}
+             :inhaber      {:type :person :name "Inhaber"}
+             :bankkonto-id {:type :string :exposure :hidden :prefill :uuid}}
+    :rules [{:op :create :object-type :bankkonto
+             :values {:bankkonto-id [:get :bankkonto-id] :bezeichnung [:get :bezeichnung]
+                      :iban [:get :iban] :art [:get :art] :waehrung [:get :waehrung]
+                      :inhaber-person-id [:get :inhaber :person-id]}}]}
+
+   :buchung-erfassen
+   {:display-name "Buchung erfassen"
+    :description  "Fuer Konten ohne Import (Kassa, Bargeld). Importierte Buchungen kommen aus dem Kontoauszug."
+    :status :experimental
+    :params {:konto            {:type :bankkonto :name "Konto" :required true :prefill :current-object}
+             :buchungsdatum    {:type :date :name "Datum" :required true :prefill :now}
+             :betrag           {:type :number :name "Betrag (Ausgabe negativ)" :required true}
+             :verwendungszweck {:type :string :name "Wofuer" :required true}
+             :gegenpartei      {:type :string :name "An/von"}
+             :buchung-id       {:type :string :exposure :hidden :prefill :uuid}}
+    :rules [{:op :create :object-type :bankbuchung
+             :values {:buchung-id [:get :buchung-id] :bankkonto-id [:get :konto :bankkonto-id]
+                      :buchungsdatum [:get :buchungsdatum] :betrag [:get :betrag]
+                      :waehrung [:get :konto :waehrung] :verwendungszweck [:get :verwendungszweck]
+                      :gegenpartei [:get :gegenpartei]}}]}
+
+   :rechnung-erfassen
+   {:display-name "Rechnung erfassen" :status :experimental :visibility :prominent
+    :params {:aussteller  {:type :organisation :name "Von" :required true}
+             :belegnummer {:type :string :name "Rechnungsnummer" :required true}
+             :belegdatum  {:type :date :name "Datum" :required true :prefill :now}
+             :betrag      {:type :number :name "Betrag" :required true :constraints {:min 0}}
+             :faellig-am  {:type :date :name "Faellig am"}
+             :rechnung-id {:type :string :exposure :hidden :prefill :uuid}}
+    :rules [{:op :create :object-type :eingangsrechnung
+             :values {:rechnung-id [:get :rechnung-id] :aussteller-id [:get :aussteller :organisation-id]
+                      :belegnummer [:get :belegnummer] :belegdatum [:get :belegdatum]
+                      :betrag [:get :betrag] :waehrung "EUR" :faellig-am [:get :faellig-am]}}]}
+
+   ;; ── Vertraege ────────────────────────────────────────────────────────────
+   ;; Anlegen gehoert zur Stufe, die den Typ traegt: ohne diese Actions blieb
+   ;; ein Dauervertrag etwas, das man nur kuendigen, aber nie erfassen konnte.
+   ;; Der Vertragspartner ist Pflicht, weil :vertrag den Link verlangt
+   ;; (1_basis.ent, :vertragspartner :required true).
+   :dauervertrag-anlegen
+   {:display-name "Vertrag anlegen"
+    :description  "Erfasst einen Dauervertrag: Miete, Strom, Handy, Abo, Leasing."
+    :status       :experimental
+    :visibility   :prominent
+    :action-log   true
+    :params       {:bezeichnung             {:type :string :name "Bezeichnung" :required true}
+                   :partner                 {:type :organisation :name "Vertragspartner" :required true}
+                   :art                     {:type :string :name "Art" :required true :default "sonstige"
+                                             :constraints {:one-of ["miete" "energie" "telekom" "abo" "leasing" "kredit" "sonstige"]}}
+                   :betrag                  {:type :number :name "Betrag je Takt" :constraints {:min 0}}
+                   :takt                    {:type :string :name "Takt" :default "monatlich"
+                                             :constraints {:one-of ["woechentlich" "monatlich" "quartalsweise" "halbjaehrlich" "jaehrlich"]}}
+                   :beginn                  {:type :date :name "Beginn"}
+                   :gueltig-bis             {:type :date :name "Laeuft bis"}
+                   :kuendigungsfrist-monate {:type :integer :name "Kuendigungsfrist (Monate)" :constraints {:min 0}}
+                   :vertragsnummer          {:type :string :name "Vertragsnummer"}
+                   :dauervertrag-id         {:type :string :exposure :hidden :prefill :uuid}}
+    :rules        [{:op :create :object-type :dauervertrag
+                    :values {:dauervertrag-id         [:get :dauervertrag-id]
+                             :bezeichnung             [:get :bezeichnung]
+                             :partner-id              [:get :partner :organisation-id]
+                             :art                     [:get :art]
+                             :betrag                  [:get :betrag]
+                             :takt                    [:get :takt]
+                             :beginn                  [:get :beginn]
+                             :gueltig-bis             [:get :gueltig-bis]
+                             :kuendigungsfrist-monate [:get :kuendigungsfrist-monate]
+                             :vertragsnummer          [:get :vertragsnummer]}}]}
+
+   :versicherung-anlegen
+   {:display-name "Versicherung anlegen"
+    :description  "Erfasst eine Polizze mit Praemie, Takt und Kuendigungsfrist."
+    :status       :experimental
+    :visibility   :prominent
+    :action-log   true
+    :params       {:bezeichnung             {:type :string :name "Bezeichnung" :required true}
+                   :partner                 {:type :organisation :name "Versicherer" :required true}
+                   :sparte                  {:type :string :name "Sparte" :required true :default "sonstige"
+                                             :constraints {:one-of ["haushalt" "haftpflicht" "kfz" "rechtsschutz" "unfall" "leben" "kranken" "betrieb" "sonstige"]}}
+                   :vertragsnummer          {:type :string :name "Polizzennummer"}
+                   :betrag                  {:type :number :name "Praemie je Takt" :constraints {:min 0}}
+                   :takt                    {:type :string :name "Takt" :default "jaehrlich"
+                                             :constraints {:one-of ["woechentlich" "monatlich" "quartalsweise" "halbjaehrlich" "jaehrlich"]}}
+                   :naechste-faelligkeit    {:type :date :name "Naechste Faelligkeit"}
+                   :beginn                  {:type :date :name "Beginn"}
+                   :kuendigungsfrist-monate {:type :integer :name "Kuendigungsfrist (Monate)" :constraints {:min 0}}
+                   :versicherungssumme      {:type :number :name "Versicherungssumme" :constraints {:min 0}}
+                   :versicherung-id         {:type :string :exposure :hidden :prefill :uuid}}
+    :rules        [{:op :create :object-type :versicherung
+                    :values {:versicherung-id         [:get :versicherung-id]
+                             :bezeichnung             [:get :bezeichnung]
+                             :partner-id              [:get :partner :organisation-id]
+                             :sparte                  [:get :sparte]
+                             :vertragsnummer          [:get :vertragsnummer]
+                             :betrag                  [:get :betrag]
+                             :takt                    [:get :takt]
+                             :naechste-faelligkeit    [:get :naechste-faelligkeit]
+                             :beginn                  [:get :beginn]
+                             :kuendigungsfrist-monate [:get :kuendigungsfrist-monate]
+                             :versicherungssumme      [:get :versicherungssumme]}}]}
+
+   :vertrag-kuendigen
+   {:display-name "Kuendigung vermerken"
+    :description  "Haelt fest, dass und wann gekuendigt wurde. Das Kuendigungsschreiben selbst ist ein eigener Ausgang."
+    :status       :experimental
+    :action-log   true
+    :params       {:vertrag {:type :dauervertrag :name "Vertrag" :required true :prefill :current-object}
+                   :am      {:type :date :name "Gekuendigt am" :required true :prefill :now}
+                   :bis     {:type :date :name "Laeuft bis" :required true}}
+    :rules        [{:op :update :object-type :dauervertrag :target [:get :vertrag :id]
+                    :values {:gekuendigt-am [:get :am] :gueltig-bis [:get :bis]}}]}
+
+   ;; ── Bezahlen und abgleichen ─────────────────────────────────────────────
+   ;; Haushalt und Betrieb bezahlen Eingangsrechnungen gleich, darum hier:
+   ;; entwurf -> freigegeben -> eingereicht, und die Bankbuchung schliesst den
+   ;; Kreis ueber einen Ausgleich.
+   :rechnung-ausgleichen
+   {:display-name "Rechnung mit Buchung abgleichen"
+    :description  "Diese Buchung begleicht (einen Teil von) dieser Rechnung."
+    :status       :experimental
+    :action-log   true
+    :params       {:rechnung   {:type :eingangsrechnung :name "Rechnung" :required true :prefill :current-object}
+                   :buchung    {:type :bankbuchung :name "Buchung" :required true}
+                   :betrag     {:type :number :name "Betrag" :required true :constraints {:min 0}}
+                   :vorgang-id {:type :string :exposure :hidden :prefill :uuid}}
+    :submission-criteria [{:test {:o [:get :rechnung :offen]} :pred [:> :o 0] :message "Die Rechnung ist bereits beglichen."}
+                          {:test {:b [:get :betrag] :o [:get :rechnung :offen]} :pred [:<= :b :o]
+                           :message "Der Betrag ist hoeher als der offene Rest der Rechnung."}]
+    :rules        [{:op :create :object-type :ausgleich
+                    :values {:ausgleich-id [:get :vorgang-id]
+                             :betrag       [:get :betrag]
+                             :bewegung-id  [:get :buchung :buchung-id]
+                             :beleg-id     [:get :rechnung :rechnung-id]
+                             :quelle       "hand"}}]}
+
+   :ueberweisung-vorbereiten
+   {:display-name "Rechnung bezahlen"
+    :description  "Legt fuer eine offene Rechnung eine Ueberweisung als ENTWURF an. Es wird noch nichts gesendet."
+    :status       :experimental
+    :visibility   :prominent
+    :action-log   true
+    :params       {:rechnung   {:type :eingangsrechnung :name "Rechnung" :required true :prefill :current-object}
+                   :konto      {:type :bankkonto :name "Von Konto" :required true}
+                   :empfaenger {:type :string :name "Empfaenger" :required true
+                                :default {:from :rechnung :property :aussteller-name}}
+                   :iban       {:type :string :name "Empfaenger-IBAN" :required true :constraints {:format :iban}}
+                   :ausfuehren-am {:type :date :name "Ausfuehren am" :description "Leer = sofort."}
+                   :vorgang-id {:type :string :exposure :hidden :prefill :uuid}}
+    :submission-criteria [{:test {:o [:get :rechnung :offen]} :pred [:> :o 0] :message "Die Rechnung ist bereits beglichen."}]
+    :rules        [{:op :create :object-type :ueberweisung
+                    :values {:auftrag-id       [:get :vorgang-id]
+                             :auftragsstand    "entwurf"
+                             :betrag           [:get :rechnung :offen]
+                             :waehrung         [:get :rechnung :waehrung]
+                             :empfaenger       [:get :empfaenger]
+                             :empfaenger-iban  [:get :iban]
+                             :ausfuehren-am    [:get :ausfuehren-am]
+                             :verwendungszweck [:get :rechnung :belegnummer]
+                             :bankkonto-id     [:get :konto :bankkonto-id]
+                             :rechnung-id      [:get :rechnung :rechnung-id]}}]}
+
+   :ueberweisung-freigeben
+   {:display-name "Ueberweisung freigeben"
+    :description  "Gibt einen Entwurf zum Einreichen frei. Es wird noch nichts gesendet; Einreichen ist ein eigener Schritt."
+    :status       :experimental
+    :visibility   :prominent
+    :action-log   true
+    :params       {:ueberweisung {:type :ueberweisung :name "Ueberweisung" :required true :prefill :current-object}}
+    :submission-criteria [{:test {:s [:get :ueberweisung :auftragsstand]} :pred [:= :s "entwurf"] :message "Nur ein Entwurf kann freigegeben werden."}]
+    :rules        [{:op :update :object-type :ueberweisung :target [:get :ueberweisung :id]
+                    :values {:auftragsstand "freigegeben" :freigegeben-am [:now]}}]}
+
+   :ueberweisung-senden
+   {:display-name "Ueberweisung einreichen"
+    :description  "Reicht eine freigegebene Ueberweisung beim Zahlungsdienst ein. Scheitert das Einreichen, aendert sich nichts (Rueckschreiben zuerst). Die Bank verlangt danach ihre eigene Bestaetigung (TAN/App)."
+    :status       :experimental
+    :visibility   :prominent
+    :action-log   true
+    :params       {:ueberweisung {:type :ueberweisung :name "Ueberweisung" :required true :prefill :current-object}}
+    :submission-criteria [{:test {:s [:get :ueberweisung :auftragsstand]} :pred [:= :s "freigegeben"] :message "Nur eine freigegebene Ueberweisung kann eingereicht werden -- einen Entwurf erst freigeben; eine gesendete ist schon unterwegs."}]
+    :rules        [{:op :invoke-webhook :phase :writeback :source :zahlungsdienst :webhook :zahlung-einreichen :as :webhook-result
+                    :params {:auftrag-id       [:get :ueberweisung :auftrag-id]
+                             :betrag           [:get :ueberweisung :betrag]
+                             :waehrung         [:get :ueberweisung :waehrung]
+                             :empfaenger       [:get :ueberweisung :empfaenger]
+                             :empfaenger-iban  [:get :ueberweisung :empfaenger-iban]
+                             :verwendungszweck [:get :ueberweisung :verwendungszweck]
+                             :ausfuehren-am    [:get :ueberweisung :ausfuehren-am]}}
+                   {:op :update :object-type :ueberweisung :target [:get :ueberweisung :id]
+                    :values {:auftragsstand "gesendet"
+                             :gesendet-am   [:now]
+                             :antwort       [:get :webhook-result :body]}}]}}}}

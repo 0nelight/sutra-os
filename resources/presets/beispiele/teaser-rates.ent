@@ -1,0 +1,112 @@
+{:schema
+ {:projects {:teaser {:description "Five houses, one condo, one paycheck"}}
+  :objects
+  {:borrower
+   {:name "Borrower" :plural "Borrowers" :symbol "🧾"
+    :description "One person, one income, and every loan someone was happy to give them."
+    :match-keys [:borrower-id]
+    :title      :name
+    :subtitle   :occupation
+    :row        [:name :monthly-income :payments-today :payments-after-reset :left-over-after-reset]
+    :attributes
+    [[:borrower-id :string {:visibility :hidden}]
+     [:name :string {:name "Name" :required true}]
+     [:occupation :string {:name "Occupation"}]
+     [:monthly-income :decimal {:name "Income / month" :format {:prefix "$" :decimals 2 :grouping true}}]
+     [:payments-today :decimal
+      {:name "Paying today"
+       :format {:prefix "$" :decimals 2 :grouping true}
+       :derived {:rollup {:over :loans :agg :sum :of :payment-now :where [:= :status "current"]}}}]
+     [:payments-after-reset :decimal
+      {:name "Paying after the reset"
+       :format {:prefix "$" :decimals 2 :grouping true}
+       :derived {:rollup {:over :loans :agg :sum :of :payment-after-reset :where [:= :status "current"]}}}]
+     [:left-over-after-reset :decimal
+      {:name "Left over after the reset"
+       :format {:prefix "$" :decimals 2 :grouping true}
+       :visibility :prominent
+       :conditional-format [{:when [:< [:get :left-over-after-reset] 0] :color "#fff" :background "#c62828"}]
+       :derived {:language :clojure
+                 :expression [:- [:get :monthly-income] [:get :payments-after-reset]]
+                 :inputs [:monthly-income :payments-after-reset]}}]]}
+
+   :loan
+   {:name "Loan" :plural "Loans" :symbol "🏠"
+    :description "An adjustable-rate mortgage: cheap until the teaser rate runs out."
+    :match-keys [:loan-id]
+    :title      :property
+    :row        [:property :kind :payment-now :payment-after-reset :resets-on :status]
+    :attributes
+    [[:loan-id :string {:visibility :hidden}]
+     [:property :string {:name "Property" :required true}]
+     [:kind :string {:name "Kind" :constraints {:one-of ["house" "condo"]}}]
+     [:balance :decimal {:name "Balance" :format {:prefix "$" :decimals 2 :grouping true}}]
+     [:payment-now :decimal {:name "Payment at teaser rate" :format {:prefix "$" :decimals 2 :grouping true}}]
+     [:payment-after-reset :decimal {:name "Payment after reset" :format {:prefix "$" :decimals 2 :grouping true}}]
+     [:resets-on :date {:name "Rate resets on"}]
+     [:income-verified :boolean {:name "Income verified"}]
+     [:status :string {:name "Status"}]
+     [:borrower-id :string {:visibility :hidden}]]
+    :lifecycle
+    {:property    :status
+     :states      [:current :refinanced :defaulted]
+     :transitions [{:action :refinance    :from [:current] :to :refinanced}
+                   {:action :mark-default :from [:current] :to :defaulted}]}}}
+
+  :links
+  [[:loan-borrower :loan :borrower :many-to-one
+    {:forward-api-name :borrower :forward-name "Borrower"
+     :reverse-api-name :loans    :reverse-name "Loans"
+     :fk :borrower-id}]]
+
+  :actions
+  {:add-borrower
+   {:display-name "Add borrower"
+    :params {:name           {:type :string :name "Name" :required true}
+             :occupation     {:type :string :name "Occupation"}
+             :monthly-income {:type :decimal :name "Income / month" :required true}
+             :borrower-id    {:type :string :exposure :hidden :prefill :uuid}}
+    :rules [{:op :create :object-type :borrower :id [:get :borrower-id]
+             :values {:borrower-id    [:get :borrower-id]
+                      :name           [:get :name]
+                      :occupation     [:get :occupation]
+                      :monthly-income [:get :monthly-income]}}]}
+
+   :add-loan
+   {:display-name "Add loan"
+    :on     :borrower
+    :params {:borrower            {:type :borrower :name "Borrower" :required true}
+             :property            {:type :string :name "Property" :required true}
+             :kind                {:type :string :name "Kind" :required true}
+             :balance             {:type :decimal :name "Balance"}
+             :payment-now         {:type :decimal :name "Payment at teaser rate" :required true}
+             :payment-after-reset {:type :decimal :name "Payment after reset" :required true}
+             :resets-on           {:type :date :name "Rate resets on"}
+             :income-verified     {:type :boolean :name "Income verified" :default false}
+             :loan-id             {:type :string :exposure :hidden :prefill :uuid}}
+    :rules
+    [{:op :create :object-type :loan :id [:get :loan-id]
+      :values {:loan-id             [:get :loan-id]
+               :borrower-id         [:get :borrower :borrower-id]
+               :property            [:get :property]
+               :kind                [:get :kind]
+               :balance             [:get :balance]
+               :payment-now         [:get :payment-now]
+               :payment-after-reset [:get :payment-after-reset]
+               :resets-on           [:get :resets-on]
+               :income-verified     [:get :income-verified]
+               :status              "current"}}]}
+
+   :refinance
+   {:display-name "Refinance before the reset"
+    :on     :loan
+    :params {:loan {:type :loan :name "Loan" :required true}}
+    :submission-criteria
+    [{:test    {:v [:get :loan :income-verified]}
+      :pred    [:= :v true]
+      :message "Income was never verified. Nobody refinances this."}]}
+
+   :mark-default
+   {:display-name "Mark default"
+    :on     :loan
+    :params {:loan {:type :loan :name "Loan" :required true}}}}}}

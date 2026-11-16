@@ -1,0 +1,8 @@
+{:schema
+ {:actions
+  {:partner-anlegen {:description "Legt einen Geschäftspartner an."
+                     :params {:name    {:type :string}
+                              :angebot {:type :angebot}}
+                     :rules  [{:op :create :object-type :partner :set [:partner-id :name]}]}
+   :setze-name      {:params {:partner {:type :partner} :name {:type :string}}
+                     :rules  [{:op :update :object-type :partner :set [:name]}]}}}}

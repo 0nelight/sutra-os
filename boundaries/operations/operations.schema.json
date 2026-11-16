@@ -1,0 +1,497 @@
+{"$defs":
+ {"sutra.foundation.contracts.automations":
+  {"items":
+   {"properties":{"id":{"type":"string"}},
+    "required":["id"],
+    "type":"object"},
+   "type":"array"},
+  "sutra.foundation.contracts.branch-in":
+  {"properties":{"branch":{"type":"string"}},
+   "required":["branch"],
+   "type":"object"},
+  "sutra.foundation.contracts.branch-names":
+  {"items":{"type":"string"}, "type":"array", "uniqueItems":true},
+  "sutra.foundation.contracts.branch-policies":
+  {"additionalProperties":{"properties":{}, "type":"object"},
+   "type":"object"},
+  "sutra.foundation.contracts.code":
+  {"properties":{"code":{"type":"string"}},
+   "required":["code"],
+   "type":"object"},
+  "sutra.foundation.contracts.drawing-request":
+  {"properties":
+   {"drawing":{"properties":{}, "type":"object"},
+    "format":{"enum":["dot", "svg"], "type":"string"}},
+   "required":["format", "drawing"],
+   "type":"object"},
+  "sutra.foundation.contracts.expectation-result":
+  {"properties":
+   {"branch":{"type":"string"},
+    "check":
+    {"properties":
+     {"expects":{"properties":{}, "type":"object"},
+      "id":{"type":"string"},
+      "name":{"type":"string"},
+      "node-key":{"type":"string"}},
+     "required":["id", "name", "node-key", "expects"],
+     "type":"object"},
+    "result":
+    {"properties":
+     {"detail":{},
+      "status":{"type":"string"},
+      "value":{"oneOf":[{"type":"string"}, {"type":"null"}]}},
+     "required":["status", "value", "detail"],
+     "type":"object"}},
+   "required":["branch", "check", "result"],
+   "type":"object"},
+  "sutra.foundation.contracts.feeds-line":
+  {"oneOf":[{"type":"string"}, {"type":"null"}]},
+  "sutra.foundation.contracts.feeds-line-in":
+  {"properties":{"ids":{"items":{"type":"string"}, "type":"array"}},
+   "required":["ids"],
+   "type":"object"},
+  "sutra.foundation.contracts.graph-handle":
+  {"properties":{"handle":{}}, "required":["handle"], "type":
+                                                      "object"},
+  "sutra.foundation.contracts.graphs-change":
+  {"properties":
+   {"after":
+    {"oneOf":[{"properties":{}, "type":"object"}, {"type":"null"}]},
+    "before":
+    {"oneOf":[{"properties":{}, "type":"object"}, {"type":"null"}]},
+    "branch":{"type":"string"}},
+   "required":["branch", "before", "after"],
+   "type":"object"},
+  "sutra.foundation.contracts.health-by-node":
+  {"additionalProperties":
+   {"properties":
+    {"checks":{"type":"integer"},
+     "failed":{"type":"integer"},
+     "status":{"oneOf":[{"type":"string"}, {"type":"null"}]}},
+    "required":["status", "checks", "failed"],
+    "type":"object"},
+   "type":"object"},
+  "sutra.foundation.contracts.inputs-around-in":
+  {"properties":
+   {"nodes":
+    {"items":
+     {"additionalItems":false, "items":[{}, {}], "type":"array"},
+     "type":"array"},
+    "trunk":
+    {"oneOf":[{"properties":{}, "type":"object"}, {"type":"null"}]}},
+   "required":["trunk", "nodes"],
+   "type":"object"},
+  "sutra.foundation.contracts.issues-by-node":
+  {"additionalProperties":{"minimum":1, "type":"integer"},
+   "type":"object"},
+  "sutra.foundation.contracts.layout-move":
+  {"properties":
+   {"branch":{"type":"string"},
+    "from":{"type":"string"},
+    "node-kind":{"type":"string"},
+    "to":{"type":"string"}},
+   "required":["branch", "node-kind", "from", "to"],
+   "type":"object"},
+  "sutra.foundation.contracts.lineage-around":
+  {"properties":
+   {"branch":
+    {"$ref":"#/$defs/sutra.foundation.contracts.lineage-prints"},
+    "logic":
+    {"properties":
+     {"branch":
+      {"$ref":"#/$defs/sutra.foundation.contracts.lineage-prints"},
+      "main":
+      {"$ref":"#/$defs/sutra.foundation.contracts.lineage-prints"}},
+     "type":"object"},
+    "main":
+    {"$ref":"#/$defs/sutra.foundation.contracts.lineage-prints"}},
+   "type":"object"},
+  "sutra.foundation.contracts.lineage-prints":
+  {"items":
+   {"additionalItems":false,
+    "items":[{"type":"string"}, {"type":"string"}],
+    "type":"array"},
+   "type":"array"},
+  "sutra.foundation.contracts.locked-in":
+  {"properties":
+   {"branch":{"type":"string"},
+    "schema":
+    {"oneOf":[{"properties":{}, "type":"object"}, {"type":"null"}]}},
+   "required":["branch"],
+   "type":"object"},
+  "sutra.foundation.contracts.no-input":
+  {"properties":{}, "type":"object"},
+  "sutra.foundation.contracts.node-ref":
+  {"additionalItems":false,
+   "items":[{"type":"string"}, {"type":"string"}],
+   "type":"array"},
+  "sutra.foundation.contracts.placements":
+  {"properties":
+   {"attributes":
+    {"additionalProperties":{"type":"string"}, "type":"object"},
+    "fields":
+    {"additionalProperties":{"type":"string"}, "type":"object"},
+    "files":
+    {"additionalProperties":
+     {"properties":
+      {"format":{"type":"string"},
+       "owner":{"oneOf":[{"type":"string"}, {"type":"null"}]},
+       "rule":{"type":"string"}},
+      "required":["format", "owner", "rule"],
+      "type":"object"},
+     "type":"object"},
+    "placement":
+    {"additionalProperties":{"type":"string"}, "type":"object"}},
+   "type":"object"},
+  "sutra.foundation.contracts.plan-source":
+  {"additionalProperties":false,
+   "properties":
+   {"datasource":{},
+    "from":
+    {"additionalProperties":false,
+     "properties":{"datasource":{}},
+     "required":["datasource"],
+     "type":"object"},
+    "join-table":
+    {"additionalProperties":false,
+     "properties":{"datasource":{}},
+     "required":["datasource"],
+     "type":"object"}},
+   "type":"object"},
+  "sutra.foundation.contracts.preview-projection":
+  {"properties":
+   {"integrity":{},
+    "schema":{"properties":{}, "type":"object"},
+    "schema-derived":{},
+    "staged-ids":{"type":"array", "uniqueItems":true},
+    "staged-types":{},
+    "version":{"type":"string"}},
+   "required":
+   ["schema", "schema-derived", "staged-types", "staged-ids",
+    "integrity", "version"],
+   "type":"object"},
+  "sutra.foundation.contracts.project-names":
+  {"items":{"type":"string"}, "type":"array", "uniqueItems":true},
+  "sutra.foundation.contracts.projection-ref":
+  {"properties":
+   {"projection":{"anyOf":[{"type":"string"}, {"type":"string"}]}},
+   "required":["projection"],
+   "type":"object"},
+  "sutra.foundation.contracts.proposal-tasks":
+  {"oneOf":
+   [{"items":{"properties":{}, "type":"object"}, "type":"array"},
+    {"type":"null"}]},
+  "sutra.foundation.contracts.push-report":
+  {"properties":
+   {"downstream":
+    {"properties":
+     {"direct":{"items":{"type":"string"}, "type":"array"},
+      "further":{"type":"integer"}},
+     "required":["direct", "further"],
+     "type":"object"},
+    "inputs-changed":
+    {"items":
+     {"properties":
+      {"node":{"type":"string"},
+       "what":{"type":"string"},
+       "where":{"type":"string"}},
+      "required":["node", "where", "what"],
+      "type":"object"},
+     "type":"array"},
+    "readers-unaffected":{"type":"integer"}},
+   "type":"object"},
+  "sutra.foundation.contracts.push-report-in":
+  {"properties":
+   {"after":{},
+    "around":
+    {"oneOf":
+     [{"$ref":"#/$defs/sutra.foundation.contracts.lineage-around"},
+      {"type":"null"}]},
+    "before":{},
+    "next":
+    {"oneOf":[{"properties":{}, "type":"object"}, {"type":"null"}]},
+    "sent":
+    {"oneOf":[{"properties":{}, "type":"object"}, {"type":"null"}]},
+    "trunk":
+    {"oneOf":[{"properties":{}, "type":"object"}, {"type":"null"}]}},
+   "required":["trunk", "around"],
+   "type":"object"},
+  "sutra.foundation.contracts.record-fence":
+  {"additionalItems":false,
+   "items":
+   [{"const":"record"}, {"type":"string"}, {"type":"string"},
+    {"anyOf":
+     [{"const":"sutra.store.api/absent"},
+      {"properties":{}, "type":"object"}]}],
+   "type":"array"},
+  "sutra.foundation.contracts.saved-graph":
+  {"oneOf":
+   [{"additionalItems":false,
+     "items":[{"type":"string"}, {"properties":{}, "type":"object"}],
+     "type":"array"},
+    {"type":"null"}]},
+  "sutra.foundation.contracts.schema-plan":
+  {"additionalProperties":false,
+   "properties":
+   {"import-plan":
+    {"additionalProperties":false,
+     "properties":
+     {"links":
+      {"additionalProperties":
+       {"$ref":"#/$defs/sutra.foundation.contracts.plan-source"},
+       "type":"object"},
+      "objects":
+      {"additionalProperties":
+       {"$ref":"#/$defs/sutra.foundation.contracts.plan-source"},
+       "type":"object"},
+      "supplements":
+      {"additionalProperties":
+       {"$ref":"#/$defs/sutra.foundation.contracts.plan-source"},
+       "type":"object"}},
+     "required":["objects", "supplements", "links"],
+     "type":"object"},
+    "sources":
+    {"items":
+     {"properties":
+      {"consumers":
+       {"items":
+        {"properties":{"target":{}, "transform":{}},
+         "required":["transform"],
+         "type":"object"},
+        "type":"array"},
+       "health":
+       {"$ref":"#/$defs/sutra.foundation.contracts.source-health"},
+       "source-name":{}},
+      "required":["source-name", "health", "consumers"],
+      "type":"object"},
+     "type":"array"},
+    "unresolved":
+    {"items":
+     {"additionalProperties":false,
+      "properties":
+      {"error":{"oneOf":[{"type":"string"}, {"type":"null"}]},
+       "kind":
+       {"enum":["object-type", "supplement", "link-type"],
+        "type":"string"},
+       "name":{}},
+      "required":["kind", "name", "error"],
+      "type":"object"},
+     "type":"array"}},
+   "required":["import-plan", "sources", "unresolved"],
+   "type":"object"},
+  "sutra.foundation.contracts.source-health":
+  {"properties":
+   {"code":{"type":"string"},
+    "message":{"type":"string"},
+    "status":{"type":"string"}},
+   "required":["status"],
+   "type":"object"},
+  "sutra.foundation.contracts.staged-in":
+  {"properties":
+   {"branch":{"oneOf":[{"type":"string"}, {"type":"null"}]}},
+   "required":["branch"],
+   "type":"object"},
+  "sutra.foundation.contracts.staged-rows":
+  {"items":{"properties":{}, "type":"object"}, "type":"array"},
+  "sutra.foundation.contracts.staging-view":
+  {"properties":
+   {"base":{},
+    "live?":{"type":"boolean"},
+    "parent":{"oneOf":[{"type":"string"}, {"type":"null"}]},
+    "read":{"oneOf":[{"type":"string"}, {"type":"null"}]},
+    "staging":{"oneOf":[{"type":"string"}, {"type":"null"}]}},
+   "required":["parent", "staging", "live?", "base", "read"],
+   "type":"object"}},
+ "$id":
+ "https://sutra.dev/boundaries/operations/operations.schema.json",
+ "$schema":"https://json-schema.org/draft/2020-12/schema",
+ "description":
+ "Boundary B-14, version 1.2.0. Generated from resources/sutra/ops.edn; do not edit by hand.",
+ "title":"Sutra operations between modules",
+ "x-sutra-operations":
+ {"actions/staged":
+  {"branch":false,
+   "doc":
+   "The staged action rows of a branch: what a batch collected and has not committed, which a live read shows on top of the branch.",
+   "in":{"$ref":"#/$defs/sutra.foundation.contracts.staged-in"},
+   "kind":"query",
+   "out":{"$ref":"#/$defs/sutra.foundation.contracts.staged-rows"},
+   "service":"actions"},
+  "authoring/locked-projects":
+  {"branch":false,
+   "doc":
+   "The projects locked product installations on :branch hold, by name \u2014 a staged one once its projects stand in :schema (the branch's committed schema): a schema change there comes only through the marketplace's upgrade.",
+   "in":{"$ref":"#/$defs/sutra.foundation.contracts.locked-in"},
+   "kind":"query",
+   "out":{"$ref":"#/$defs/sutra.foundation.contracts.project-names"},
+   "service":"authoring"},
+  "authoring/placements":
+  {"branch":false,
+   "doc":
+   "Where a projection's texts hold what: the placement memory of the instance.",
+   "in":{"$ref":"#/$defs/sutra.foundation.contracts.projection-ref"},
+   "kind":"query",
+   "out":{"$ref":"#/$defs/sutra.foundation.contracts.placements"},
+   "service":"authoring"},
+  "authoring/preview-projection":
+  {"branch":false,
+   "doc":
+   "What a staging view projects: its schema, derived views, staged types and ids, the types without a table, and a :version fingerprint.",
+   "in":{"$ref":"#/$defs/sutra.foundation.contracts.staging-view"},
+   "kind":"query",
+   "out":
+   {"$ref":"#/$defs/sutra.foundation.contracts.preview-projection"},
+   "service":"authoring"},
+  "automation/list":
+  {"branch":true,
+   "doc":"The branch's automations, which lineage draws as readers.",
+   "in":{"$ref":"#/$defs/sutra.foundation.contracts.branch-in"},
+   "kind":"query",
+   "out":{"$ref":"#/$defs/sutra.foundation.contracts.automations"},
+   "service":"automation"},
+  "branch/ended":
+  {"branch":false,
+   "doc":
+   "The ended (closed) branches of the instance, as the governance records declare them.",
+   "in":{"$ref":"#/$defs/sutra.foundation.contracts.no-input"},
+   "kind":"query",
+   "out":{"$ref":"#/$defs/sutra.foundation.contracts.branch-names"},
+   "service":"governance"},
+  "branching/tasks":
+  {"branch":false,
+   "doc":
+   "What a branch changes against its merge target, as proposal tasks; nil on the trunk.",
+   "in":{"$ref":"#/$defs/sutra.foundation.contracts.branch-in"},
+   "kind":"query",
+   "out":{"$ref":"#/$defs/sutra.foundation.contracts.proposal-tasks"},
+   "service":"branching"},
+  "builds/schema-plan":
+  {"branch":false,
+   "doc":
+   "What the snapshot's schema plans to build: per planned entity its datasource (:import-plan), the datasources with their consumers, and what did not resolve.",
+   "in":{"$ref":"#/$defs/sutra.foundation.contracts.no-input"},
+   "kind":"query",
+   "out":{"$ref":"#/$defs/sutra.foundation.contracts.schema-plan"},
+   "service":"builds"},
+  "canvas/move-layout-node":
+  {"branch":false,
+   "doc":
+   "A graph node's layout entries move from one key to another, unless the target already has one in that graph; answers how many moved.",
+   "in":{"$ref":"#/$defs/sutra.foundation.contracts.layout-move"},
+   "kind":"command",
+   "out":{"minimum":0, "type":"integer"},
+   "service":"canvas"},
+  "canvas/saved-graph":
+  {"branch":false,
+   "doc":
+   "[rid spec] of the saved lineage graph a handle (rid, name, title or kompass path) names in the snapshot's schema, or nil.",
+   "in":{"$ref":"#/$defs/sutra.foundation.contracts.graph-handle"},
+   "kind":"query",
+   "out":{"$ref":"#/$defs/sutra.foundation.contracts.saved-graph"},
+   "service":"canvas"},
+  "canvas/sweep-dropped-graphs":
+  {"branch":false,
+   "doc":
+   "The side data (layouts, color schemes, kompass placements) of the graphs a world change dropped; answers how many graphs were swept.",
+   "in":{"$ref":"#/$defs/sutra.foundation.contracts.graphs-change"},
+   "kind":"command",
+   "out":{"minimum":0, "type":"integer"},
+   "service":"canvas"},
+  "compute/check-edit-function":
+  {"branch":false,
+   "doc":
+   "nil when an edit function's Clojure source compiles, else why not.",
+   "in":{"$ref":"#/$defs/sutra.foundation.contracts.code"},
+   "kind":"query",
+   "out":{"oneOf":[{"type":"string"}, {"type":"null"}]},
+   "service":"compute"},
+  "governance/policies":
+  {"branch":false,
+   "doc":
+   "Every branch's governance row, by branch: what a write guard is decided on.",
+   "in":{"$ref":"#/$defs/sutra.foundation.contracts.no-input"},
+   "kind":"query",
+   "out":
+   {"$ref":"#/$defs/sutra.foundation.contracts.branch-policies"},
+   "service":"governance"},
+  "governance/policy-in":
+  {"branch":false,
+   "doc":
+   "The policy in force on a branch: its own governance, else what it inherits.",
+   "in":{"$ref":"#/$defs/sutra.foundation.contracts.branch-in"},
+   "kind":"query",
+   "out":{"properties":{}, "type":"object"},
+   "service":"governance"},
+  "health/by-node":
+  {"branch":true,
+   "doc":
+   "The health checks of each lineage node: worst latest status, checks, failed.",
+   "in":{"$ref":"#/$defs/sutra.foundation.contracts.branch-in"},
+   "kind":"query",
+   "out":{"$ref":"#/$defs/sutra.foundation.contracts.health-by-node"},
+   "service":"health"},
+  "health/record-expectation":
+  {"branch":false,
+   "doc":
+   "A build's data expectation lands in Data Health: its check (kind expectation, on the transform, on the build's branch) is registered or updated, and its result recorded.",
+   "in":
+   {"$ref":"#/$defs/sutra.foundation.contracts.expectation-result"},
+   "kind":"command",
+   "out":{"type":"null"},
+   "service":"health"},
+  "issues/open-by-node":
+  {"branch":false,
+   "doc":
+   "Open reports per lineage node ([:object-type t] or [:application a]) the asker may see.",
+   "in":{"$ref":"#/$defs/sutra.foundation.contracts.no-input"},
+   "kind":"query",
+   "out":{"$ref":"#/$defs/sutra.foundation.contracts.issues-by-node"},
+   "service":"feedback"},
+  "lineage/drawing":
+  {"branch":false,
+   "doc":"A lineage drawing as graphviz dot or svg text.",
+   "in":{"$ref":"#/$defs/sutra.foundation.contracts.drawing-request"},
+   "kind":"query",
+   "out":{"type":"string"},
+   "service":"lineage"},
+  "lineage/feeds-line":
+  {"branch":false,
+   "doc":
+   "A sentence for what the given nodes feed, for a git push to print.",
+   "in":{"$ref":"#/$defs/sutra.foundation.contracts.feeds-line-in"},
+   "kind":"query",
+   "out":{"$ref":"#/$defs/sutra.foundation.contracts.feeds-line"},
+   "service":"lineage"},
+  "lineage/inputs-around":
+  {"branch":false,
+   "doc":
+   "What a pull remembers of the direct inputs of its nodes: their contracts and how they are written, on the branch and the trunk.",
+   "in":
+   {"$ref":"#/$defs/sutra.foundation.contracts.inputs-around-in"},
+   "kind":"query",
+   "out":{"$ref":"#/$defs/sutra.foundation.contracts.lineage-around"},
+   "service":"lineage"},
+  "lineage/push-report":
+  {"branch":false,
+   "doc":
+   "What a push should know beyond its own texts: moved inputs, what a changed contract feeds, how many readers its other changes leave as they are.",
+   "in":{"$ref":"#/$defs/sutra.foundation.contracts.push-report-in"},
+   "kind":"query",
+   "out":{"$ref":"#/$defs/sutra.foundation.contracts.push-report"},
+   "service":"lineage"},
+  "scenarios/append-fence":
+  {"branch":true,
+   "doc":
+   "The record fence an action applied on a scenario branch commits under, so a seal meanwhile refuses it; refuses :scenario/not-open (a :conflict) when the scenario is not open.",
+   "in":{"$ref":"#/$defs/sutra.foundation.contracts.branch-in"},
+   "kind":"query",
+   "out":{"$ref":"#/$defs/sutra.foundation.contracts.record-fence"},
+   "service":"scenarios"},
+  "scenarios/state":
+  {"branch":true,
+   "doc":
+   "The lifecycle state of the scenario a branch is (:open, sealed, \u2026), or nil.",
+   "in":{"$ref":"#/$defs/sutra.foundation.contracts.branch-in"},
+   "kind":"query",
+   "out":{"oneOf":[{"type":"string"}, {"type":"null"}]},
+   "service":"scenarios"}}}

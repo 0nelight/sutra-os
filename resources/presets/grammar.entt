@@ -1,0 +1,150 @@
+;; ════════════════════════════════════════════════════════════════════════════
+;; grammar.entt — THE authoritative `.entt` grammar, in one annotated file.
+;;
+;; An `.entt` is ONE DOCUMENT TEMPLATE: the blueprint Documents generates from, and
+;; the fourth lean authoring form beside `.entv` (one type's object views),
+;; `.enta` (one standalone app) and `.entp` (one pipeline). It lowers into a
+;; `:templates` entry through `parser.ent/parse-entt`, so nothing downstream
+;; knows a template came from its own file rather than from a `.ent`'s
+;; `:templates` block.
+;;
+;; A DOCUMENT is the other half and is deliberately NOT a resource. It is what
+;; someone generated or wrote this morning, it lives in `control_documents`, and
+;; nothing about it is a promise to anyone.
+;;
+;; ── TWO files, always ───────────────────────────────────────────────────────
+;;     doc-templates/<name>.entt        this file — the declaration
+;;     doc-templates/<name>.html.j2     the body, beside it
+;;
+;; The body is not in the EDN on purpose. It is HTML (or markdown) with `{{ }}`
+;; in it, and a reviewer reading the diff of a report wants to read the report —
+;; not a quoted string with escaped newlines in the middle of a schema. The
+;; extension follows `:format`: `.html.j2` · `.md.j2` · `.txt.j2`.
+;;
+;; `doc-templates/` and not `templates/`: the ontology repository already carries
+;; `templates/template.*` (the scaffolds) and `templates/grammar.*` (this
+;; reference) as FILE-plane files the projection lays in last-wins. Giving that prefix a schema handler would turn a scaffold
+;; into a resource that publishes.
+;;
+;; ── What the body may reach ─────────────────────────────────────────────────
+;; ONLY the declared parameters, bound by `foreign.render` before jinja runs.
+;; The body never queries: it is handed rows. Two things follow, and both are
+;; the point. A template cannot read what its caller may not (binding goes
+;; through the same `authorize-read!` the object door does), and a name the body
+;; invented is an ERROR at render time rather than a blank cell in a printed
+;; report — jinja runs with `StrictUndefined`.
+;;
+;; ── Rendering ───────────────────────────────────────────────────────────────
+;; jinja2 in the same netless bwrap jail every python transform runs in, then
+;; WeasyPrint for the PDF. Filters available in a body, beyond jinja's own:
+;;     | datum            2026-09-18      (| datum('%d.%m.%y') to choose)
+;;     | zahl             1 234,50        (| zahl(0) for decimals)
+;;     | waehrung         1 234,50 €
+;;     | prozent          12,5 %
+;;     | summe('feld')    folds a column of rows
+;; ════════════════════════════════════════════════════════════════════════════
+
+{;; THE NAME. The resource is `:monatsbericht`; the file is named after it.
+ :name        :monatsbericht
+
+ ;; WHERE IT LIVES — ownership (`:project`, a grant on it cascades) and the code
+ ;; repository whose tree carries it. Same pair every code-bearing resource
+ ;; states, and stated ONCE here rather than per field.
+ :project     :werft
+ :repository  :werft-berichte
+
+ :title       "Monatsbericht"
+ :description "Umsatz, offene Posten und Auslastung eines Monats, je Arbeitsauftrag."
+ :format      :html          ;; :html (default) · :markdown · :text
+ :engine      :jinja2
+ :source-file "doc-templates/monatsbericht.html.j2"
+
+ ;; `:preview` is the preview value and is NOT a default. It exists so the
+ ;; template can be rendered while it is being written (`render-template
+ ;; --preview`) and is ignored at generation time. `:default` is the other thing,
+ ;; and it is used.
+ :parameters
+ {:monat      {:type :string :required true
+               :description "Der Berichtsmonat, YYYY-MM."
+               :preview "2026-07"}
+  :auftrag    {:type :object :object-type :arbeitsauftrag
+               :description "Der Auftrag, über den berichtet wird."}
+  :positionen {:type :object-set :object-type :rechnungsposition
+               :description "Die Positionen, die die Tabelle füllt."}
+  :zeiten     {:type :object-set :object-type :zeitbuchung
+               :search-around :zeitbuchung-arbeitsauftrag :of :auftrag
+               :description "Die Zeiten am Auftrag, ohne sie zu uebergeben."}
+  ;; Mehrere Spruenge: `:search-around` als VEKTOR von Link-Seiten, gegangen vom
+  ;; :of-Objekt aus, jede eine Seite des jeweils erreichten Typs. Die letzte muss
+  ;; bei :object-type enden — das pruefen Install und `sutra diff`, nicht erst
+  ;; das Rendern. Das ersetzt jede FK-Kopie, die nur fuer den Bericht an einen
+  ;; Typ geschrieben wuerde.
+  :luftfahrzeuge {:type :object-set :object-type :luftfahrzeug
+                  :search-around [:arbeitsauftrag-luftfahrzeug] :of :auftrag
+                  :description "Das Luftfahrzeug des Auftrags, als Kette von einem Link."}
+  :mit-grafik {:type :boolean :default false}
+
+  ;; EIN GRAPH. `:object-type` sind die Knoten, `:edge` die Link-SEITE, entlang der
+  ;; die Kanten laufen (wie bei `:search-around` von dem Typ aus gesehen gelesen).
+  ;; Gebunden wird eine fertige Zeichnung: im Rumpf steht `{{ schaltschrank }}`,
+  ;; ohne `| safe` -- die Plattform meldet dem Jail, dass dieser Wert Markup ist.
+  ;; Gezeichnet wird mit demselben Renderer wie jeder andere Graph der Plattform,
+  ;; ein erklaerter Graph sieht also aus wie die Lineage-Zeichnung.
+  ;;
+  ;; DIESE ZWEI ANGABEN GENUEGEN. Ohne `:layout` wird :hierarchie angeordnet; alles
+  ;; weitere ist Ausbau, nie Voraussetzung:
+  ;;   :layout    :hierarchie  Schaltschrank, Abhaengigkeiten, alles Gerichtete (Vorgabe)
+  ;;              :baum        strenge Baeume -- Kinder mittig unter dem Elternteil
+  ;;              :organisch :kreis :radial :dot :fdp   aus dem dot-Plugin (graphviz)
+  ;;   :richtung  :links-rechts (Vorgabe) · :oben-unten
+  ;; Welche Layouts es WIRKLICH gibt, sagt die Instanz (`GET /api/system`,
+  ;; :graph-layouts) -- ein Plugin steckt welche dazu (Rollentabelle :viz/layouts).
+  ;; Darum ist `:layout` hier ein Schluesselwort und keine Aufzaehlung: ein Name, den
+  ;; die laufende Instanz zeichnen kann, darf bei der Installation nicht abgewiesen
+  ;; werden. Ein unbekannter Name scheitert beim Zeichnen und nennt das Menue.
+  ;;
+  ;; Zum Durchprobieren, ohne die .entt anzufassen -- fuenf Varianten, fuenf Befehle:
+  ;;   bin/sutra render-template --file plan.entt --layout baum --pdf --out /tmp/baum.pdf
+  :schaltschrank {:type :graph :object-type :schutzorgan :edge :gespeist-von
+                  :description "Welches Schutzorgan speist welches."}}
+
+ ;; THE PAGE BOX — what an EXPORT obeys (`notebook/export-pdf.md`). Export-only by
+ ;; construction: a running header is not part of the document body, it is part
+ ;; of every printed page of it. `:css` is appended after the base stylesheet.
+ ;;
+ ;; THE BASE STYLESHEET (`sutra_render.BASE_CSS`) sits under every template that
+ ;; does not switch it off. It is passed to WeasyPrint as a stylesheet, so it
+ ;; comes AFTER the body's own <style> and wins a tie of equal specificity:
+ ;;   html   DejaVu/Liberation Sans, 10pt          body  margin 0, colour #1c1c1c
+ ;;   h1/h2/h3  18/14/11.5pt with top/bottom margins
+ ;;   p      margin 0 0 .5em, line-height 1.45
+ ;;   table  border-collapse, width 100%, margin .6em 0
+ ;;   th, td 1px solid #c8c8c8 border, padding 3pt 5pt, left/top aligned
+ ;;   th     grey background #f0f0f0, weight 600
+ ;;   td.num / th.num  right-aligned, tabular figures
+ ;;   thead repeats on every page · tr does not break · .page-break breaks after
+ ;;   hr     1px #c8c8c8 top rule, margin 1em 0
+ ;; `:base-css false` drops ALL of it (the @page box — size, margin, header,
+ ;; footer — and `:css` stay). A fixed layout, e.g. an invoice that must match
+ ;; its printed original, switches it off rather than resetting every rule.
+ :page
+ {:size        :a4           ;; :a3 :a4 :a5 :letter :legal :tabloid
+  :orientation :portrait     ;; :portrait | :landscape
+  :margin      "20mm 16mm"
+  :header      "Monatsbericht — vertraulich"
+  :footer      "Beispiel GmbH"
+  :css         "h1 { color: #14505a; }"
+  :base-css    true}         ;; false = no base stylesheet, only :css
+
+ ;; WHAT MAY BE ASKED OF IT. Absent ⇒ [:html].
+ :targets [:html :pdf]
+
+ :limits {:max-objects 500 :max-rows 1000 :seconds 30}
+
+ ;; PUBLISHING. `:status` self-publishes on first install — a template nobody may
+ ;; generate from is not a safer template, it is an unusable one. `:version`
+ ;; cuts an IMMUTABLE release: a document generated against 1.2.0 keeps meaning
+ ;; what 1.2.0 meant even after the body on main has moved on, and re-pushing a
+ ;; different body under the same version is refused.
+ :status  :published
+ :version "1.0.0"}

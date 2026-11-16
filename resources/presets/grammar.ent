@@ -1,0 +1,1539 @@
+;; ════════════════════════════════════════════════════════════════════════════
+;; grammar.ent — THE authoritative `.ent` grammar, in one annotated file.
+;;
+;; To START a model, copy `template.ent` beside this file instead: a short
+;; scaffold in one example world (an aircraft MRO shop), ordered the way one designs —
+;; objects, relationships, actions, attributes, and only then where the data
+;; comes from. THIS file is the reference you look a key up in.
+;;
+;; This is a *reference* ontology-installation file: it exercises EVERY section
+;; and EVERY grammar KEY the single `.ent` door (parser.ent) accepts, each with an
+;; inline description. It is kept structurally valid — it passes
+;; `parser.ent/validate!` and survives the lowering passes — so it doubles as a
+;; living, checkable spec. `unit/template-coverage-test` MECHANICALLY asserts that
+;; every key of the closed `EntFile` grammar appears here: add a grammar key
+;; without documenting it here and that test FAILS. (The test checks the CLOSED
+;; grammar only — the SECTIONS + KEYS. It does NOT check open RUNTIME vocabulary:
+;; source `:type` values, `:profile` values, model ids, object/link/action NAMES —
+;; those fill open `:keyword` slots and are resolved against a registry or the live
+;; schema at run time, not enumerated by the grammar. So this file shows a FEW
+;; source types as examples; it neither can nor should list the open set.)
+;;
+;; It is NOT meant to be installed as-is: the cross-references (link targets,
+;; :implements, :satisfies, source datasources) are illustrative names, and the
+;; deeper "which keys go together" semantics (output-mutex, ref integrity,
+;; ER-source coherence) are enforced LATER by declare/valid-schema? at install,
+;; not by the structural door this file documents.
+;;
+;; ── How a `.ent` is read (parser.ent/read-ent) ──────────────────────────────
+;;   1. slurp + edn/read-string
+;;   2. validate!      — CLOSED structural check; an unknown section / entity key /
+;;                       mistyped field is REJECTED with a humanized error.
+;;   3. lower-schema    = lower-value-types  (resolve :value-types refs → base type
+;;                                            + spliced :constraints/:format, then
+;;                                            DROP the :value-types section)
+;;                      ∘ lower-links        (link :fk → :endpoint-fk / :join → :sql producer)
+;;                      ∘ lower-rollups      (resolve every :derived :rollup sugar
+;;                                            → :derived :expression connected-* AST)
+;;                      ∘ lower-incremental  (`:incremental true` → the canonical
+;;                                            {:read-mode :added :write-mode :modify} map)
+;;   The wire / install / canonical schema only ever see the LOWERED result — both
+;;   :value-types and :rollup are pure file-local author sugar.
+;;
+;; A `.ent` deliberately carries NO `:ontology` key: the instance serves exactly
+;; one ontology (its DB name is in the connection config), so the same file
+;; installs anywhere. A top-level `:ontology` is rejected.
+;;
+;; Top-level keys: :schema (required) + the optional operational riders
+;; :automations / :schedules / :health-checks (they install into per-branch tables,
+;; not the schema blob) and :lineage-drawing (declarative presentation attached to
+;; the install). `:schema` sections shown below: :value-types :shared-properties
+;; :interfaces :objects :links :transforms (alias :functions) :datasets :llm-models
+;; :sources :actions :object-sets :functions :projects :applications :agents
+;; :pipelines.
+;; ════════════════════════════════════════════════════════════════════════════
+{:schema
+ {;; ══════════════════════════════════════════════════════════════════════════
+  :value-types
+  {:currency  {:type        :string
+               :description "ISO-4217 currency code"
+               :constraints {:min-length 3 :max-length 3 :regex "[A-Z]{3}"}
+               :format      {:kind :id}}
+   :ean       {:type        :string
+               :description "EAN/GTIN barcode — check-digit validated (:format :ean)"
+               :constraints {:format :ean}}
+   :iban      {:type        :string
+               :description "IBAN — structure + mod-97 validated (:format :iban)"
+               :constraints {:format :iban}}
+   :email     {:type :string :constraints {:format :email}}
+   :percent   {:type        :decimal
+               :description "0–100 percentage"
+               :constraints {:min 0 :max 100}
+               :format      {:kind :percentage :suffix "%" :decimals 2}}
+   ;; ── the FULL constraint + format vocabulary in one entry (each key annotated) ──
+   :positive-amount
+   {:type        :decimal
+    :description "A strictly-positive money amount — exercises every Constraints key."
+    :constraints {:min           0        ; inclusive lower bound
+                  :max           1000000  ; inclusive upper bound
+                  :exclusive-min 0        ; strict lower bound (value must be > 0)
+                  :exclusive-max 1000000  ; strict upper bound (value must be < 1e6)
+                  :min-length    1        ; string length bounds (string base types)
+                  :max-length    18
+                  :case-sensitive true}   ; string/enum matching case-sensitivity
+    :format      {:kind     :currency     ; numeric: :currency|:unit|:percentage|:duration|:id|:rid
+                                          ; temporal, and these ARE the render
+                                          ; styles: :date|:datetime-short
+                                          ; |:datetime-long|:time|:relative
+                                          ; |:iso-instant
+                  :currency "EUR"
+                  :prefix   "€ "          ; leading string
+                  :suffix   " netto"      ; trailing string
+                  :unit     "EUR"         ; unit label (for :kind :unit)
+                  :decimals 2
+                  :grouping true          ; thousands separators — WHICH separator
+                                          ; is the viewer's locale, not the app's
+                  :notation :compact      ; :compact|:scientific|:engineering
+                  :timezone "Europe/Vienna"}} ; pins a timestamp to ONE zone; omit
+                                          ; it and it renders in the viewer's zone
+   ;; ── array-shape constraints (on an [:array …] typed attribute) ──
+   :tag-set
+   {:type        [:array :string]
+    :description "A set of free-text tags — exercises the array-shape constraints."
+    :constraints {:min-size 0 :max-size 32 :unique true}}} ; length bounds + distinct elements
+
+  ;; ══════════════════════════════════════════════════════════════════════════
+  ;; :shared-properties — a property defined ONCE, reused across types/interfaces
+  ;; ──────────────────────────────────────────────────────────────────────────
+  ;; Referenced by its bare keyword in an :attributes / :property-list (e.g. just
+  ;; `:created-at`). Carries the same metadata/constraint vocabulary as a local
+  ;; property. (Unlike a value-type, a shared-property names BOTH the column and
+  ;; its type; a value-type only names a reusable type for a freshly-named column.)
+  :shared-properties
+  {:created-at {:type         :timestamp
+                :name         "Created at"
+                :description  "Row creation instant."
+                :visibility   :normal           ; :prominent | :normal | :hidden
+                :status       :active            ; :active|:experimental|:deprecated|:example
+                :render-hints [:sortable]
+                :ignore-inherited false}
+   :label      {:type :string :name "Label" :render-hints [:searchable :identifier]}}
+
+  :interfaces
+  {:locatable
+   {:display-name     "Locatable"
+    :description      "Anything with a geographic position."
+    :status           :active
+    :searchable       true
+    ;; :properties is an accepted alias for :property-list (both are AttrLists).
+    :property-list    [[:position :geopoint]]}
+
+   :document
+   {:display-name     "Document"
+    :description      "A procurement document anchored to an order."
+    ;; :extends — transitive interface inheritance (an implementer of :document
+    ;; also implements every interface listed here, with their props + links).
+    :extends          [:locatable]
+    :property-list    [[:doc-number :string]
+                       [:doc-date   :string]]
+    :link-constraints [{:link-name      :doc-of      ; constraint name (matched by :satisfies)
+                        :to-object-type :order       ; or :to-interface for a poly target
+                        :cardinality    :many-to-one
+                        :required       true}]}}
+
+  ;; ══════════════════════════════════════════════════════════════════════════
+  ;; :objects — object types (the terse author form; map shape is REQUIRED)
+  ;; ──────────────────────────────────────────────────────────────────────────
+  :objects
+  {;; ── A minimal writeback hub (no :external-source → populated by Actions) ──
+   :order
+   {:symbol      "📦"
+    :name        "Order"                  ; display name
+    :plural      "Orders"                 ; plural display name
+    :description "A purchase order — the writeback hub the documents hang off."
+    ;; OOUX (Sophia Prater): an instance is NAMED by something a person reads —
+    ;; never by its key. :title names it, :subtitle sits under it (typically the
+    ;; number), :row is how one reads as a LIST ROW wherever a list of this type
+    ;; appears (tables, pickers, search results). A title of `:pk` is the classic
+    ;; anti-pattern: every list becomes a column of order numbers.
+    :title       :subject                 ; title key: the property that names an instance
+    :subtitle    :pk                      ; shown under the title — the number
+    :row         [:pk :subject :status :summe-netto] ; the default list row (props of this type)
+    :groups      [:procurement]           ; categorisation labels
+    :aliases     ["PO" "Bestellung"]      ; extra search terms
+    :visibility  :prominent
+    :status      :active
+    :markings    [:confidential]          ; object-level mandatory access control
+    ;; rationale-as-data: WHY (queryable), distinct from :description's WHAT.
+    :rationale   "A source-less hub: rollups + Actions populate it, so it carries no :external-source."
+    :doc         {:caveats ["cross-refs here are illustrative"]}
+    :reconcile-mode :replace
+    :attributes
+    [;; (a) bare keyword → a shared-property reference (type comes from the section)
+     :created-at
+     ;; (b) [name type] → a local property with a bare/parametric/value-type type
+     [:pk            :string]
+     [:subject       :string]             ; the readable name :title points at
+     [:menge         :decimal]            ; base type, stored as DECIMAL(38,10)
+     [:preis         [:decimal 12 2]]     ; parametric: [:decimal precision scale]; a
+                                          ; column backing it
+                                          ; must declare the same, and a derived value
+                                          ; is rounded to the scale
+     [:embedding     [:vector 1536]]      ; parametric: [:vector dims]
+     [:tags          [:array :string]]    ; parametric: [:array elem-type] — no array of
+                                          ; arrays, and no nil element
+     [:adresse       [:struct {:strasse :string :plz :integer}]] ; [:struct {field type}]:
+                                          ; 1 to 10 scalar fields, no nesting
+     [:waehrung      :currency]           ; ← value-type ref (lowers to :string + constraints)
+     ;; (c) [name type opts] → a property carrying the full PropOpts metadata
+     [:status :string
+      {:name               "Status"
+       :description        "Lifecycle state of the order."
+       :visibility         :normal
+       ;; The lifecycle pair (see :invoice), here in the opts map — so ONE
+       ;; property can be deprecated without touching its type.
+       :status             :active
+       ;; :deprecation     {:reason "replaced by :status-latest"
+       ;;                   :deadline "2027-01-01" :replacement :status-latest}
+       :required           true           ; non-null validation (catalog.constraints)
+       :edit-only          false          ; true ⇒ not backed by a source column
+       :render-hints       [:selectable :low-cardinality]
+       :constraints        {:one-of ["offen" "teilbezahlt" "bezahlt" "storniert"]}
+       :format             {:kind :id}    ; display formatting (ValueFormat)
+       :conditional-format [{:when [:= [:get :status] "storniert"]
+                             :color "#fff" :background "#c00" :align :center :icon "⛔"}]
+       :markings           [:confidential] ; property-level MAC
+       :type-classes       {:semantic :status} ; forward-compat escape hatch
+       }]
+     [:summe-netto :decimal
+      {:description "Σ of every linked invoice's :netto."
+       :derived {:rollup {:over :invoices :agg :sum :of :netto}}}]
+     ;;     There is no switch that stores it. `:materialize true` was one and is
+     ;;     RETIRED — the key is still accepted by the grammar so it can be refused
+     ;;     with a sentence instead of a bare "disallowed key". A pipeline that
+     ;;     needs the value as a COLUMN reads this type's MATERIALIZATION
+     ;;     (`:order_mat` in `:datasets` below), where every derived property is
+     ;;     computed into one — so the reader that used to need a stored column
+     ;;     doesn't. A value that genuinely belongs in a column OF THIS TYPE is
+     ;;     dataset-layer work: compute it in a transform, and it arrives here as
+     ;;     an ordinary backed property with no `:derived` at all.
+     [:status-latest :string
+      {:description "kind of the latest event by doc-date (arg-max sugar)."
+       :derived {:rollup {:over :events :agg :arg-max :by :doc-date :pick :kind}}}]
+     [:invoice-count :integer
+      {:description "Number of linked invoices."
+       :derived {:rollup {:over :invoices :agg :count}}}]
+     [:avg-netto :decimal
+      {:description "Mean linked-invoice net (:avg rollup → :connected-avg; nil for none)."
+       :derived {:rollup {:over :invoices :agg :avg :of :netto}}}]
+     [:summe-netto-2026 :decimal
+      {:description "Σ of the linked invoices dated 2026 — the rollup, filtered."
+       :derived {:rollup {:over :invoices :agg :sum :of :netto
+                          :where [:starts-with :doc-date "2026"]}}}]
+     ;; (e) derived EXPRESSION property — the lowered form rollups become, also
+     ;;     usable directly for non-rollup compute (SQL/text string or expr AST).
+     [:netto-stimmt :boolean
+      {:description "Whether the rolled-up net equals the stated net."
+       :derived {:language :clojure :expression [:= [:get :summe-netto] [:get :netto]]
+                 :inputs [:summe-netto :netto]}}]]
+    :semantic-search {:property :embedding      ; the [:vector 1536] attribute above
+                      :model    "grok-4"        ; embedding model (allow-listed in :llm-models)
+                      :k        10              ; default top-K
+                      :metric   :cosine}        ; :cosine | :dot | :l2
+    ;; :lifecycle — the STATES an instance moves through and the Actions that move
+    ;; it (types.lifecycle). OOUX keeps a state (an attribute) and a call to action
+    ;; apart everywhere else; this is where they meet: which CTA is offered depends
+    ;; on the state the object is in.
+    ;;   :property    the attribute holding the state (must be one of :attributes)
+    ;;   :states      ≥2 states, in order; keyword or string — the property STORES
+    ;;                the name, so :offen and "offen" are the same state
+    ;;   :transitions each {:action :from [states…] :to state}. The Action needs
+    ;;                EXACTLY ONE (non-:multiple) param of this type — the object
+    ;;                whose state moves. At RUN TIME (not lowered into its rules,
+    ;;                so the projection has nothing to raise back) the Action gets
+    ;;                a submission criterion "stands in one of :from" and — unless
+    ;;                one of its own rules already writes :property — a rule that
+    ;;                sets it to :to. :mark-paid below writes :status itself, so
+    ;;                only the gate is added. Problems (unknown state, missing
+    ;;                Action, no/several object params) are said by the grammar
+    ;;                door and lint alike.
+    :lifecycle {:property    :status
+                :states      [:offen :teilbezahlt :bezahlt :storniert]
+                :transitions [{:action :mark-paid :from [:offen :teilbezahlt] :to :bezahlt}]}}
+
+   ;; ── An interface implementer with a data binding ──
+   :invoice
+   {:symbol      "💶"
+    :title       :doc-number
+    :status      :active
+    :deprecation {:reason "superseded by the v2 billing model"
+                  :deadline "2027-01-01" :replacement :invoice-v2}
+    :implements  [:document]              ; must carry :document's props + satisfy its links
+    :attributes  [[:doc-number :string]
+                  [:doc-date   :string]
+                  [:position   :geopoint] ; from :locatable (via :document :extends)
+                  [:netto      :decimal]
+                  [:ean        :ean]
+                  ;; :media-reference — a first-class SCALAR (alias :attachment): a
+                  ;; VARCHAR(64) sha256 content-address into the blob CAS (access.table
+                  ;; + GET /api/blob/:hash + the :blob object). NO new media table — the
+                  ;; scalar IS the reference. (Rechnung.quell-pdf is exactly this.)
+                  [:quell-pdf  :media-reference]
+                  ;; an ARRAY of media-references — e.g. an email's attachments. Uses the
+                  ;; :attachment alias purely to show it; identical storage to above.
+                  [:anhaenge   [:array :attachment]]
+                  ;; :rollup is how points FOLD inside a bucket, and it is declared here
+                  ;; because only the series knows: :sum for a FLOW (hours booked), :avg or
+                  ;; :max for a LEVEL (a balance). There is deliberately no default — a
+                  ;; bucketed read of a property without one is REFUSED, not guessed.
+                  [:zahlungsverlauf :timeseries
+                   {:series {:sync :zahlungs_serien :rollup :sum :unit "EUR"}}]]
+    ;; A single binding (object pulled from a datasource table).
+    ;;
+    ;; :primary-key HERE IS A SETTING, AND A TOO-COARSE ONE SILENTLY DROPS ROWS —
+    ;; at ingest, before any versioned step can see them, in the one layer that is
+    ;; deliberately not reviewable. It must carry the source's WHOLE grain. Keyed on
+    ;; `name` alone, a rates table turned 18 source rows into 15: three suppliers'
+    ;; older rate periods vanished on the way in, and no downstream transform could
+    ;; get them back. The identity gates judge the OBJECT TYPE, not the dataset
+    ;; underneath it, so nothing catches this for you — check it by hand, once:
+    ;; source row count vs `dataset preview <raw> --limit 1`. They must agree.
+    ;;
+    ;; The fix is the whole grain, NOT "drop the key" — the two differ in cost.
+    ;; Without :primary-key a dataset is FULL-REFRESH ONLY; with one, an incremental
+    ;; re-emit UPSERTs by pk-uuid. So dropping it is right for a small table (18 rows:
+    ;; a full refresh is free and cannot lose one) and wrong for a big one (77k rows:
+    ;; give it a key spanning the entire grain instead). Never keep a key that is
+    ;; merely COARSER than the source's grain — that is the one option with no upside.
+    :external-source
+    {:strategy    :simple
+     :datasource  :erp                    ; → a :sources entry
+     :table       "invoices"
+     :primary-key :doc-number
+     :column-map  {:doc-number :invoice_no :netto :net_amount} ; col → attr
+     :on-null     :skip}
+
+    ;;   :external-source
+    ;;   {:strategy    :simple
+    ;;    :datasource  :erp
+    ;;    :primary-key :doc-number
+    ;;    :incremental {:column :changed-at :initial "1900-01-01"}
+    ;;    :query "SELECT … FROM invoices WHERE changed_at > ?"}
+    ;;
+    ;; THE COLUMN HAS TO RISE WITH EVERY CHANGE, and it has to be one the query
+    ;; itself emits — the mark is read back from the landed dataset, so a column
+    ;; that is not in the output cannot be a cursor. An auto-incrementing id is
+    ;; enough only when rows are IMMUTABLE; if they can be edited in place, name
+    ;; an update-timestamp instead, or you will never see the edits.
+    ;; :initial is what `?` gets on the very first run (nothing landed yet).
+    ;;
+    ;; FOR A CHILD TABLE THAT CARRIES NO SUCH COLUMN, take its parent's: emit
+    ;; the head's change-timestamp as a column of the sync and make THAT the
+    ;; cursor. Coarse granularity (a date rather than an instant) is fine —
+    ;; overlap one period; the upsert on :primary-key makes a re-pull harmless.
+    ;;
+
+    ;;   :backing {:dataset     :rechnungen_raw
+    ;;             :primary-key :doc-number
+    ;;             :column-map  {:doc-number :invoice_no}}
+    ;;
+    ;; Fill it from several transforms and no single Job owns the index — that is
+    ;; legal and reported as such, rather than attributed to whichever one sorts first.
+    ;;
+    }
+
+   ;; ── An Entity-Resolution master (canonical entity merged from many sources) ──
+   :supplier
+   {:symbol        "🏭"
+    :title         :name
+    :resolve-entity true                  ; this type is a resolved master
+    :match-keys    [:ust-idnr]            ; exact shared-property equality merges rows
+    :requires-action-log true
+    :survivorship  {:name :latest :address :preferred-source} ; opaque here; tuned downstream
+    :edit-conflict {:strategy :apply-most-recent :timestamp-attr :updated-at}
+    :attributes    [[:name :string] [:ust-idnr :string] [:iban :iban]]
+    :checks        [{:name     "ust-idnr present"
+                     :expr     [:not= [:get :ust-idnr] ""]
+                     :inputs   [:ust-idnr]
+                     :on-error :warn}]
+    ;; Several sources legitimately feed one resolved entity → :external-sources.
+    :external-sources
+    [{:strategy :simple :datasource :erp    :table "suppliers"      :primary-key :ust-idnr}
+     {:strategy :simple :datasource :crm    :table "vendors"        :primary-key :vat_id
+      :column-map {:ust-idnr :vat_id}}]
+    :project        :master-data
+    :ignore-inherited false}}
+
+  :object-type-groups
+  {:master-data {:description "Types owned by the data-stewardship team."
+                 :members     [:order :vendor]
+                 :project     :master-data
+                 :ignore-inherited false}}
+
+  ;; ══════════════════════════════════════════════════════════════════════════
+  ;; :links — link types. A link is a PURE EDGE (no :attributes): a link needing
+  ;; its own metadata is modeled as an intermediary OBJECT TYPE + two m:1 links.
+  ;; Tuple: [name from to cardinality] or [name from to cardinality {opts}].
+  ;;
+  :links
+  [;; Minimal source-less link (populated later by a transform or an Action).
+   [:events :order :event :one-to-many]
+
+   ;; A link with full presentation opts + an interface-link membership.
+   ;; A link has TWO sides, and each is named the way a person standing on one
+   ;; end names the other: from an invoice, "its order"; from an order, "its
+   ;; invoices". Naming both sides after the link (or both `:invoices`) is the
+   ;; anti-pattern — a traversal then reads the same word in both directions.
+   [:invoice-order :invoice :order :many-to-one
+    {:name            "Invoice ↔ Order"
+     :forward-api-name :order              ; side from :invoice (default: link name)
+     :reverse-api-name :invoices           ; side from :order   (default: link name)
+     :forward-name    "Order"              ; from → to label: what an invoice calls its order
+     :reverse-name    "Invoices"           ; to → from label: what an order calls its invoices
+     :forward-plural  "Orders"
+     :reverse-plural  "Invoices"
+     :description     "Assigns an invoice to its order (by order-ref)."
+     :symbol          "🧾"
+     :visibility      :normal
+     :status          :active
+     :satisfies       {:interface :document :constraint :doc-of}}]
+
+   ;; A SELF-LINK: both ends :order. Each side gets its own API name — a rollup
+   ;; on :order says `:over :child-orders` (down) or reads `:parent-order` (up).
+   [:order-parent :order :order :many-to-one
+    {:forward-api-name :parent-order
+     :reverse-api-name :child-orders
+     :forward-name     "Parent order"
+     :reverse-name     "Child orders"}]
+
+   ;; A link fed by a datasource join table (ExtSource on the edge).
+   [:supplier-of :order :supplier :many-to-one
+    {:description "The supplier an order was placed with."
+     :external-source {:strategy        :resolve-by-shared-property
+                       :datasource      :erp
+                       :shared-property :ust-idnr
+                       :from-key-column :order_id
+                       :to-key-column   :supplier_id
+                       :on-unresolved   :skip}}]
+
+   [:placed-by :order :supplier :many-to-one
+    {:description "Order → the supplier it was placed with, by the order's own ref."
+     :fk :supplier-ref}]
+
+   ;; Map form — an explicit :side plus the strictness knobs (each defaults to
+   ;; :fail, which makes a bad FK LOUD instead of silently dropping the row).
+   ;; :side is REQUIRED for :one-to-one, where neither end is the `many` side.
+   [:invoice-of :invoice :order :one-to-one
+    {:description "Invoice ↔ its order (one apiece), keyed off the invoice."
+     :fk {:attribute     :order-ref
+          :side          :from      ; the FK lives on :invoice
+          :on-null       :skip      ; FK attribute null on the row
+          :on-unresolved :skip      ; FK value matches no imported PK
+          :on-duplicate  :fail}}]   ; (:one-to-one only) one FK value, several rows
+
+   [:related-orders :order :order :many-to-many
+    {:description "Orders that share a supplier VAT id (self-join, inline producer)."
+     ;; a self-link, so each side names itself — even a symmetric one
+     :forward-api-name :related-orders
+     :reverse-api-name :related-orders-of
+     :join {:on [:ust-idnr :ust-idnr] :from-pk :pk :to-pk :pk
+            :where :both-non-empty}}]
+
+   [:reconciled-supplier :invoice :supplier :many-to-one
+    {:description "Invoice → supplier, reconciled by a business match then linked FK→PK."
+     :fk-resolve {:key           :doc-number   ; invoice's own PK (the supplement merge key)
+                  :as            :supplier-fk   ; computed FK (supplier's PK) — auto-declared on :invoice
+                  :fk-type       :string        ; value-type of the :as attribute (default :string)
+                  :language      :pg-sql           ; :pg-sql | :sqlite-sql | :mssql-sql | :python | :clojure
+                  :on-unresolved :skip          ; forwarded to the endpoint-fk link
+                  ;; the join body — references each endpoint TYPE NAME as a table
+                  ;; (the runner views the object tables under those aliases):
+                  :query "SELECT invoice.doc_number, supplier.ust_idnr AS supplier_fk
+                          FROM invoice JOIN supplier ON invoice.supplier_ref = supplier.ust_idnr"}}]
+
+   ;; A link resolved by an ENDPOINT-FK external source — the FK column lives on
+   ;; ONE endpoint's own table (`:fk-side` names it, `:fk-attribute` the column),
+   ;; matched to the other endpoint via `:match-column`. `:on-duplicate` is the
+   ;; policy when the match is non-unique.
+   [:invoice-supplier :invoice :supplier :many-to-one
+    {:description "Invoice → supplier by the invoice row's own supplier ref."
+     :external-source {:strategy      :endpoint-fk
+                       :fk-side       :from            ; the FK lives on :invoice
+                       :fk-attribute  :supplier_ref    ; …in this column
+                       :match-column  :ust-idnr        ; matched to supplier.ust-idnr
+                       :on-duplicate  :first           ; policy on a non-unique match
+                       :on-unresolved :skip}}]]
+
+  ;; ══════════════════════════════════════════════════════════════════════════
+  ;; :transforms (alias :functions) — compute that produces rows / object sets.
+  ;; A CLOSED UNION over python/sql compute + source/polymorphic transform keys;
+  ;; the output-mutex / nil-guard matrix is declare/valid-schema?'s job downstream.
+  ;;
+  ;; ── THE LAYER RULE — read before authoring one ────────────────────────────
+  ;; The chain is  source → dataset → transform → CLEAN DATASET → object type.
+  ;; Pipeline work (parsing, joining, dedup, aggregation, FK resolution) belongs
+  ;; BETWEEN datasets. An object type is what a curated dataset is finally shaped
+  ;; into — it is not the pipeline's scratch space.
+  ;;
+  ;;   ✗ one transform: datasource/media-set + LLM ──────────────→ :object-type
+  ;;   ✓ two:           datasource/media-set + LLM → :dataset → shaping → :object-type
+  ;;
+  ;; A transform that reads an object-type and WRITES another object-type is
+  ;; dataset-layer work hosted in the ontology: terminate it in a `:dataset` and
+  ;; back the object type off that. The pair below (`:parse-invoices` → the
+  ;; `:invoices_parsed` dataset → `:shape-invoices` → `:invoice`) is the shape to
+  ;; copy. A datasource SYNC lands in a dataset too — that is `:external-source`
+  ;; on a `:datasets` entry (see the section below), NOT on an object type.
+  ;;
+  ;; ── NO LOOPS ──────────────────────────────────────────────────────────────
+  ;; A transform never reads what it writes, and transforms never depend on each
+  ;; other in a circle — also not through an object type and its
+  ;; `:materialization` dataset. The install refuses a loop it adds, a build one
+  ;; it meets. What the previous run wrote is `previous_output()` of an
+  ;; `:incremental` transform; a `:role :supplement` reads the type it supplements.
+  ;; ──────────────────────────────────────────────────────────────────────────
+  :transforms
+  {;; A python transform with named inputs, landing a CLEAN DATASET. Note the
+   ;; output kind: the expensive LLM extraction is persisted as its own
+   ;; checkpoint, so `run-import --only invoices_parsed` builds and lets you
+   ;; eyeball it, and the cheap shaping below re-runs for free with no re-Grok.
+   ;; That is the same split the layer rule asks for, paid for twice.
+   :parse-invoices
+   {:language        :python
+    :code-file       "transforms/parse_invoices.py" ; or inline :code "..."
+    ;; The lifecycle pair, as on every kind (see "RETIRING something" at the
+    ;; end of :schema): :active blocks removal by omission, :deprecated or
+    ;; :experimental (= unmarked) lets the next push drop it when left out.
+    :status          :active
+    ;; :deprecation  {:reason "replaced by :parse-invoices-v2"
+    ;;                :deadline "2027-01-01" :replacement :parse-invoices-v2}
+    ;; A `:kind :datasource` INPUT reads a source table inline, inside this
+    ;; transform's own pass. Use it only when the work genuinely needs the source
+    ;; and something else at once — here the ERP header rows must be joined to the
+    ;; PDF bytes and the model in a single sandbox. For PLAIN table ingestion
+    ;; prefer a SYNC (`:external-source` on a `:datasets` entry, e.g.
+    ;; `:invoices_raw` below): that lands its own versioned dataset you can build,
+    ;; inspect and rebuild independently, which an inline input cannot give you.
+    :inputs          {:raw  {:kind :datasource :datasource :erp :table "invoice_headers"}
+                      ;; :media-set input — reads a dataset's rows AND lands their
+                      ;; :media-reference blobs into the sandbox (PDF bytes here).
+                      :pdfs {:kind :media-set :dataset :raw-attachments}
+                      :llm  {:kind :language-model :source :xai
+                             :model "grok-4" :base-url "https://api.x.ai/v1"}}
+    ;; EXTERNAL transform: grants this sandbox egress to these source-ids (flips
+    ;; the netless sandbox to the network profile; each source still gates on its
+    ;; own :external-transform opt-in).
+    :external-systems [:erp :xai]
+    ;; :profile — the admin-curated resource ceiling (server.sandbox/profiles):
+    ;; an OPEN keyword resolved to sandbox wall/cpu/memory limits at RUN time (NOT
+    ;; a grammar enum). Absent ⇒ the 60 s default; an LLM transform issuing many
+    ;; sequential calls needs a wider one (e.g. :xlarge = 900 s).
+    :profile          :xlarge
+    ;; :resources — what ONE run requests, as the reference design's with_resources(cpu_cores=…,
+    ;; memory_gb=…): the worker's vCPU queue grants that many cores (FIFO, waits
+    ;; while they are taken) and pins the run to them; parallel_map() in the SDK
+    ;; spreads work over exactly those. Absent ⇒ 2 cores, the reference design's default.
+    :resources        {:cpu-cores 4 :memory-gb 8}
+    :semantic-version 1
+    ;; :done-key / :max-per-run — THE DRAIN. What is still to do, and how much of
+    ;; it one build takes on. Both used to be knowable only by reading the
+    ;; transform's body (`previous_output()` done-filtering and
+    ;; `cap_batch(…, MAX_PER_RUN)`), where the platform cannot see them — so
+    ;; `build estimate` had to project the consumer-pointer delta (rows READ) as
+    ;; if it were the work. On prod those differ by ~90× for a transform capped
+    ;; at 20 per build.
+    ;;   :done-key    the anti-join that IS the done-filter — the input alias and
+    ;;                the column on it whose values are this transform's output
+    ;;                primary key. Pending = input keys absent from the output.
+    ;;   :max-per-run the per-build cap. Python's `cap_batch(items)` reads it back
+    ;;                at run time, so the number the code caps at and the number
+    ;;                the estimate projects are ONE number.
+    ;; The python decorator spells the same thing as
+    ;; `@transform(done_key="mail.message_id", max_per_run=60)`.
+    :done-key         {:input :mail :key :message-id}
+    :max-per-run      60
+    ;; :prompt-key — the drain question one level sharper, and the one that makes
+    ;; a prompt edit self-invalidating. `:done-key` asks "is there already a row
+    ;; with this key" — identity, not the question: change the prompt, switch the
+    ;; model or correct an input column and the stale answer still counts as done
+    ;; (retiring it takes a `:semantic-version` bump PLUS a `:write-mode :replace`
+    ;; run). `:prompt-key` names the input columns the prompt is BUILT from; both
+    ;; the transform's `unprocessed(rows, previous_output())` and the platform's
+    ;; estimate hash the same md5 over them — with `:semantic-version` hashed in
+    ;; FIRST, so a bump invalidates every key with no second mechanism.
+    ;;   :columns  in ORDER (the order is part of the key), all from ONE input
+    ;;   :column   the output attribute the hash is stamped into; the output
+    ;;             object-type must DECLARE it, or the importer drops the column
+    ;;             and the anti-join matches nothing — forever, and silently.
+    ;; Python spells the same thing as
+    ;; `@transform(prompt_key=["mail.subject", "mail.body_text"])`.
+    :prompt-key       {:input :mail :columns [:subject :body-text] :column :prompt-hash}
+    ;; OUTPUT-MUTEX: exactly ONE of `:output` / `:outputs` / `:output-columns`
+    ;; (declare/valid-schema?). They are three different producer shapes, not
+    ;; three fields — `:output-columns` makes the transform an INTERMEDIATE with
+    ;; its own `t_` table (see `:normalize-invoices` below), so pairing it with
+    ;; an `:output` is a validation error, not a widening.
+    ;;
+    ;; Here the output is a first-class DATASET, not the object type.
+    ;; `:primary-key` still matters: it makes an incremental re-emit UPSERT into
+    ;; the landing table by `pk-uuid` instead of duplicating rows.
+    :output          {:kind :dataset :dataset :invoices_parsed}
+    :primary-key     :doc-number
+    :repository      :ingest
+    ;; rationale-as-data on a transform: WHY python-not-sql, queryable by the CLI.
+    :rationale       "python (not sql): the PDF extraction needs the multimodal model, not a relational scan."}
+
+   ;; ── The third producer shape: an INTERMEDIATE (`:output-columns`) ────────
+   ;; Neither a dataset nor an object type: a transform that declares
+   ;; `:output-columns` owns its own `t_<name>` table and is read by a downstream
+   ;; `{:kind :transform}` hop. Use it for a step whose result is not worth
+   ;; publishing as a first-class dataset — a chain link, not a checkpoint.
+   ;; Mutually exclusive with `:output`/`:outputs` (see the note above).
+   ;;
+   ;; Like a `:dataset` output, this keeps work OUT of the ontology; the layer
+   ;; rule is satisfied by either. Prefer a `:dataset` when you want to build,
+   ;; inspect or rebuild the step on its own (`run-import --only <name>`).
+   ;; NOTE `:primary-key` is absent, and that is enforced: on an intermediate it
+   ;; is the INCREMENTAL merge key, so it is required when `:incremental` is set
+   ;; and must be nil when it is not (parser.spec/valid-transform?). A stray PK
+   ;; on a full-refresh intermediate is a validation error, not a hint.
+   ;; FORM `:output-columns` is authored as `[[name type opts?] …]` TUPLES — the
+   ;; same shape a type's `:attributes` take, NOT the `{:attribute-name …}` maps a
+   ;; standalone `:dataset` lists under `:columns` (those two attribute-lists
+   ;; differ by field, by design). The install canonicalizes the tuples to maps
+   ;; internally, and the projection un-canonicalizes them BACK to tuples on
+   ;; export — so what you clone/pull is exactly this form and re-pushes clean.
+   ;;
+   :normalize-invoices
+   {:language       :pg-sql
+    :query          "SELECT doc_number, TRIM(supplier) AS supplier FROM invoices_parsed WHERE ingested_at >= ${cutoff} AND netto >= ${min-netto}"
+    :inputs         {:parsed {:kind :dataset :dataset :invoices_parsed}}
+    ;; :parameters — named values a build may set (a schedule's :parameters, a
+    ;; run setup's); else the :default. SQL reads them as ${name}; python declares
+    ;; them beside its inputs, @transform(inputs={'cutoff': StringParam('2026-01-01')})
+    ;; (IntegerParam, FloatParam, BooleanParam too), and reads cutoff.value. A
+    ;; transform with parameters needs no :inputs.
+    :parameters     {:cutoff    {:type :string :default "2026-01-01"
+                                 :description "Ignore anything ingested before this day."}
+                     :min-netto {:type :number :default 0}}
+    :output-columns [[:doc-number :string] [:supplier :string]]}
+
+   ;; It is deliberately cheap and deterministic: :sql, no egress, no model. That
+   ;; is what makes it free to re-run when the ontology's shape changes, without
+   ;; touching the expensive extract.
+   :shape-invoices
+   {:language    :pg-sql
+    :query       "SELECT doc_number, netto FROM invoices_parsed"
+    :inputs      {:parsed {:kind :dataset :dataset :invoices_parsed}}
+    :output      {:kind :object-type :object-type :invoice}
+    :primary-key :doc-number
+    :rationale   "sql (not python): a projection over a landed dataset never leaves the engine."}
+
+   ;; An @incremental transform (framework injects its own prior output). The
+   ;; bare `:incremental true` desugars to `{:read-mode :added :write-mode :modify}`
+   ;; (lower-incremental) — the shipped default behaviour.
+   ;;
+   ;; NOTE both rollups below write an object type DIRECTLY. They are here to
+   ;; document `:incremental`, not as a layering example — an aggregation is
+   ;; dataset-layer work, so in real code a rollup lands a `:dataset` and a
+   ;; shaping hop backs the object type off it, exactly as the pair above does.
+   :rollup-totals
+   {:language    :pg-sql
+    :query       "SELECT order_id, SUM(net_amount) AS netto FROM invoices GROUP BY order_id"
+    :incremental true
+    :outputs     [{:kind :object-type :object-type :order}]
+    :column-map  {:netto :netto}
+    ;; :board — the no-code Pipeline-Editor op-list this :query was compiled FROM.
+    ;; Pure round-trip metadata (the materializer ignores it and runs :query); its
+    ;; shape is validated at compile, not here.
+    :board       {:ops [{:op :group-by :keys [:order_id] :agg {:netto [:sum :net_amount]}}]}
+    ;; DO NOT WRITE IT HERE. A member is authored inside its pipeline's own
+    ;; `pipelines/<name>.entp` (see `resources/presets/grammar.entp`), which
+    ;; stamps this key — that is what makes two pipelines unable to claim one
+    ;; transform. It is documented here because the field is what every reader
+    ;; asks, not because this is where you set it.
+    :pipeline    :invoice-shaping}
+
+   :rollup-delta
+   {:language    :pg-sql
+    :query       "SELECT order_id, SUM(net_amount) AS netto FROM invoices GROUP BY order_id"
+    :incremental {:read-mode       :added      ; :added (default) | :current | :previous
+                  :write-mode      :modify     ; :modify (default incr) | :replace
+                  :static-inputs [:invoices] ; inputs that SNAPSHOT without breaking incr
+                  :strict-append   false}      ; force an APPEND transaction (no UPDATE)
+    ;; :write-mode :replace is the ONLY retraction an :incremental transform has.
+    ;; Under the default :modify a run can add rows and never remove one, so rows
+    ;; minted under a rule you have since changed sit beside the new ones forever —
+    ;; which is why a change to how a PRIMARY KEY is derived ships as a PAIR: a
+    ;; :semantic-version bump (forces one full non-incremental run) AND
+    ;; :write-mode :replace (makes that run's return value authoritative, so the
+    ;; deletion reconcile retires whatever it omits). Neither half works alone.
+    ;;
+    ;; GUARD THE EMPTY CASE. Under :replace the return value IS the authority, so a
+    ;; run that legitimately computes nothing — a source unreachable, a filter that
+    ;; matched no rows, a live lookup that came back empty — DELETES EVERY ROW rather
+    ;; than leaving the output untouched. A transform that carries previous rows
+    ;; forward filtered against a source of truth must RAISE on an empty authority
+    ;; instead of returning it. Declare that invariant beside the transform as a
+    ;; `:health-checks` rider (`:kind :custom`), naming nodes as {{object-type}} /
+    ;; {{dataset:x}} rather than a literal d_<locator>.
+    :outputs     [{:kind :object-type :object-type :order}]
+    :column-map  {:netto :netto}}
+
+   ;; A polymorphic link transform (per-from-type sub-sources).
+   :link-docs
+   {:strategy :polymorphic
+    :sources  [{:from-type :invoice :to-type :order
+                :from-key-column :order_ref :to-key-column :pk
+                :language :pg-sql :query "SELECT order_ref, pk FROM invoices"}]}}
+
+  ;;   1. SYNCED   — bound to a datasource by `:external-source` (below). The
+  ;;                 Source→Dataset sync; install lifts it to a `<name>-sync`
+  ;;                 transform. This is where an ERP table lands.
+  ;;   2. CLEAN    — the curated output of a transform (`:dataset` output), which
+  ;;                 a shaping transform then reads to feed an object type. THE
+  ;;                 LAYER the ontology is built on; see the layer rule above.
+  ;;   3. RAW/UPLOADED — landed by an uploader or read as a `:dataset` /
+  ;;                 `:media-set` input.
+  ;;
+  ;; `:columns` are the backing schema; `:kind` an optional producer-relationship
+  ;; tag. A CLEAN dataset needs no `:columns` — the producer's output defines them.
+  ;; ──────────────────────────────────────────────────────────────────────────
+  :datasets
+  {;; ROLE 1 — SYNCED. `:external-source` binds this dataset straight to a
+   ;; datasource table/query; install lifts it into an `invoices_raw-sync`
+   ;; transform whose output is THIS dataset. Prefer this over hanging
+   ;; `:external-source` on an object type: a source bound to an object type
+   ;; lands raw ERP rows in the ontology with no curated layer in between.
+   ;; Shape it into the object type with a transform, as `:shape-invoices` does.
+   :invoices_raw
+   {:title       "Invoices (ERP, raw)"
+    :description "Source→Dataset sync. Shaped into :invoice downstream."
+    :kind        :standalone
+    :external-source {:datasource  :erp
+                      :table       "raw_invoices"   ; or :query "SELECT …"
+                      :primary-key :doc_id}}
+
+   ;; ROLE 2 — CLEAN. The curated checkpoint `:parse-invoices` writes and
+   ;; `:shape-invoices` reads: the layer the `:invoice` object type is built on.
+   ;; No `:columns` — the producer's `:output-columns` define them. A transform
+   ;; naming a `:dataset` output must have that dataset declared here
+   ;; (declare/valid-schema?); only an UNNAMED producer-minted one is implicit.
+   :invoices_parsed
+   {:title       "Invoices (parsed)"
+    :description "LLM extraction checkpoint. Build + eyeball alone; shaping re-runs free."
+    :kind        :transform-output}
+
+   ;; ROLE 3 — RAW/UPLOADED, read by `:parse-invoices` as a `:media-set` input.
+   :raw-attachments
+   {:title       "Raw attachments"
+    :description "One row per uploaded attachment; media_ref = sha256 into the blob CAS."
+    :kind        :standalone
+    :columns     [{:attribute-name :att_id     :attribute-type :string}
+                  {:attribute-name :message_id :attribute-type :string}
+                  {:attribute-name :filename   :attribute-type :string}
+                  {:attribute-name :media_ref  :attribute-type :media-reference}]}
+
+   ;; It is an ordinary dataset in every other respect: a transform writes it (one
+   ;; row per series per timestamp), it versions, it builds. That is the point —
+   ;; the measurements are BULK data, and the ontology only points at them.
+   :zahlungs_serien
+   {:title       "Payment history (series)"
+    :description "One row per (series, timestamp): the sync behind :invoice.zahlungsverlauf."
+    :kind        :standalone
+    :columns     [{:attribute-name :series_id :attribute-type :string}
+                  {:attribute-name :ts        :attribute-type :date}
+                  {:attribute-name :value     :attribute-type [:decimal 12 2]}]}
+
+   ;; A dataset of the ontology's current state: for a download or a dataset-shaped
+   ;; consumer. It holds stored properties and edits, no derived ones. A pipeline may
+   ;; read the object type directly: that input is the same state without a stored copy.
+   :order_mat
+   {:title       "Orders (ontology state)"
+    :description "Materialization of :order — latest indexed state, link rollups included."
+    :kind        :materialization
+    :object-type :order
+    :properties  [:pk :status]}
+
+   ;; What the buffer adds is an ORDER and an ADDRESS. Records are appended to a
+   ;; partition and numbered; a consumer holds an offset and can replay from it.
+   ;; `:columns` is therefore required — a stream is inherently tabular, and the
+   ;; schema is what each published record is validated against, batch-at-a-time
+   ;; (one bad record refuses the whole batch, so no caller is left guessing
+   ;; which half landed).
+   ;;
+   ;; ── PARTITION KEY ≠ PRIMARY KEY ───────────────────────────────────────────
+   ;; `:partition-keys` GROUP records so their order is kept — all readings for
+   ;; one device, all events for one customer. They do NOT deduplicate.
+   ;; `:primary-key` is the CDC half: the columns that identify a resolved
+   ;; record. With one, the data is a CHANGELOG and consumers read a CURRENT
+   ;; VIEW — the most recent record per key, whole (a null in the latest record
+   ;; is a value, not a gap to fill from the one before it), minus the keys a
+   ;; record with `:deletion-column` true has retracted. Without one, every
+   ;; record is its own row and nothing is ever superseded.
+   ;;
+   ;; The dedup columns are folded into `:partition-keys` on install, because a
+   ;; changelog whose updates for one key can land on two partitions has no order
+   ;; in which to resolve them.
+   ;;
+   ;; ── THE TWO CONSUMERS ─────────────────────────────────────────────────────
+   ;; `archive` moves buffered records into this dataset's own table every
+   ;; `:archive-every-ms` — that is what makes a stream readable by everything
+   ;; that speaks tables. `index` hydrates any object type backed by it, at
+   ;; streaming latency rather than at build cadence. They hold SEPARATE offsets
+   ;; and the buffer is trimmed to the slower of the two, so archiving can never
+   ;; retire a record the Ontology has not seen. `:retention-ms` is how long an
+   ;; already-archived record stays addressable for a replay.
+   :sensor_readings
+   {:title       "Sensor readings (stream)"
+    :description "Push-based ingestion. An object type naming this as its :backing
+                  dataset is hydrated at streaming latency, not at build cadence."
+    :kind        :standalone
+    :columns     [{:attribute-name :sensor_id   :attribute-type :string}
+                  {:attribute-name :temperature :attribute-type [:decimal 8 2]}
+                  {:attribute-name :taken_at    :attribute-type :date}
+                  {:attribute-name :retired     :attribute-type :boolean}]
+    :stream      {:partitions       4          ; 1..16; each carries ~5 mb/s
+                  :partition-keys   [:sensor_id]
+                  :primary-key      {:columns         [:sensor_id]
+                                     :deletion-column :retired}
+                  :stream-type      :low-latency   ; or :high-throughput
+                  :semantics        :at-least-once ; or :exactly-once
+                  :compressed?      false
+                  :retention-ms     3600000
+                  :archive-every-ms 60000}}}
+
+  ;; ══════════════════════════════════════════════════════════════════════════
+  ;; :llm-models — the whole-schema allow-list + cost table for LLM model ids.
+  ;; Keyed by the model-id STRING (they carry dots/dashes). A `:language-model`
+  ;; transform input may only name a model present here. `:in`/`:out` are a direct
+  ;; TOKEN PRICE — currency units per 1,000,000 tokens, the unit providers quote
+  ;; (there is no compute-seconds proxy). The rate IS the registration: a model
+  ;; without one cannot be used. `:description` and `:context-window` are the
+  ;; Model-Registry half — what the model is for and how many tokens it accepts.
+  ;; Both are DESCRIPTIVE: nothing truncates a prompt against the window.
+  ;; A registration also says how the model is reached: `:source` (the :sources
+  ;; entry holding base URL and key) and `:provider`, the dialect spoken to it —
+  ;; :openai-chat (xAI, OpenAI, Mistral, OpenRouter, Ollama, vLLM, …) or
+  ;; :anthropic-messages (Claude); a plugin adds more (:llm/wires). Without one the
+  ;; source's host decides. `:capabilities` says what it can do; an agent needs
+  ;; :tool-calling. `:default` marks the model the built-in analyst answers with.
+  ;; ──────────────────────────────────────────────────────────────────────────
+  :llm-models
+  {"grok-4" {:in 0.15 :out 0.60 :currency "USD" :deprecated false
+             :description    "General reasoning model — the default for extraction transforms."
+             :context-window 131072
+             :source         :xai
+             :provider       :openai-chat
+             :capabilities   [:tool-calling :vision]
+             :default        true}}
+
+  ;; ══════════════════════════════════════════════════════════════════════════
+  ;; :sources — registered source connectors (author form). Closed at the top;
+  ;; nested :writeback/:webhooks validated semantically downstream.
+  ;; ──────────────────────────────────────────────────────────────────────────
+  :sources
+  {;; A code-consumed (data-driven) source, e.g. :rest/:imap — :config holds
+   ;; cleartext, :secrets holds PLAINTEXT creds the CLI seals (RSA-OAEP) into
+   ;; :secret-cipher before the schema leaves the CLI (plaintext never reaches core).
+   :erp
+   {:type               :rest
+    :description        "The ERP system's REST API."
+    :config             {:base-url "https://erp.example.com/api"}
+    :secrets            {:api-key "PLAINTEXT-AT-AUTHOR-TIME-ONLY"}
+    :external-transform true                ; opt this source into worker secret-release
+    :egress             ["erp.example.com:443"]
+    :access             :read-only
+    :markings           [:confidential]
+    :export-markings    [:confidential]}
+
+   ;; A classic JDBC source.
+   :crm
+   {:type     :mssql
+    :jdbc-url "jdbc:sqlserver://crm.example.com;database=crm"
+    :host     "crm.example.com"
+    :port     1433}
+
+   ;; A command/SSH source with an allow-list + a writeback channel.
+   :legacy
+   {:type           :ssh
+    :host           "legacy.example.com"
+    :port           22
+    :remote-path    "/var/exports"
+    :command        "cat"
+    :allow-commands ["cat" "ls"]
+    :writeback      {:enabled true}
+    :webhooks       {:on-change {:url "https://hooks.example.com/legacy"}}}
+
+   ;; A filesystem source (:path). NOTE the `:type` value: it is RUNTIME
+   ;; vocabulary, not grammar — the grammar slot is only `[:type :keyword]`; which
+   ;; concrete source types exist (:file/:rest/:imap/:ssh/:mssql/…) is defined by
+   ;; the DATA registry `parser.spec/default-source-types`, resolved at run time.
+   ;; So this file shows a FEW type values as examples; it does not (and cannot)
+   ;; enumerate the open set.
+   :dropbox
+   {:type :file :path "/var/imports/incoming"}
+
+   ;; An IMAP mailbox — again `:imap` is a registry value, not a grammar token.
+   :mailbox
+   {:type               :imap
+    :config             {:host "mail.example.com" :port 993 :folder "INBOX" :tls true}
+    :secrets            {:username "PLAINTEXT-AT-AUTHOR-TIME-ONLY"
+                         :password "PLAINTEXT-AT-AUTHOR-TIME-ONLY"}
+    :external-transform true
+    :egress             ["mail.example.com:993"]
+    :access             :read-only}}
+
+  ;; ══════════════════════════════════════════════════════════════════════════
+  ;; :actions — Action types (form-driven writeback). Rules are step trees; the
+  ;; op-specific shape of each {:op …} step is compiled downstream (open here).
+  ;; ──────────────────────────────────────────────────────────────────────────
+  :actions
+  {:mark-paid
+   {:name                :mark-paid
+    :display-name        "Mark order paid"
+    :description         "Set an order's status to bezahlt."
+    :visibility          :prominent
+    ;; :on — the object type this Action is offered ON (OOUX: the call to action
+    ;; lives on its object). The standard Object View of :order offers it, any app
+    ;; that binds :order may submit it, and its ONE param of type :order becomes
+    ;; the viewed object: `:prefill :current-object` is implied
+    ;; (types.submission/with-on-prefill) unless the param states its own
+    ;; :prefill. A CREATE Action (:open-order below) has no :on — the object does
+    ;; not exist yet. It is also a transition of :order's :lifecycle (above).
+    :on                  :order
+    ;; The lifecycle pair (see :invoice), stored + compared like the rules.
+    :status              :active
+    ;; :deprecation      {:reason "superseded by :mark-settled"
+    ;;                    :deadline "2027-01-01" :replacement :mark-settled}
+    :params              {:order  {:type        :order        ; :some — a type or ref
+                                   :name        "Order"
+                                   :description "The order to update."
+                                   :required    true
+                                   :exposure    :visible      ; :visible | :hidden
+                                   :editable    true
+                                   :prefill     :current-object
+                                   ;; :multiple true — a LIST (bulk action). The action
+                                   ;; is applied ONCE: :update/:delete-object/:create-link
+                                   ;; over [:get :order] edit each order of the list
+                                   ;; ([:get :order :x] reads that order); a :create
+                                   ;; makes ONE object (one per element: {:op :for-each
+                                   ;; :collection :order :as :o :steps […]}); :run-schedule,
+                                   ;; webhooks and :notify run once and get the list.
+                                   :multiple    false
+                                   :options-from {:object-set :open-orders :label :pk}}
+                          :amount {:type :number :default 0
+                                   :constraints {:min 0}
+                                   :overrides [{:when     [:= [:get :order :status] "storniert"]
+                                                :exposure :hidden
+                                                :required false
+                                                :default  0
+                                                :editable false}]}}
+    :submission-criteria [{:test {:s [:get :order :status]} :pred [:not= :s "storniert"]}]
+    :form                {:sections [{:title "Auftrag" :columns 2 :params [:order :menge]}
+                                     {:title       "Begruendung"
+                                      :description "Steht spaeter im Action-Log."
+                                      :collapsed   true
+                                      ;; blendet den ganzen Abschnitt samt Parametern aus
+                                      :overrides   [{:when [:= :order nil] :exposure :hidden}]
+                                      :params      [:vermerk]}]}
+    :rules               [{:op :update :target [:get :order :id]
+                           :object-type :order :values {:status "bezahlt"}}
+                          {:op :create :interface :document :values {:doc-number "auto"}}]
+    :edits               [{:object-type :order}]
+    ;; Es ist AUTOREN-ZUCKER: `lower-schema` expandiert den Toggle in genau diese
+    ;; drei Dinge, bevor irgendetwas anderes die Action sieht. Darum ist die
+    ;; Log-Zeile atomar mit den Edits, die sie beschreibt (eine Transaktion), und
+    ;; eine per :required/:submission-criteria ABGEWIESENE Submission schreibt gar
+    ;; keine — sie kommt nie bis zur ersten Regel.
+    ;;
+    ;; ERZWINGEN geht auf der anderen Seite: `:requires-action-log true` am
+    ;; OBJEKTTYP (siehe :supplier oben) weist beim Install jede Action ab, die
+    ;; diesen Typ ohne Log bearbeitet.
+    :action-log          true
+    :notifications       [{:to :current-user :template "order-paid"}] ; email on apply
+    :webhooks            [{:url "https://hooks.example.com/paid" :method "POST"}] ; outbound REST
+    :on-branch           {:webhooks       false
+                          :notifications  false
+                          :external-calls false}}
+
+   ;;   1. Der PRIMÄRSCHLÜSSEL ist Pflicht — ohne ihn gibt es kein Objekt, das
+   ;;      die Action anlegen könnte.
+   ;;      Bei :order ist das :pk. Ohne diesen Parameter legt die Action nichts an.
+   ;;   2. Es gibt KEIN `:prefill :current-object`. Ein Create wird nicht auf
+   ;;      einem Objekt geöffnet — es entsteht erst eins. Die Umgebungswerte, die
+   ;;      hier überhaupt tragen, sind :current-user und :uuid. Wer :mark-paid
+   ;;      abschreibt, erbt sonst ein Prefill, das nichts füllt, und der Knopf
+   ;;      kann nicht abschicken, weil ein Pflichtparameter leer bleibt.
+   ;;   3. Deshalb sitzt der Knopf auch woanders: NICHT in einer Object View (die
+   ;;      wird über die Instanz adressiert, die es noch nicht gibt), sondern auf
+   ;;      einer App-Seite — im `.enta`, mit Werten aus Eingaben statt aus einem
+   ;;      Objekt:
+   ;;        {:widget :action-button :label "Anlegen" :action :open-order
+   ;;         :params {:pk {:val :neue-nr} :menge {:val :neue-menge}}}
+   ;;      Das Gegenstück, die Bindung an das AKTUELLE Objekt, steht in
+   ;;      grammar.entv am :action-form für :mark-paid — dank `:on :order`
+   ;;      ohne eigene Bindung.
+   :open-order
+   {:name                :open-order
+    :display-name        "Open order"
+    :description         "Eine neue Bestellung anlegen."
+    :status              :active
+    :params              {:pk    {:type :string :name "Order no."
+                                  :description "Der Primärschlüssel — Pflicht, und aus nichts vorbelegbar."
+                                  :required true :exposure :visible}
+                          :menge {:type :number :name "Menge"
+                                  :required false :constraints {:min 0}}}
+    ;; A SCHEDULE RULE starts a schedule's build: {:op :run-schedule :schedule
+    ;; "invoices je stichtag" :parameters {:cutoff [:get :stichtag]} :as :lauf}.
+    ;; A parallelized schedule builds the run setup its :parameters make; the run id
+    ;; is bound under :as, and the rules after it apply once the build has begun —
+    ;; it does not wait for the build — e.g. {:op :create … :values {:lauf [:get :lauf]}}
+    ;; keeps the run on the object. It runs on a branch too (a build is no side
+    ;; effect a branch holds back).
+    ;;
+    ;; An action reaches a foreign system only through a WEBHOOK of a source, and
+    ;; only in one of two positions — :phase is required:
+    ;;
+    ;;   :writeback — at most ONE per action. Runs BEFORE every other rule, wherever it
+    ;;     stands; a failure ABORTS the action (:writeback-failed, nothing changes). Its
+    ;;     answer is bound under :as for the rules after it — e.g. the key the foreign
+    ;;     system minted: {:op :invoke-webhook :phase :writeback :source :erp
+    ;;     :webhook :order-insert :params {:menge [:get :menge]} :as :wb}, then
+    ;;     {:op :create :object-type :order :values {:pk [:get :wb :identity] …}}.
+    ;;     A list input goes to it whole, in one call.
+    ;;
+    ;;   :side-effect — after the commit, as many as you like, in no guaranteed order,
+    ;;     best effort: a failure is recorded, the action stands. Given a LIST of
+    ;;     payloads it runs once per payload.
+    ;;
+    ;; A webhook is an interface — named inputs, named outputs — and what it does is
+    ;; the source's declaration, e.g. Sutra-OS's table writeback:
+    ;;   :webhooks {:order-insert {:kind :table :table "ORDERS" :op :insert}}
+    ;; over the source's :writeback allowlist. On a branch webhooks do not run unless
+    ;; :on-branch {:webhooks true}; the action is applied anyway.
+    :rules               [{:op :create :object-type :order
+                           :values {:pk [:get :pk] :menge [:get :menge]}}
+                          {:op :invoke-webhook :phase :side-effect
+                           :source :erp :webhook :order-created
+                           :params {:pk [:get :pk]}}]
+    :edits               [{:object-type :order}]}}
+
+  :object-sets
+  {:open-orders
+   {:name        :open-orders
+    :description "Orders still awaiting fulfilment, newest first."
+    :project     :master-data
+    :root        :order
+    :param-slots []
+    :where       [:= :status "open"]           ; predicate IR, slots as [:param p]
+    ;; Geo (the reference design withinDistanceOf/withinBoundingBox) on a :geopoint attribute ("lat,lon")
+    ;; or a [lat-attr lon-attr] pair; a point is [lat lon], {:lat :lon} or "lat,lon":
+    ;;   [:within-distance :lage {:center [:param :ort] :distance 300 :unit :km}]   ; :m :km :mi :nmi :ft :yd
+    ;;   [:within-bounding-box [:lat :lon] {:top-left [48.5 12.0] :bottom-right [46.0 17.0]}]
+    :select      [:created-at :status]
+    :order-by    :created-at
+    :limit       100
+    :include     [{:link :invoices}]}}
+
+  ;; ══════════════════════════════════════════════════════════════════════════
+  ;; :functions — an edit Function (a :source program that writes edits) over a target type.
+  ;;
+  ;; `:releases` is the history {version → snapshot}. NOT hand-authored — the
+  ;; install mints it and `project export` emits it back, so that re-installing
+  ;; an exported project does not strip what its consumers are pinned to. It is
+  ;; shown here because the grammar accepts it for exactly that round-trip.
+  ;;
+  :functions
+  {:reconcile
+   {:name        :reconcile
+    :language    :clojure
+    ;; body: search the matching supplier and set the order's :supplier-fk — a
+    ;; Function computes its OWN edits (unlike an action's fixed rule chain).
+    :source      "(defn reconcile [order] …)"
+    :target-type :order
+    :types       {:order :order}
+    :param-types {:threshold :number}
+    ;; RELEASE — the install publishes this source AS 1.2.0; `:releases` is the
+    ;; immutable history a pinned consumer resolves against.
+    :version     "1.2.0"
+    :releases    {"1.0.0" {:language :clojure :source "(defn reconcile [order] …)"
+                           :target-type :order :param-types {:threshold :number}}}}
+
+   :close-order
+   {:name        :close-order
+    :language    :python
+    :target-type :order
+    :source      "from functions.api import function, OntologyEdit, String
+from ontology_sdk import PlatformClient
+from ontology_sdk.ontology.objects import Order
+
+@function(edits=[Order])
+def close_order(order: Order, reason: String) -> list[OntologyEdit]:
+    edits = PlatformClient().ontology.edits()
+    edits.objects.Order.edit(order).status = 'closed: ' + reason
+    return edits.get_edits()
+"}
+
+   :classify-cost-center
+   {:name        :classify-cost-center
+    :language    :clojure
+    :source      "(defn classify-cost-center [invoice]
+                    (let [cc (OntologyClient/use-llm
+                               {:model \"grok-4\" :source :lms
+                                :prompt \"Rechnung {{invoice.nr}}: {{invoice.text}}. Welche Kostenstelle?\"
+                                :output [:enum \"werkstatt\" \"buero\" \"fuhrpark\"]
+                                :tools [{:query-objects :cost-center :properties [:name :description]}
+                                        :calculator]})]
+                      (OntologyClient/apply-action :assign-cost-center
+                                                   {:invoice invoice :cost-center cc})))"
+    :target-type :invoice
+    :types       {:invoice :invoice}
+    ;; LIMITS: two minutes for the whole run; reads live (it calls a model)
+    :timeout-ms  120000
+    :snapshot    :default}
+
+   :beleg-lesen
+   {:name        :beleg-lesen
+    :language    :clojure
+    :source      "(defn beleg-lesen [dokument]
+                    (let [l (OntologyClient/use-llm
+                              {:model \"grok-4\" :source :xai
+                               :prompt \"Lies den Beleg {{dokument.betreff}}: Rechnungsnummer, Datum, Netto.\"
+                               :media [\"{{dokument.pdf}}\"]
+                               :media-as :auto
+                               :media-pages 3
+                               :output {:struct {:rechnungsnr :string :datum :string
+                                                 :netto :number :begruendung :string}}})]
+                      (OntologyClient/apply-action :lesung-anlegen
+                                                   {:dokument dokument
+                                                    :rechnungsnr (:rechnungsnr l)
+                                                    :datum (:datum l)
+                                                    :netto (:netto l)
+                                                    :begruendung (:begruendung l)})))"
+    :target-type :lesung
+    :types       {:dokument :eingangsdokument}
+    :timeout-ms  120000}
+
+   ;; ── STAGED WRITES: the count below sees the order this run just created ──
+   :open-order-and-count
+   {:name          :open-order-and-count
+    :language      :clojure
+    :staged-writes true
+    :source        "(defn open-order-and-count [order]
+                      (let [neu   (-> OntologyClient/action
+                                      (.create-order {:pk \"PO-2\" :subject \"Nachbestellung\" :status \"open\"}))
+                            offen (-> (OntologyClient/search) (.order)
+                                      (.filter (fn [o] (= (.status o) \"open\"))) (.all) deref)]
+                        offen))"
+    :target-type   :order
+    :types         {:order :order}}
+
+   :grossauftraege
+   {:language :clojure
+    :inputs   {:order      {:kind :object-type :object-type :order}
+               :min-betrag {:kind :scalar}}
+    :code     "(fn [{:keys [order min-betrag]}]
+                 (filter #(>= (or (:betrag %) 0) min-betrag) order))"}
+
+   ;; ── A query Function that asks a SOURCE live and keeps nothing ────────────
+   ;; :external-systems names sources that exist and carry :external-transform
+   ;; true (the install refuses others). The call needs clearance for the source's
+   ;; markings, and they must be exportable: the arguments leave the platform.
+   ;; Called from an app variable or the function-run endpoint it reads live; an
+   ;; action's :invoke-function refuses it (egress from an action: :invoke-webhook).
+   ;; In python: get_source('erp') → .url, .get_secret('api-key'),
+   ;; .get_https_connection().get_client() (a path '/…' joins the url; a host
+   ;; outside the source's :egress is refused). Rows need no object type.
+   ;; A python Function is `@function` from functions.api — never `@transform`,
+   ;; which declares a build transform (the install refuses either one in the
+   ;; other's section). `sources=` is its :external-systems, `api_name=` its API
+   ;; name; its arguments are the function's own parameters. It returns its value
+   ;; ONCE: a generator (`yield`) is refused — as it is for a transform, which
+   ;; writes its outputs once per build, as one transaction.
+   :lieferstatus
+   {:language         :python
+    :inputs           {:bestellnummer {:kind :scalar}}
+    :external-systems [:erp]
+    :code             "from functions.api import function, String
+from functions.sources import get_source
+
+@function(sources=['erp'], api_name='lieferstatus')
+def lieferstatus(bestellnummer: String):
+    erp = get_source('erp')
+    r = erp.get_client().get('/orders/' + bestellnummer,
+                             headers={'Authorization': 'Bearer ' + erp.get_secret('api-key')})
+    r.raise_for_status()
+    return [{'bestellnummer': bestellnummer, 'status': r.json()['status']}]
+"}}
+
+  :projects
+  {:master-data {:name        "Master Data"
+                 :description "Resolved master entities (suppliers, articles)."
+                 :grants      {:read [:everyone] :write [:data-stewards]}}
+   :procurement {:name    "Procurement"
+                 :imports [:master-data]}}
+
+  :repositories
+  {:ingest {:description "ETL + entity-resolution transforms."
+            :type        :transforms
+            :python-deps ["pandas>=2"]
+            :project     :procurement}}
+
+  ;; ══════════════════════════════════════════════════════════════════════════
+  ;; :pipelines — a pipeline editor PIPELINE: the data-integration resource the
+  ;; builder app opens, and the unit a build/deploy is scoped to.
+  ;;
+  ;; AUTHOR ONE AS `pipelines/<name>.entp`, NOT HERE — exactly as an app is
+  ;; authored as `apps/<name>.enta`. The lean file carries the pipeline AND its
+  ;; member transforms, which is what makes membership exclusive by construction;
+  ;; `resources/presets/grammar.entp` is its annotated grammar. This inline
+  ;; section is the monolith form the grammar still accepts, and it can only state
+  ;; the CONTAINER: the members are ordinary `:transforms` entries carrying a
+  ;; `:pipeline` back-ref (documented above), because membership is stored once, on
+  ;; the member.
+  ;;
+  :pipelines
+  {:invoice-shaping
+   {:kind        :batch                     ; :batch | :streaming
+    :description "Shape raw invoice landings into the invoice type."
+    :project     :procurement               ; ownership; grants cascade from it
+    :repository  :ingest                    ; the git tree its boards live in
+    :imports     [:raw_invoices :supplier]  ; read, not produced, by this pipeline
+    :outputs     [:invoice]}}               ; what it delivers
+
+  ;; AUTHOR ONE AS `apps/<name>.enta`, NOT HERE. This inline section is the
+  ;; monolith form the grammar still accepts; the lean per-app file is what people
+  ;; write, and `resources/presets/grammar.enta` is its annotated grammar —
+  ;; `:layout` is NOT opaque view config, it is a typed node tree (containers ·
+  ;; widgets · `:vars`), the same kit a `.entv` object view speaks.
+  ;;
+  ;; `:client-id` is NOT writable here — it is minted when the section installs,
+  ;; which is why the grammar refuses it as an authored key.
+  ;; ──────────────────────────────────────────────────────────────────────────
+  :custom-applications
+  {:field-tool
+   {:display-name "Field Tool"
+    :description  "Desktop client for the app-studio floor."
+    :status       :draft                    ; :draft | :published
+    :project      :procurement              ; must resolve, like any other ref
+    :repository   :ingest                   ; where its own source is kept
+
+    ;; THE CLIENT. :authorization-code = a person signs in and the token carries
+    ;; THEIR permissions; :client-credentials = a generated service user, carrying
+    ;; the APPLICATION's. A redirect URI must be absolute https://…, or
+    ;; http://localhost… for a desktop or development client — an authorization
+    ;; code handed to a relative or plain-http address is a code handed to the
+    ;; network.
+    :client       {:grant-types   [:authorization-code]
+                   :redirect-uris ["http://localhost:8787/callback"]
+                   :token-ttl     3600}     ; seconds, 60 … 86400
+
+    ;; THE SCOPE is the SDK's contents AND the token's reach — one list, so a name
+    ;; the token may not touch cannot appear in the generated module either.
+    ;; :operations are API NAMESPACES — the first path segment after /api/.
+    ;; The client SECRET is never here: `custom-app client mint` returns it once.
+    :scope        {:object-types [:purchase-order]
+                   :actions      [:approve-order]
+                   :functions    [:reconcile]
+                   :operations   [:objects :object-types :actions :function]}
+
+    :sdk          {:namespace "field.sdk"}  ; `sutra sdk generate <namespace>`
+    :permissions  {:roles [:admin]}         ; who may open it at all
+
+    ;; HOSTING is optional and static-only — no server runs here. Declare a
+    ;; subdomain and the hosted callback (https://<sub>.<instance>/auth/callback)
+    ;; must ALSO appear in :redirect-uris, or `custom-app` reports it unresolved.
+    ;; :csp names the origins the hosted page may pull each KIND of resource
+    ;; from. Every directive left out stays at the platform default, so list a
+    ;; kind only where the app genuinely reaches off its own origin.
+    :hosting      {:subdomain "field" :root "dist"
+                   :csp {:script-src  ["'self'"]
+                         :style-src   ["'self'" "'unsafe-inline'"]
+                         :connect-src ["'self'"]
+                         :img-src     ["'self'" "data:"]
+                         :font-src    ["'self'"]}}
+    :metrics      true}}
+
+  :applications
+  {:order-board
+   {:auto-publish true                      ; every save cuts a release; without it the
+                                            ; first install cuts version 1, later ones wait
+    :promoted    true
+    :collection  :operations
+    :tags        [:daily :leadership]
+    :owner       "Procurement"
+    :thumbnail   "media/order-board.png"
+    :icon        "📦"
+    :description "Live board of orders by status."
+    :object-type :order                     ; the type the app binds
+    :project     :procurement               ; whose grants gate who may open it
+    :layout      {:kind         :board       ; opaque to the grammar; the view reads it
+                  :title        "Orders"
+                  :object-types [:order :invoice]
+                  :columns      [{:key "open" :label "Open" :status ["offen"]}]
+                  ;; the consumer upload seam (server writes ONE dataset + build)
+                  :upload       {:dataset "raw-attachments" :media-column :media_ref
+                                 :key-field :att_id :build [:invoice]}
+                  ;; the read-side export seam (server fills a template in-sandbox)
+                  :export       {:object-type :invoice :key-field :doc-number
+                                 :value-field :netto :filename "Invoices"}}
+    :source-file "apps/order_board.cljs"}    ; the .cljs view, client-inlined to :source
+
+   ;; An OBJECT VIEW: an app bound to :object-type with a :form-factor — the
+   ;; per-object detail surface, not a nav app. :full is the standalone page,
+   ;; :panel the embeddable condensed form. Data-only (no :source), its :layout
+   ;; is an ordered card list. In a projection these are authored more leanly,
+   ;; ONE file per object-type: `views/<type>.entv` (see grammar.entv) — the
+   ;; grammar also accepts the inline form this entry documents.
+   :order-detail
+   {:object-type :order
+    :form-factor :full                       ; :full | :panel — makes it an Object View
+    :layout      {:cards [{:widget :attributes}
+                          {:widget :relations}
+                          {:widget :matrix :config {:rows :line :cols :sku}}]}}}
+
+  :collections
+  {:operations {:name        "Betrieb"
+                :description "Was täglich läuft."
+                :icon        "📋"
+                :order       1
+                :project     :procurement}}
+
+  ;; `:home` paints the landing page in up to three columns (`:a`, `:b`, `:c` — one
+  ;; widget each). `:display :cards` is roomier and carries each item's description;
+  ;; `:list` stays compact once there are more than a handful. An item names exactly
+  ;; the target its `:kind` promises: `:app` an app, `:object-type` a type (a step OUT
+  ;; of the workspace, so it is dropped when `:nav-out` is false), `:link` a URL.
+  ;; ──────────────────────────────────────────────────────────────────────────
+  :workspaces
+  {:werkstatt {:name        "Werkstatt"
+               :subtitle    "Was heute durch die Halle geht."
+               :description "Der Blick des Werkstattleiters."
+               :icon        "🏭"
+               :promoted    true
+               :order       1
+               :nav-out     true
+               :landing     :order-board
+               :apps        [:order-board]
+               :anchored    [:order-board]
+               :home        [{:column :a
+                              :title   "Täglich"
+                              :display :cards
+                              :items   [{:kind :app :app :order-board}]}
+                             {:column :b
+                              :title   "Nachschlagen"
+                              :display :list
+                              :items   [{:kind :object-type :object-type :order}]}]
+               :project     :procurement}}
+
+  :agents
+  {:invoice-clerk
+   {:display-name  "Invoice clerk"
+    :description   "Reconciles invoices against orders, grounded on invoice retrieval."
+    :model         "grok-4"                  ; must be in :llm-models
+    ;; the language-model source that serves :model. Absent: the one source the
+    ;; instance's :language-model inputs use, when there is exactly one.
+    :source        :xai
+    :temperature   0.2
+    :max-turns     8                         ; model round trips per question
+    ;; :propose (default) stages each Action call as a proposal the asker accepts
+    ;; or rejects in the thread; :apply runs it at once under the asker's rights.
+    :writes        :propose
+    :system-prompt "You reconcile invoices against orders. Cite the order id."
+    ;; tool KINDS: an Action, a Function, a read query on one type, the whole
+    ;; readable ontology (list types + query any of them — the analyst), and a
+    ;; calculator. A query filters, searches, follows links and aggregates in the
+    ;; store; :limit caps the rows one call returns.
+    :tools         [{:kind :action       :action :mark-paid
+                     :description "Mark an order paid once its invoices reconcile."}
+                    {:kind :function     :function :reconcile}
+                    {:kind :object-query :object-type :invoice :limit 30}
+                    {:kind :ontology     :object-types [:order :invoice]}
+                    {:kind :calculator}]
+    ;; retrieval ties the agent to a type that declares :semantic-search (#3).
+    :retrieval     {:kind :semantic-search :object-type :order}
+    :project       :procurement              ; grants gate who may invoke
+    :status        :active}}
+
+  ;; ── RETIRING something — there is NO `:retire` section ──────────────────────
+  ;; It was removed, and the reason is the same one that governs every other
+  ;; lifecycle rule here: a resource's state belongs ON the resource. A list of
+  ;; names beside it named identities twice, could carry no reason, deadline or
+  ;; successor, and staged its deletes past the status guard — so it removed an
+  ;; `:active` type that the CLI, the HTTP verb and the git `retire` check all
+  ;; refuse to touch. `parser.ent/validate!` now rejects the key by name.
+  ;;
+  ;; Retire in two steps instead, both of them ordinary edits to this file —
+  ;; and the SAME two steps for every kind a tree declares: object/link types,
+  ;; interfaces, actions, object-type groups, object sets, agents, sources and
+  ;; declared (`:kind :standalone`) datasets here; transforms, functions,
+  ;; pipelines and apps in a code repository (each tree only for what it owns;
+  ;; a code repository only for members whose `:repository` is itself):
+  ;;
+  ;;   1. announce it where a consumer can see it — on the resource itself:
+  ;;        :status      :deprecated          ; or :experimental
+  ;;        :deprecation {:reason "superseded by :ereignis-geschäftspartner"
+  ;;                      :deadline "2026-09-01"
+  ;;                      :replacement :ereignis-geschäftspartner}
+  ;;      An unmarked resource counts as :experimental (removable). Apps carry
+  ;;      their published version, document templates `:status :draft|:published`
+  ;;      instead — not a lifecycle, so leaving one out removes it without
+  ;;      step 1; object sets take no status and go the same way.
+  ;;   2. later, LEAVE IT OUT. Absence from the tree IS the removal, and the
+  ;;      push refuses it — nothing is written — while the resource is
+  ;;      `:active`/`:endorsed` or something that stays still points at it.
+  ;;
+  ;; See it BEFORE pushing: `projection push <text> --preview` plans exactly
+  ;; like the push and lists every removal (with its status) and every refusal. Not removed by omission, because no tree is authoritative
+  ;; for them: value types, shared properties, collections, workspaces and
+  ;; minted datasets (a transform's output) — delete those by verb.
+  ;;
+  ;; Both steps are one commit each, and each is independently installable —
+  ;; which is the rule the whole two-repository order rests on. Dropping a type
+  ;; AND its now-orphan producer together still works: omit both, in one commit.
+  }
+
+ ;; ════════════════════════════════════════════════════════════════════════════
+ ;; :automations — automation rules (OPERATIONAL metadata, not schema). Installed
+ ;; into the per-branch `automations` table; reference watched type + effect Action
+ ;; BY NAME, resolved at run time by orchestration.automate.
+ ;; They live at the top level of a repository's ROOT .ent (ontology.ent for a rule
+ ;; whose effect is an ontology Action) and branch like the rest of the tree: a
+ ;; push installs them on its branch, landing the proposal merges them three-way
+ ;; into main's table and main's ontology.ent, and leaving one out (a rule has no
+ ;; :status, so it is :experimental) removes it — `push --preview` lists + ~ −.
+ ;; :schedules and :health-checks ride the same way.
+ ;; ════════════════════════════════════════════════════════════════════════════
+ :automations
+ [{:name   "auto-mark-paid"
+   :on     :invoice                         ; watched object-type
+   ;; :when — a native decl/eval-pred VECTOR or the legacy map sugar
+   ;; ({:eq …}/{:contains-any …}/{:and/:or/:not …}); compiled by automate/when->pred.
+   :when   [:= [:get :status] "bezahlt"]
+   :effect {:action :mark-paid :args {:order [:get :order-ref]}} ; {:action …} (open)
+   :every-ms 60000
+   :paused   false}
+  {:name   "propose-cost-center"
+   :on     :invoice
+   :when   {:eq {:attr :status :value "eingegangen"}}
+   :effect {:function    :classify-cost-center
+            :inputs      {:invoice {:self :id}}
+            :mode        :propose
+            :parallelism 20
+            :retries     1}
+   :every-ms 300000}
+  {:name   "belege-lesen"
+   :on     :eingangsdokument
+   :when   [:= [:get :einordnung] "offen"]
+   :effect {:function    :beleg-lesen
+            :version     "1.0.0"
+            :inputs      {:dokument {:self :id}}
+            :mode        :propose
+            :once        :version
+            :parallelism 4
+            :retry       {:attempts 2 :backoff :exponential :delay-ms 2000
+                          :max-delay-ms 30000 :jitter 0.2}
+            :fallback    {:action :lesung-fehlgeschlagen
+                          :args   {:dokument {:self :id}
+                                   :fehler   {:failure :message}}}}
+   :every-ms 300000}
+  ;; REPLAYING a recorded reading: the LLM already read these values into the
+  ;; objects (a pipeline did it); instead of trusting them, each becomes ONE
+  ;; pending proposal of the hand-Action — a Logic function of one Apply-action
+  ;; block, staged for review. `:key` makes it once-ever per
+  ;; branch (re-running stages nothing, a decided proposal never comes back);
+  ;; `:reason` and `:provenance` ride along as the decision log. Missing values
+  ;; are left for the reviewer (edit, then accept). No `:every-ms`: run it by
+  ;; hand, once (`automation run lesungen-vorschlagen`).
+  {:name   "lesungen-vorschlagen"
+   :on     :invoice
+   :effect {:action     :mark-paid
+            :mode       :propose
+            ;; {:ref T :pk expr}: the T object whose primary key is expr, as
+            ;; its object id — a reading names objects by key; none or several
+            ;; = left open for the reviewer
+            :args       {:order {:ref :order :pk {:self :order-ref}}}
+            :key        {:template "invoice_llm:{{id}}"}
+            :reason     {:template "{{model}} read order {{order-ref}}"}
+            :provenance {:model {:self :model} :read-at {:self :read-at}
+                         :source-dataset "invoice_llm" :source-pk {:self :id}}}}]
+
+ :schedules
+ [{:name "nightly-erp-pull" :target :invoice :cron "0 2 * * *" :paused false}
+  ;; PARAMETERIZED: :parameters are values for the parameters the target's
+  ;; transforms declare (their :parameters; in python StringParam/IntegerParam/
+  ;; FloatParam/BooleanParam) — a build passes them instead of the defaults.
+  ;; PARALLELIZED: :run-setup-key names one of them. Each value of it is a RUN
+  ;; SETUP: started by an action's {:op :run-schedule …} rule or `schedule run`
+  ;; with parameter values, built at once, its values kept. A run setup writes its
+  ;; own SHARE of each output whose transform declares the key — the rows carry
+  ;; the key value, and a rerun replaces that share alone; the dataset is the
+  ;; union of the shares. A parallelized schedule takes no :cron, :every-ms or
+  ;; :trigger: it runs by its run setups only (at most 1000).
+  {:name          "invoices je stichtag"
+   :target        :normalize-invoices
+   :scope         :self
+   :parameters    {:cutoff nil :min-netto 0}
+   :run-setup-key :cutoff}
+  {:name "hourly-raw-pull" :target :raw-attachments :every-ms 3600000 :scope :self}
+  ;; A :trigger-driven schedule: rebuild :invoice (and its dependents) when the
+  ;; parent dataset :raw-attachments changes content — vs the clock. `:of` takes
+  ;; one name or a vector of them.
+  {:name    "invoice on-arrival"
+   :target  :invoice
+   :trigger {:kind :parent-updated :of :raw-attachments} ; vs :cadence
+   :scope   :with-dependencies}                           ; :self | :with-dependencies | :downstream | :connecting
+  {:name    "invoice daily-if-fresh"
+   :target  :invoice
+   :trigger {:kind :all-of
+             :triggers [{:kind :cadence :cron "0 6 * * *"}
+                        {:kind :parent-updated :of [:raw-attachments :raw-messages]}]}
+   :scope   :downstream}
+  {:name    "invoice from-raw"
+   :target  :invoice
+   :scope   :connecting
+   :from    :raw-attachments
+   :trigger {:kind :parent-updated :of :raw-attachments}}
+  {:name             "nightly-parse-retrying"
+   :target           :invoice
+   :cron             "0 3 * * *"
+   :retry-count      2
+   :retry-backoff    "5m"
+   :abort-on-failure false}]
+
+ :health-checks
+ [{:name "invoices fresh"   :target :invoice :kind :freshness
+   :column :doc-date :within-hours 26 :severity :critical}
+  {:name "invoice rowcount" :target :invoice :kind :row-count
+   :min 1 :severity :moderate}
+  {:name "no schema drift"  :target :invoice :kind :schema
+   :comparison :column-additions-allowed :severity :critical :paused false}
+  ;; a :custom check runs a stored read-only SELECT and grades the scalar.
+  {:name "no negative netto" :target :invoice :kind :custom
+   :query "SELECT COUNT(*) FROM invoices WHERE net_amount < 0"
+   :max 0 :severity :moderate}
+  ;; :reconcile — the object type against its SOURCE: :measure :count (default)
+  ;; or :sum of :column, compared with the node named in :against (its own
+  ;; :column when the name differs). Passes while |a − b| <= :tolerance
+  ;; (absent = exact). index-drift only counts rows; this compares values.
+  {:name "invoice netto matches source" :target :invoice :kind :reconcile
+   :measure :sum :column :netto
+   :against {:on :dataset :target :invoices_raw :column :net_amount}
+   :tolerance 0.01 :severity :critical}]
+
+ ;; ════════════════════════════════════════════════════════════════════════════
+ ;; :lineage-drawing — declarative presentation attached to the install (the
+ ;; lineage canvas: node placement, scope, color schemes).
+ ;; ════════════════════════════════════════════════════════════════════════════
+ :lineage-drawing
+ {:name    "Procurement lineage"
+  :payload {:zoom 1.0 :pan [0 0]}
+  :scope   {:datasources  #{:erp :crm}
+            :transforms   #{:parse-invoices}
+            :object-types #{:order :invoice :supplier}}
+  :nodes   [{:kind :object-type :key "order"   :x 0   :y 0}
+            {:kind :object-type :key "invoice" :x 200 :y 0}]
+  :color-schemes [{:name "by-kind" :is-default true
+                   :rules [{:type :object-type :color "#3b82f6"}
+                           {:type :link-type   :color "#10b981"}]}]}}

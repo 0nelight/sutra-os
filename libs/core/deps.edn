@@ -1,0 +1,9 @@
+{:paths ["src" "resources"]
+ :deps  {org.clojure/clojure       {:mvn/version "1.12.0"}
+         sutra/kernel              {:local/root "../kernel"}
+         sutra/dialect             {:local/root "../dialect"}
+         com.cognitect/transit-clj {:mvn/version "1.0.333"}
+         metosin/malli             {:mvn/version "0.16.4"}
+         org.clojure/data.json     {:mvn/version "2.5.0"}
+         clj-commons/clj-yaml      {:mvn/version "1.0.29"}
+         com.fasterxml.jackson.core/jackson-core {:mvn/version "2.18.12"}}}

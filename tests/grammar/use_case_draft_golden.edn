@@ -1,0 +1,456 @@
+{:without-group
+ ["Lebenszyklus auftrag-status: Übergang offen → neu hat keine :action (Guide §6)"
+  "Kante kunde → fehlt verweist auf einen Typ, der nicht gezeichnet ist"
+  "Typ ohne-klasse hat keine Klasse (Kern, Abgeleitet, Use Case — Guide §3)"
+  "Klasse kunde: liest den Use-Case-Typ auftrag (Rückkopplung nur ausdrücklich erklärt)"
+  "Klasse lieferant: Kern ohne Quelle stromauf"
+  "Klasse umsatz: Abgeleitet ohne Transform"
+  "Klasse umsatz: Abgeleitet, aber eine Action ändert ihn"
+  "Klasse auftrag: Use Case ohne schreibende Action"
+  ":group fehlt — mit einer Objekttyp-Gruppe zeichnet das Objektmodell-Widget die Typen später aus der Ontologie"],
+ :statechart-dot
+ "digraph statechart {\n  graph [compound=true, bgcolor=\"white\", fontname=\"Helvetica\", ranksep=0.55, pad=0.4, label=<<b>Lebenszyklus auftrag</b><br/><font point-size=\"11\" color=\"#555555\">Zustand in der Eigenschaft status</font>>, labelloc=t, fontsize=16, rankdir=TB, nodesep=0.5];\n  \"neu\" [shape=circle, style=filled, fillcolor=\"#333333\", label=\"\", width=0.18, fixedsize=true];\n  \"offen\" [color=\"#d9942a\", fillcolor=\"#fdf0d5\", fontname=\"Helvetica\", penwidth=1.4, style=\"rounded,filled\", label=<<b>offen</b>>, shape=box, fontsize=11, margin=\"0.18,0.08\"];\n  \"erledigt\" [shape=doublecircle, style=filled, fillcolor=\"#333333\", label=\"\", width=0.14, fixedsize=true];\n  \"neu\" -> \"offen\" [color=\"#555555\", fontname=\"Helvetica\", fontcolor=\"#333333\", label=\"Action: auftrag-oeffnen\\n(Verkauf)\", fontsize=9, arrowsize=0.7];\n  \"offen\" -> \"erledigt\" [color=\"#555555\", fontname=\"Helvetica\", fontcolor=\"#ac2f33\", label=\"Action: auftrag-schliessen\\n[bezahlt]\\n· neu\", fontsize=9, arrowsize=0.7];\n  \"offen\" -> \"neu\" [color=\"#555555\", fontname=\"Helvetica\", fontcolor=\"#333333\", label=\"zurück\", fontsize=9, arrowsize=0.7];\n}",
+ :summary
+ {:keep 7, :create 7, :change 2, :retire 1, :check 4, :auto 6},
+ :install-schema
+ {:objects
+  {:vorgang
+   {:name "Vorgang",
+    :plural "Vorgang",
+    :title :vorgang-id,
+    :primary-key :vorgang-id,
+    :attributes [[:vorgang-id :string]]},
+   :schatten
+   {:name "Schatten",
+    :plural "Schatten",
+    :title :kunde-id,
+    :primary-key :kunde-id,
+    :attributes [[:kunde-id :string]]}},
+  :links
+  [[:auftrag-lager :auftrag :lager :many-to-many]
+   [:vorgang-auftrag :vorgang :auftrag :one-to-many]],
+  :object-type-groups
+  {:vorgaenge
+   {:members
+    [:auftrag :kunde :lager :lieferant :schatten :umsatz :vorgang],
+    :description "Use Case: Demo"}}},
+ :retirements [[:object-type :altlast]],
+ :dot-no-live
+ "digraph objektmodell {\n  graph [sep=\"+18\", overlap=false, layout=neato, splines=true, bgcolor=\"white\", fontname=\"Helvetica\", pad=0.4, label=<<b>Demo</b>>, labelloc=t, fontsize=16];\n  \"kunde\" [fixedsize=true, color=\"#4a7fc1\", fillcolor=\"#dbe8f7\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled\", label=<<b>kunde</b><br/><font point-size=\"9\">PK kunde-id</font><br/><font point-size=\"9\" color=\"#555555\">Kern · shop</font>>, shape=circle, fontsize=11];\n  \"lieferant\" [fixedsize=true, color=\"#4a7fc1\", fillcolor=\"#dbe8f7\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled\", label=<<b>lieferant</b><br/><font point-size=\"9\">PK lieferant-id</font>>, shape=circle, fontsize=11];\n  \"lager\" [fixedsize=true, color=\"#5f9c45\", fillcolor=\"#dff0d8\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled\", label=<<b>lager</b><br/><font point-size=\"9\">PK lager-id</font>>, shape=circle, fontsize=11];\n  \"umsatz\" [fixedsize=true, color=\"#8a63ad\", fillcolor=\"#ece1f3\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled\", label=<<b>umsatz</b><br/><font point-size=\"9\">PK umsatz-id</font>>, shape=circle, fontsize=11];\n  \"auftrag\" [fixedsize=true, color=\"#d9942a\", fillcolor=\"#fdebc8\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled\", label=<<b>auftrag</b><br/><font point-size=\"9\">PK auftrag-id</font>>, shape=circle, fontsize=11];\n  \"vorgang\" [fixedsize=true, color=\"#d9942a\", fillcolor=\"#fdebc8\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled\", label=<<b>vorgang</b><br/><font point-size=\"9\">PK Vorgang Nr</font>>, shape=circle, fontsize=11];\n  \"schatten\" [fixedsize=true, color=\"#d9942a\", fillcolor=\"#fdebc8\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled\", label=<<b>schatten</b><br/><font point-size=\"9\">PK kunde-id</font>>, shape=circle, fontsize=11];\n  \"altlast\" [fixedsize=true, color=\"#9e9e9e\", fillcolor=\"#eeeeee\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled,dashed\", label=<<b>altlast</b>>, shape=circle, fontsize=11];\n  \"weg\" [fixedsize=true, color=\"#9e9e9e\", fillcolor=\"#eeeeee\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled,dashed\", label=<<b>weg</b>>, shape=circle, fontsize=11];\n  \"bericht\" [fixedsize=true, color=\"#9e9e9e\", fillcolor=\"#ffffff\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled,dashed\", label=<<b>bericht</b>>, shape=circle, fontsize=11];\n  \"farbe\" [fixedsize=true, color=\"#9e9e9e\", fillcolor=\"#ffffff\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled,dashed\", label=<<b>farbe</b><br/><font point-size=\"9\" color=\"#555555\">an auftrag</font>>, shape=circle, fontsize=11];\n  \"ohne-klasse\" [fixedsize=true, color=\"#4a7fc1\", fillcolor=\"#dbe8f7\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled\", label=<<b>ohne-klasse</b><br/><font point-size=\"9\">PK x-id</font>>, shape=circle, fontsize=11];\n  \"auftrag\" -> \"kunde\" [label=\"für N:1\", fontsize=9, fontname=\"Helvetica\", color=\"#777777\", fontcolor=\"#444444\", arrowhead=none];\n  \"auftrag\" -> \"lager\" [label=\"N:M\", fontsize=9, fontname=\"Helvetica\", color=\"#777777\", fontcolor=\"#444444\", arrowhead=none];\n  \"umsatz\" -> \"kunde\" [label=\"\", fontsize=9, fontname=\"Helvetica\", color=\"#777777\", fontcolor=\"#444444\", arrowhead=none, style=\"dashed\"];\n  \"vorgang\" -> \"auftrag\" [label=\"1:N\", fontsize=9, fontname=\"Helvetica\", color=\"#777777\", fontcolor=\"#444444\", arrowhead=none];\n  legende [shape=plaintext, fontname=\"Helvetica\", label=<<table border=\"1\" cellborder=\"0\" cellspacing=\"3\" color=\"#999999\"><tr><td bgcolor=\"#dbe8f7\" width=\"14\" height=\"14\" style=\"rounded\" color=\"#4a7fc1\" border=\"1\"></td><td align=\"left\"><font point-size=\"10\">Kern · Quellsystem</font></td></tr><tr><td bgcolor=\"#dff0d8\" width=\"14\" height=\"14\" style=\"rounded\" color=\"#5f9c45\" border=\"1\"></td><td align=\"left\"><font point-size=\"10\">Kern · interner Betrieb</font></td></tr><tr><td bgcolor=\"#ece1f3\" width=\"14\" height=\"14\" style=\"rounded\" color=\"#8a63ad\" border=\"1\"></td><td align=\"left\"><font point-size=\"10\">Abgeleitet · Anreicherung</font></td></tr><tr><td bgcolor=\"#fdebc8\" width=\"14\" height=\"14\" style=\"rounded\" color=\"#d9942a\" border=\"1\"></td><td align=\"left\"><font point-size=\"10\">Use Case · operativ bearbeitet</font></td></tr><tr><td bgcolor=\"#eeeeee\" width=\"14\" height=\"14\" style=\"rounded\" color=\"#9e9e9e\" border=\"1\"></td><td align=\"left\"><font point-size=\"10\">entfällt</font></td></tr><tr><td bgcolor=\"#ffffff\" width=\"14\" height=\"14\" style=\"rounded\" color=\"#9e9e9e\" border=\"1\"></td><td align=\"left\"><font point-size=\"10\">→ App (Bericht, kein Typ)</font></td></tr><tr><td bgcolor=\"#ffffff\" width=\"14\" height=\"14\" style=\"rounded\" color=\"#9e9e9e\" border=\"1\"></td><td align=\"left\"><font point-size=\"10\">→ Eigenschaft (kein Typ)</font></td></tr></table>>];\n}",
+ :plan-no-live
+ {:steps
+  [{:op :create,
+    :kind :source,
+    :name :erp,
+    :auto? false,
+    :why
+    "Quelle fehlt (jdbc) — Quellen gelten instanzweit und tragen Geheimnisse: `source add`, dann `source secret erp`"}
+   {:op :create,
+    :kind :source,
+    :name :neu-quelle,
+    :auto? false,
+    :why
+    "Quelle fehlt (ssh) — Quellen gelten instanzweit und tragen Geheimnisse: `source add`, dann `source secret neu-quelle`"}
+   {:op :create,
+    :kind :object-type,
+    :name :kunde,
+    :auto? false,
+    :spec
+    {:name "Kunde",
+     :plural "Kunde",
+     :title :kunde-id,
+     :primary-key :kunde-id,
+     :attributes [[:kunde-id :string]]},
+    :class :core,
+    :warn [],
+    :why
+    "Kern: braucht Sync und Transform aus Quelle erp (Guide §3), erst dann anlegen"}
+   {:op :create,
+    :kind :object-type,
+    :name :lieferant,
+    :auto? false,
+    :spec
+    {:name "Lieferant",
+     :plural "Lieferant",
+     :title :lieferant-id,
+     :primary-key :lieferant-id,
+     :attributes [[:lieferant-id :string]]},
+    :class :core,
+    :warn [],
+    :why
+    "Kern: braucht Sync und Transform (Guide §3), erst dann anlegen"}
+   {:op :create,
+    :kind :object-type,
+    :name :lager,
+    :auto? false,
+    :spec
+    {:name "Lager",
+     :plural "Lager",
+     :title :lager-id,
+     :primary-key :lager-id,
+     :attributes [[:lager-id :string]]},
+    :class :core-internal,
+    :warn [],
+    :why
+    "Kern: braucht Sync und Transform (Guide §3), erst dann anlegen"}
+   {:op :create,
+    :kind :object-type,
+    :name :umsatz,
+    :auto? false,
+    :spec
+    {:name "Umsatz",
+     :plural "Umsatz",
+     :title :umsatz-id,
+     :primary-key :umsatz-id,
+     :attributes [[:umsatz-id :string]]},
+    :class :derived,
+    :warn [],
+    :why
+    "Abgeleitet: braucht einen Transform (Guide §3), erst dann anlegen"}
+   {:op :create,
+    :kind :object-type,
+    :name :auftrag,
+    :auto? true,
+    :spec
+    {:name "Auftrag",
+     :plural "Auftrag",
+     :title :auftrag-id,
+     :primary-key :auftrag-id,
+     :attributes
+     [[:auftrag-id :string] [:betrag :double] [:status :string]]},
+    :class :use-case,
+    :warn [],
+    :why "Use-Case-Typ: wird von Actions geschrieben"}
+   {:op :create,
+    :kind :object-type,
+    :name :vorgang,
+    :auto? true,
+    :spec
+    {:name "Vorgang",
+     :plural "Vorgang",
+     :title :vorgang-id,
+     :primary-key :vorgang-id,
+     :attributes [[:vorgang-id :string]]},
+    :class :use-case,
+    :warn
+    ["Schlüssel \"Vorgang Nr\" ist kein Eigenschaftsname, vorgeschlagen vorgang-id"],
+    :why "Use-Case-Typ: wird von Actions geschrieben"}
+   {:op :create,
+    :kind :object-type,
+    :name :schatten,
+    :auto? true,
+    :spec
+    {:name "Schatten",
+     :plural "Schatten",
+     :title :kunde-id,
+     :primary-key :kunde-id,
+     :attributes [[:kunde-id :string]]},
+    :class :use-case,
+    :warn [],
+    :why "Use-Case-Typ: wird von Actions geschrieben"}
+   {:op :check,
+    :kind :object-type,
+    :name :bericht,
+    :auto? false,
+    :why
+    "kein Objekttyp: ein Bericht gehört in eine App mit Aggregation zur Lesezeit (Guide §3)",
+    :warn []}
+   {:op :check,
+    :kind :object-type,
+    :name :farbe,
+    :auto? false,
+    :why
+    "kein Objekttyp: Ergänzung (:role :supp) oder :derived an auftrag",
+    :warn []}
+   {:op :create,
+    :kind :object-type,
+    :name :ohne-klasse,
+    :auto? false,
+    :spec
+    {:name "Ohne klasse",
+     :plural "Ohne klasse",
+     :title :x-id,
+     :primary-key :x-id,
+     :attributes [[:x-id :string]]},
+    :class :core,
+    :warn [],
+    :why
+    "Kern: braucht Sync und Transform (Guide §3), erst dann anlegen"}
+   {:op :create,
+    :kind :link-type,
+    :name :auftrag-kunde,
+    :auto? false,
+    :spec [:auftrag-kunde :auftrag :kunde :many-to-one],
+    :why "auftrag → kunde N:1 — wartet, bis beide Typen angelegt sind"}
+   {:op :create,
+    :kind :link-type,
+    :name :auftrag-lager,
+    :auto? false,
+    :spec [:auftrag-lager :auftrag :lager :many-to-many],
+    :why "auftrag → lager N:M — wartet, bis beide Typen angelegt sind"}
+   {:op :create,
+    :kind :link-type,
+    :name :vorgang-auftrag,
+    :auto? true,
+    :spec [:vorgang-auftrag :vorgang :auftrag :one-to-many],
+    :why "vorgang → auftrag 1:N"}
+   {:op :create,
+    :kind :action-type,
+    :name :auftrag-oeffnen,
+    :auto? true,
+    :spec
+    {:display-name "Auftrag oeffnen",
+     :params
+     {:auftrag-id {:type :string, :exposure :hidden, :prefill :uuid}},
+     :rules
+     [{:op :create,
+       :object-type :auftrag,
+       :id [:get :auftrag-id],
+       :values {:auftrag-id [:get :auftrag-id], :status "offen"}}]},
+    :role "Verkauf",
+    :why "aus dem Lebenszyklus erzeugt: status → offen"}
+   {:op :create,
+    :kind :action-type,
+    :name :auftrag-schliessen,
+    :auto? true,
+    :spec
+    {:display-name "Auftrag schliessen",
+     :on :auftrag,
+     :params
+     {:auftrag {:type :auftrag, :name "Auftrag", :required true},
+      :ergebnis
+      {:type :string,
+       :name "Ergebnis",
+       :required true,
+       :constraints {:one-of []}}},
+     :rules
+     [{:op :update,
+       :target [:get :auftrag :id],
+       :object-type :auftrag,
+       :values {:status [:get :ergebnis]}}],
+     :submission-criteria
+     [{:test {:s [:get :auftrag :status]},
+       :pred [:in :s "offen"],
+       :message "nur aus offen"}]},
+    :role nil,
+    :why "aus dem Lebenszyklus erzeugt: status → "}
+   {:op :create,
+    :kind :object-type-group,
+    :name :vorgaenge,
+    :auto? true,
+    :spec
+    {:members [:auftrag :schatten :vorgang],
+     :description "Use Case: Demo"},
+    :why
+    "Auswahl für das Objektmodell-Widget (data-group); neu: auftrag, schatten, vorgang"}
+   {:op :check,
+    :kind :writeback,
+    :name :auftrag-schliessen,
+    :auto? false,
+    :system "ERP",
+    :via :webhook,
+    :why "ERP über webhook",
+    :warn
+    ["Webhook nach dem Anlegen eintragen; Quelle braucht :writeback"]}
+   {:op :check,
+    :kind :writeback,
+    :name :fehlt,
+    :auto? false,
+    :system "UCS",
+    :via :hand,
+    :why "UCS über hand",
+    :warn
+    ["keine Action fehlt — Zeile ohne Entsprechung (Guide §8)"]}],
+  :hints
+  ["Lebenszyklus auftrag-status: Übergang offen → neu hat keine :action (Guide §6)"
+   "Kante kunde → fehlt verweist auf einen Typ, der nicht gezeichnet ist"
+   "Typ ohne-klasse hat keine Klasse (Kern, Abgeleitet, Use Case — Guide §3)"]},
+ :dot
+ "digraph objektmodell {\n  graph [sep=\"+18\", overlap=false, layout=neato, splines=true, bgcolor=\"white\", fontname=\"Helvetica\", pad=0.4, label=<<b>Demo</b>>, labelloc=t, fontsize=16];\n  \"kunde\" [fixedsize=true, color=\"#4a7fc1\", fillcolor=\"#dbe8f7\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled\", label=<<b>kunde</b><br/><font point-size=\"9\">PK kunde-id</font><br/><font point-size=\"9\" color=\"#555555\">Kern · shop</font>>, shape=circle, fontsize=11];\n  \"lieferant\" [fixedsize=true, color=\"#4a7fc1\", fillcolor=\"#dbe8f7\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled\", label=<<b>lieferant</b><br/><font point-size=\"9\">PK lieferant-id</font>>, shape=circle, fontsize=11];\n  \"lager\" [fixedsize=true, color=\"#5f9c45\", fillcolor=\"#dff0d8\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled\", label=<<b>lager</b><br/><font point-size=\"9\">PK lager-id</font>>, shape=circle, fontsize=11];\n  \"umsatz\" [fixedsize=true, color=\"#8a63ad\", fillcolor=\"#ece1f3\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled\", label=<<b>umsatz</b><br/><font point-size=\"9\">PK umsatz-id</font>>, shape=circle, fontsize=11];\n  \"auftrag\" [fixedsize=true, color=\"#d9942a\", fillcolor=\"#fdebc8\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled\", label=<<b>auftrag</b><br/><font point-size=\"9\">PK auftrag-id</font>>, shape=circle, fontsize=11];\n  \"vorgang\" [fixedsize=true, color=\"#d9942a\", fillcolor=\"#fdebc8\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled,dashed\", label=<<b>vorgang</b><br/><font point-size=\"9\">PK Vorgang Nr</font><br/><font point-size=\"8\" color=\"#ac2f33\">noch nicht angelegt</font>>, shape=circle, fontsize=11];\n  \"schatten\" [fixedsize=true, color=\"#d9942a\", fillcolor=\"#fdebc8\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled,dashed\", label=<<b>schatten</b><br/><font point-size=\"9\">PK kunde-id</font><br/><font point-size=\"8\" color=\"#ac2f33\">noch nicht angelegt</font>>, shape=circle, fontsize=11];\n  \"altlast\" [fixedsize=true, color=\"#9e9e9e\", fillcolor=\"#eeeeee\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled,dashed\", label=<<b>altlast</b><br/><font point-size=\"8\" color=\"#ac2f33\">wird zurückgebaut</font>>, shape=circle, fontsize=11];\n  \"weg\" [fixedsize=true, color=\"#9e9e9e\", fillcolor=\"#eeeeee\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled,dashed\", label=<<b>weg</b>>, shape=circle, fontsize=11];\n  \"bericht\" [fixedsize=true, color=\"#9e9e9e\", fillcolor=\"#ffffff\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled,dashed\", label=<<b>bericht</b>>, shape=circle, fontsize=11];\n  \"farbe\" [fixedsize=true, color=\"#9e9e9e\", fillcolor=\"#ffffff\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled,dashed\", label=<<b>farbe</b><br/><font point-size=\"9\" color=\"#555555\">an auftrag</font>>, shape=circle, fontsize=11];\n  \"ohne-klasse\" [fixedsize=true, color=\"#4a7fc1\", fillcolor=\"#dbe8f7\", width=1.7, fontname=\"Helvetica\", penwidth=1.6, style=\"filled,dashed\", label=<<b>ohne-klasse</b><br/><font point-size=\"9\">PK x-id</font><br/><font point-size=\"8\" color=\"#ac2f33\">noch nicht angelegt</font>>, shape=circle, fontsize=11];\n  \"auftrag\" -> \"kunde\" [label=\"für N:1\", fontsize=9, fontname=\"Helvetica\", color=\"#777777\", fontcolor=\"#444444\", arrowhead=none];\n  \"auftrag\" -> \"lager\" [label=\"N:M · neu\", fontsize=9, fontname=\"Helvetica\", color=\"#777777\", fontcolor=\"#ac2f33\", arrowhead=none, style=\"dashed\"];\n  \"umsatz\" -> \"kunde\" [label=\"\", fontsize=9, fontname=\"Helvetica\", color=\"#777777\", fontcolor=\"#444444\", arrowhead=none, style=\"dashed\"];\n  \"vorgang\" -> \"auftrag\" [label=\"1:N · neu\", fontsize=9, fontname=\"Helvetica\", color=\"#777777\", fontcolor=\"#ac2f33\", arrowhead=none, style=\"dashed\"];\n  legende [shape=plaintext, fontname=\"Helvetica\", label=<<table border=\"1\" cellborder=\"0\" cellspacing=\"3\" color=\"#999999\"><tr><td bgcolor=\"#dbe8f7\" width=\"14\" height=\"14\" style=\"rounded\" color=\"#4a7fc1\" border=\"1\"></td><td align=\"left\"><font point-size=\"10\">Kern · Quellsystem</font></td></tr><tr><td bgcolor=\"#dff0d8\" width=\"14\" height=\"14\" style=\"rounded\" color=\"#5f9c45\" border=\"1\"></td><td align=\"left\"><font point-size=\"10\">Kern · interner Betrieb</font></td></tr><tr><td bgcolor=\"#ece1f3\" width=\"14\" height=\"14\" style=\"rounded\" color=\"#8a63ad\" border=\"1\"></td><td align=\"left\"><font point-size=\"10\">Abgeleitet · Anreicherung</font></td></tr><tr><td bgcolor=\"#fdebc8\" width=\"14\" height=\"14\" style=\"rounded\" color=\"#d9942a\" border=\"1\"></td><td align=\"left\"><font point-size=\"10\">Use Case · operativ bearbeitet</font></td></tr><tr><td bgcolor=\"#eeeeee\" width=\"14\" height=\"14\" style=\"rounded\" color=\"#9e9e9e\" border=\"1\"></td><td align=\"left\"><font point-size=\"10\">entfällt</font></td></tr><tr><td bgcolor=\"#ffffff\" width=\"14\" height=\"14\" style=\"rounded\" color=\"#9e9e9e\" border=\"1\"></td><td align=\"left\"><font point-size=\"10\">→ App (Bericht, kein Typ)</font></td></tr><tr><td bgcolor=\"#ffffff\" width=\"14\" height=\"14\" style=\"rounded\" color=\"#9e9e9e\" border=\"1\"></td><td align=\"left\"><font point-size=\"10\">→ Eigenschaft (kein Typ)</font></td></tr><tr><td></td><td align=\"left\"><font point-size=\"9\" color=\"#ac2f33\">gestrichelt = noch nicht in der Ontologie</font></td></tr></table>>];\n}",
+ :plan
+ {:steps
+  [{:op :keep,
+    :kind :source,
+    :name :erp,
+    :auto? false,
+    :why "Quelle ist angebunden"}
+   {:op :create,
+    :kind :source,
+    :name :neu-quelle,
+    :auto? false,
+    :why
+    "Quelle fehlt (ssh) — Quellen gelten instanzweit und tragen Geheimnisse: `source add`, dann `source secret neu-quelle`"}
+   {:op :keep,
+    :kind :object-type,
+    :name :kunde,
+    :auto? false,
+    :why "gibt es schon"}
+   {:op :keep,
+    :kind :object-type,
+    :name :lieferant,
+    :auto? false,
+    :why "gibt es schon"}
+   {:op :keep,
+    :kind :object-type,
+    :name :lager,
+    :auto? false,
+    :why "gibt es schon"}
+   {:op :keep,
+    :kind :object-type,
+    :name :umsatz,
+    :auto? false,
+    :why "gibt es schon"}
+   {:op :change,
+    :kind :object-type,
+    :name :auftrag,
+    :auto? false,
+    :why "fehlende Eigenschaften: betrag, status",
+    :add [:betrag :status],
+    :hint
+    "`ontology object-type edit auftrag` (eine Teil-Installation würde die übrigen Felder leeren)"}
+   {:op :create,
+    :kind :object-type,
+    :name :vorgang,
+    :auto? true,
+    :spec
+    {:name "Vorgang",
+     :plural "Vorgang",
+     :title :vorgang-id,
+     :primary-key :vorgang-id,
+     :attributes [[:vorgang-id :string]]},
+    :class :use-case,
+    :warn
+    ["Schlüssel \"Vorgang Nr\" ist kein Eigenschaftsname, vorgeschlagen vorgang-id"],
+    :why "Use-Case-Typ: wird von Actions geschrieben"}
+   {:op :create,
+    :kind :object-type,
+    :name :schatten,
+    :auto? true,
+    :spec
+    {:name "Schatten",
+     :plural "Schatten",
+     :title :kunde-id,
+     :primary-key :kunde-id,
+     :attributes [[:kunde-id :string]]},
+    :class :use-case,
+    :warn
+    ["Schattentyp? kunde hat denselben Schlüssel kunde-id (System Silo, Guide §3)"],
+    :why "Use-Case-Typ: wird von Actions geschrieben"}
+   {:op :retire,
+    :kind :object-type,
+    :name :altlast,
+    :auto? true,
+    :why "im Entwurf als entfallend gezeichnet"}
+   {:op :check,
+    :kind :object-type,
+    :name :bericht,
+    :auto? false,
+    :why
+    "kein Objekttyp: ein Bericht gehört in eine App mit Aggregation zur Lesezeit (Guide §3)",
+    :warn [":bericht ist installiert — Rückbau prüfen"]}
+   {:op :check,
+    :kind :object-type,
+    :name :farbe,
+    :auto? false,
+    :why
+    "kein Objekttyp: Ergänzung (:role :supp) oder :derived an auftrag",
+    :warn []}
+   {:op :create,
+    :kind :object-type,
+    :name :ohne-klasse,
+    :auto? false,
+    :spec
+    {:name "Ohne klasse",
+     :plural "Ohne klasse",
+     :title :x-id,
+     :primary-key :x-id,
+     :attributes [[:x-id :string]]},
+    :class :core,
+    :warn [],
+    :why
+    "Kern: braucht Sync und Transform (Guide §3), erst dann anlegen"}
+   {:op :keep,
+    :kind :link-type,
+    :name :auftrag-kunde,
+    :auto? false,
+    :why "auftrag ↔ kunde"}
+   {:op :create,
+    :kind :link-type,
+    :name :auftrag-lager,
+    :auto? true,
+    :spec [:auftrag-lager :auftrag :lager :many-to-many],
+    :why "auftrag → lager N:M"}
+   {:op :create,
+    :kind :link-type,
+    :name :vorgang-auftrag,
+    :auto? true,
+    :spec [:vorgang-auftrag :vorgang :auftrag :one-to-many],
+    :why "vorgang → auftrag 1:N"}
+   {:op :keep,
+    :kind :action-type,
+    :name :auftrag-oeffnen,
+    :auto? false,
+    :why "gibt es schon"}
+   {:op :create,
+    :kind :action-type,
+    :name :auftrag-schliessen,
+    :auto? false,
+    :spec
+    {:display-name "Auftrag schliessen",
+     :on :auftrag,
+     :params
+     {:auftrag {:type :auftrag, :name "Auftrag", :required true},
+      :ergebnis
+      {:type :string,
+       :name "Ergebnis",
+       :required true,
+       :constraints {:one-of []}}},
+     :rules
+     [{:op :update,
+       :target [:get :auftrag :id],
+       :object-type :auftrag,
+       :values {:status [:get :ergebnis]}}],
+     :submission-criteria
+     [{:test {:s [:get :auftrag :status]},
+       :pred [:in :s "offen"],
+       :message "nur aus offen"}]},
+    :role nil,
+    :why
+    "aus dem Lebenszyklus erzeugt: status →  — wartet auf Eigenschaft auftrag.status"}
+   {:op :change,
+    :kind :object-type-group,
+    :name :vorgaenge,
+    :auto? true,
+    :spec
+    {:members
+     [:auftrag :kunde :lager :lieferant :schatten :umsatz :vorgang],
+     :description "Use Case: Demo"},
+    :why
+    "Auswahl für das Objektmodell-Widget (data-group); neu: auftrag, lager, lieferant, schatten, umsatz, vorgang"}
+   {:op :check,
+    :kind :writeback,
+    :name :auftrag-schliessen,
+    :auto? false,
+    :system "ERP",
+    :via :webhook,
+    :why "ERP über webhook",
+    :warn
+    ["Webhook nach dem Anlegen eintragen; Quelle braucht :writeback"]}
+   {:op :check,
+    :kind :writeback,
+    :name :fehlt,
+    :auto? false,
+    :system "UCS",
+    :via :hand,
+    :why "UCS über hand",
+    :warn
+    ["keine Action fehlt — Zeile ohne Entsprechung (Guide §8)"]}],
+  :hints
+  ["Lebenszyklus auftrag-status: Übergang offen → neu hat keine :action (Guide §6)"
+   "Kante kunde → fehlt verweist auf einen Typ, der nicht gezeichnet ist"
+   "Typ ohne-klasse hat keine Klasse (Kern, Abgeleitet, Use Case — Guide §3)"
+   "Klasse kunde: liest den Use-Case-Typ auftrag (Rückkopplung nur ausdrücklich erklärt)"
+   "Klasse lieferant: Kern ohne Quelle stromauf"
+   "Klasse umsatz: Abgeleitet ohne Transform"
+   "Klasse umsatz: Abgeleitet, aber eine Action ändert ihn"
+   "Klasse auftrag: Use Case ohne schreibende Action"]}}

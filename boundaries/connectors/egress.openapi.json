@@ -1,0 +1,1041 @@
+{"components":
+ {"parameters":
+  {"requestKey":
+   {"description":
+    "A retry with the same key attaches to the running work.",
+    "in":"header",
+    "name":"x-sutra-request-key",
+    "required":false,
+    "schema":{"type":"string"}},
+   "waitMs":
+   {"description":
+    "How long the caller waits; past it the work is cancelled.",
+    "in":"header",
+    "name":"x-sutra-wait-ms",
+    "required":false,
+    "schema":{"type":"integer"}}},
+  "schemas":
+  {"Envelope":
+   {"anyOf":
+    [{"properties":{"ok":{"const":true}, "result":{}},
+      "required":["ok", "result"],
+      "type":"object"},
+     {"properties":
+      {"data":{"additionalProperties":{}, "type":"object"},
+       "error":{"type":"string"},
+       "ok":{"const":false}},
+      "required":["ok", "error"],
+      "type":"object"}]},
+   "SourceSpec":
+   {"properties":
+    {"agent":{"anyOf":[{"type":"string"}, {"type":"string"}]},
+     "config":{"additionalProperties":{}, "type":"object"},
+     "secret-cipher":{"type":"string"},
+     "source-name":{"type":"string"},
+     "type":{"anyOf":[{"type":"string"}, {"type":"string"}]}},
+    "type":"object"}},
+  "securitySchemes":
+  {"agentToken":
+   {"description":
+    "HMAC-SHA256 of the agent's name under the deployment's egress master secret, hex; or a token file given to the agent (SUTRA_EGRESS_TOKEN_FILE).",
+    "scheme":"bearer",
+    "type":"http"}}},
+ "info":
+ {"description":
+  "Boundary B-8: what a platform process sends an egress agent, the out-of-process boundary a third-party connector implements. Bodies are EDN (application/edn); the schemas describe the EDN data model (a keyword is a string here). Generated from src/sutra/sources/egress_protocol.clj; do not edit by hand.",
+  "license":{"identifier":"Apache-2.0", "name":"Apache-2.0"},
+  "title":"Sutra egress agent protocol",
+  "version":"1.1.0"},
+ "openapi":"3.1.0",
+ "paths":
+ {"/chat":
+  {"post":
+   {"operationId":"chat",
+    "parameters":
+    [{"$ref":"#/components/parameters/requestKey"},
+     {"$ref":"#/components/parameters/waitMs"}],
+    "requestBody":
+    {"content":
+     {"application/edn":
+      {"schema":
+       {"properties":
+        {"payload":{"properties":{}, "type":"object"},
+         "span":{},
+         "spec":
+         {"properties":
+          {"agent":{"anyOf":[{"type":"string"}, {"type":"string"}]},
+           "config":{"additionalProperties":{}, "type":"object"},
+           "secret-cipher":{"type":"string"},
+           "source-name":{"type":"string"},
+           "type":{"anyOf":[{"type":"string"}, {"type":"string"}]}},
+          "type":"object"},
+         "timeout-ms":{"minimum":1, "type":"integer"}},
+        "required":["spec", "payload"],
+        "type":"object"}}},
+     "required":true},
+    "responses":
+    {"200":
+     {"content":
+      {"application/edn":
+       {"schema":
+        {"oneOf":
+         [{"properties":
+           {"ok":{"const":true},
+            "result":
+            {"properties":
+             {"body":{},
+              "latency-ms":{"type":"integer"},
+              "status":{"type":"integer"}},
+             "required":["status", "latency-ms", "body"],
+             "type":"object"}},
+           "required":["ok", "result"],
+           "type":"object"},
+          {"properties":
+           {"data":{"type":"object"},
+            "error":{"type":"string"},
+            "ok":{"const":false}},
+           "required":["ok", "error"],
+           "type":"object"}]}}},
+      "description":"Done."},
+     "400":
+     {"content":
+      {"application/edn":
+       {"schema":{"$ref":"#/components/schemas/Envelope"}}},
+      "description":"Refused or failed: {:ok false}."},
+     "401":{"description":"Missing or wrong agent token."},
+     "404":{"description":"No such route."}},
+    "security":[{"agentToken":[]}],
+    "summary":
+    "One language-model chat call through the source's wire (B-10)."}},
+  "/connect":
+  {"post":
+   {"operationId":"connect",
+    "parameters":
+    [{"$ref":"#/components/parameters/requestKey"},
+     {"$ref":"#/components/parameters/waitMs"}],
+    "requestBody":
+    {"content":
+     {"application/edn":
+      {"schema":
+       {"properties":
+        {"endpoints":{"items":{"type":"string"}, "type":"array"},
+         "span":{},
+         "timeout-ms":{"minimum":1, "type":"integer"}},
+        "required":["endpoints"],
+        "type":"object"}}},
+     "required":true},
+    "responses":
+    {"200":
+     {"content":
+      {"application/edn":
+       {"schema":
+        {"oneOf":
+         [{"properties":
+           {"ok":{"const":true},
+            "result":
+            {"properties":
+             {"endpoints":
+              {"items":
+               {"properties":
+                {"endpoint":{"type":"string"},
+                 "error":{"type":"string"},
+                 "ms":{"type":"integer"},
+                 "open":{"type":"boolean"}},
+                "required":["endpoint", "open"],
+                "type":"object"},
+               "type":"array"}},
+             "required":["endpoints"],
+             "type":"object"}},
+           "required":["ok", "result"],
+           "type":"object"},
+          {"properties":
+           {"data":{"type":"object"},
+            "error":{"type":"string"},
+            "ok":{"const":false}},
+           "required":["ok", "error"],
+           "type":"object"}]}}},
+      "description":"Done."},
+     "400":
+     {"content":
+      {"application/edn":
+       {"schema":{"$ref":"#/components/schemas/Envelope"}}},
+      "description":"Refused or failed: {:ok false}."},
+     "401":{"description":"Missing or wrong agent token."},
+     "404":{"description":"No such route."}},
+    "security":[{"agentToken":[]}],
+    "summary":
+    "Probe TCP reachability of host:port endpoints from the agent (\u226464)."}},
+  "/connector":
+  {"post":
+   {"operationId":"connector",
+    "parameters":
+    [{"$ref":"#/components/parameters/requestKey"},
+     {"$ref":"#/components/parameters/waitMs"}],
+    "requestBody":
+    {"content":
+     {"application/edn":
+      {"schema":
+       {"properties":
+        {"op":
+         {"enum":
+          ["probe", "tables", "columns", "scan-profile", "scan",
+           "write", "invoke", "token"],
+          "type":"string"},
+         "opts":{"properties":{}, "type":"object"},
+         "params":{},
+         "scan":{"properties":{}, "type":"object"},
+         "span":{},
+         "spec":
+         {"properties":
+          {"agent":{"anyOf":[{"type":"string"}, {"type":"string"}]},
+           "config":{"additionalProperties":{}, "type":"object"},
+           "secret-cipher":{"type":"string"},
+           "source-name":{"type":"string"},
+           "type":{"anyOf":[{"type":"string"}, {"type":"string"}]}},
+          "type":"object"},
+         "table":{"anyOf":[{"type":"string"}, {"type":"string"}]},
+         "timeout-ms":{"minimum":1, "type":"integer"},
+         "webhook-id":
+         {"anyOf":[{"type":"string"}, {"type":"string"}]},
+         "write-spec":{"properties":{}, "type":"object"}},
+        "required":["spec", "op"],
+        "type":"object"}}},
+     "required":true},
+    "responses":
+    {"200":
+     {"content":
+      {"application/edn":
+       {"schema":
+        {"oneOf":
+         [{"properties":
+           {"ok":{"const":true},
+            "result":
+            {"properties":{"result":{}},
+             "required":["result"],
+             "type":"object"}},
+           "required":["ok", "result"],
+           "type":"object"},
+          {"properties":
+           {"data":{"type":"object"},
+            "error":{"type":"string"},
+            "ok":{"const":false}},
+           "required":["ok", "error"],
+           "type":"object"}]}}},
+      "description":"Done."},
+     "400":
+     {"content":
+      {"application/edn":
+       {"schema":{"$ref":"#/components/schemas/Envelope"}}},
+      "description":"Refused or failed: {:ok false}."},
+     "401":{"description":"Missing or wrong agent token."},
+     "404":{"description":"No such route."}},
+    "security":[{"agentToken":[]}],
+    "summary":
+    "Run one operation of a plugin or sidecar connector (sutra.sources.protocols)."}},
+  "/embed":
+  {"post":
+   {"operationId":"embed",
+    "parameters":
+    [{"$ref":"#/components/parameters/requestKey"},
+     {"$ref":"#/components/parameters/waitMs"}],
+    "requestBody":
+    {"content":
+     {"application/edn":
+      {"schema":
+       {"properties":
+        {"payload":{"properties":{}, "type":"object"},
+         "span":{},
+         "spec":
+         {"properties":
+          {"agent":{"anyOf":[{"type":"string"}, {"type":"string"}]},
+           "config":{"additionalProperties":{}, "type":"object"},
+           "secret-cipher":{"type":"string"},
+           "source-name":{"type":"string"},
+           "type":{"anyOf":[{"type":"string"}, {"type":"string"}]}},
+          "type":"object"},
+         "timeout-ms":{"minimum":1, "type":"integer"}},
+        "required":["spec", "payload"],
+        "type":"object"}}},
+     "required":true},
+    "responses":
+    {"200":
+     {"content":
+      {"application/edn":
+       {"schema":
+        {"oneOf":
+         [{"properties":
+           {"ok":{"const":true},
+            "result":
+            {"properties":
+             {"body":{},
+              "latency-ms":{"type":"integer"},
+              "status":{"type":"integer"}},
+             "required":["status", "latency-ms", "body"],
+             "type":"object"}},
+           "required":["ok", "result"],
+           "type":"object"},
+          {"properties":
+           {"data":{"type":"object"},
+            "error":{"type":"string"},
+            "ok":{"const":false}},
+           "required":["ok", "error"],
+           "type":"object"}]}}},
+      "description":"Done."},
+     "400":
+     {"content":
+      {"application/edn":
+       {"schema":{"$ref":"#/components/schemas/Envelope"}}},
+      "description":"Refused or failed: {:ok false}."},
+     "401":{"description":"Missing or wrong agent token."},
+     "404":{"description":"No such route."}},
+    "security":[{"agentToken":[]}],
+    "summary":
+    "One embedding call through the source's wire (B-10)."}},
+  "/listen":
+  {"post":
+   {"operationId":"listen",
+    "parameters":
+    [{"$ref":"#/components/parameters/requestKey"},
+     {"$ref":"#/components/parameters/waitMs"}],
+    "requestBody":
+    {"content":
+     {"application/edn":
+      {"schema":
+       {"properties":
+        {"folders":{"items":{"type":"string"}, "type":"array"},
+         "span":{},
+         "spec":
+         {"properties":
+          {"agent":{"anyOf":[{"type":"string"}, {"type":"string"}]},
+           "config":{"additionalProperties":{}, "type":"object"},
+           "secret-cipher":{"type":"string"},
+           "source-name":{"type":"string"},
+           "type":{"anyOf":[{"type":"string"}, {"type":"string"}]}},
+          "type":"object"},
+         "state":{},
+         "timeout-ms":{"minimum":1, "type":"integer"},
+         "window-ms":{"minimum":1, "type":"integer"}},
+        "required":["spec", "window-ms"],
+        "type":"object"}}},
+     "required":true},
+    "responses":
+    {"200":
+     {"content":
+      {"application/edn":
+       {"schema":
+        {"oneOf":
+         [{"properties":{"ok":{"const":true}, "result":{}},
+           "required":["ok", "result"],
+           "type":"object"},
+          {"properties":
+           {"data":{"type":"object"},
+            "error":{"type":"string"},
+            "ok":{"const":false}},
+           "required":["ok", "error"],
+           "type":"object"}]}}},
+      "description":"Done."},
+     "400":
+     {"content":
+      {"application/edn":
+       {"schema":{"$ref":"#/components/schemas/Envelope"}}},
+      "description":"Refused or failed: {:ok false}."},
+     "401":{"description":"Missing or wrong agent token."},
+     "404":{"description":"No such route."}},
+    "security":[{"agentToken":[]}],
+    "summary":
+    "Wait for a change in IMAP folders, up to window-ms (IMAP IDLE)."}},
+  "/models":
+  {"post":
+   {"operationId":"models",
+    "parameters":
+    [{"$ref":"#/components/parameters/requestKey"},
+     {"$ref":"#/components/parameters/waitMs"}],
+    "requestBody":
+    {"content":
+     {"application/edn":
+      {"schema":
+       {"properties":
+        {"models-path":{"oneOf":[{"type":"string"}, {"type":"null"}]},
+         "span":{},
+         "spec":
+         {"properties":
+          {"agent":{"anyOf":[{"type":"string"}, {"type":"string"}]},
+           "config":{"additionalProperties":{}, "type":"object"},
+           "secret-cipher":{"type":"string"},
+           "source-name":{"type":"string"},
+           "type":{"anyOf":[{"type":"string"}, {"type":"string"}]}},
+          "type":"object"},
+         "timeout-ms":{"minimum":1, "type":"integer"}},
+        "required":["spec"],
+        "type":"object"}}},
+     "required":true},
+    "responses":
+    {"200":
+     {"content":
+      {"application/edn":
+       {"schema":
+        {"oneOf":
+         [{"properties":
+           {"ok":{"const":true},
+            "result":
+            {"properties":
+             {"body":{"type":"string"},
+              "latency-ms":{"type":"integer"},
+              "status":{"type":"integer"}},
+             "required":["status", "latency-ms", "body"],
+             "type":"object"}},
+           "required":["ok", "result"],
+           "type":"object"},
+          {"properties":
+           {"data":{"type":"object"},
+            "error":{"type":"string"},
+            "ok":{"const":false}},
+           "required":["ok", "error"],
+           "type":"object"}]}}},
+      "description":"Done."},
+     "400":
+     {"content":
+      {"application/edn":
+       {"schema":{"$ref":"#/components/schemas/Envelope"}}},
+      "description":"Refused or failed: {:ok false}."},
+     "401":{"description":"Missing or wrong agent token."},
+     "404":{"description":"No such route."}},
+    "security":[{"agentToken":[]}],
+    "summary":"The model inventory of a language-model source."}},
+  "/pubkey":
+  {"post":
+   {"operationId":"pubkey",
+    "parameters":
+    [{"$ref":"#/components/parameters/requestKey"},
+     {"$ref":"#/components/parameters/waitMs"}],
+    "requestBody":
+    {"content":
+     {"application/edn":
+      {"schema":
+       {"properties":
+        {"span":{}, "timeout-ms":{"minimum":1, "type":"integer"}},
+        "type":"object"}}},
+     "required":true},
+    "responses":
+    {"200":
+     {"content":
+      {"application/edn":
+       {"schema":
+        {"oneOf":
+         [{"properties":
+           {"ok":{"const":true},
+            "result":
+            {"properties":
+             {"alg":{"const":"RSA-OAEP-256"},
+              "public-key":{"type":"string"}},
+             "required":["public-key", "alg"],
+             "type":"object"}},
+           "required":["ok", "result"],
+           "type":"object"},
+          {"properties":
+           {"data":{"type":"object"},
+            "error":{"type":"string"},
+            "ok":{"const":false}},
+           "required":["ok", "error"],
+           "type":"object"}]}}},
+      "description":"Done."},
+     "400":
+     {"content":
+      {"application/edn":
+       {"schema":{"$ref":"#/components/schemas/Envelope"}}},
+      "description":"Refused or failed: {:ok false}."},
+     "401":{"description":"Missing or wrong agent token."},
+     "404":{"description":"No such route."}},
+    "security":[],
+    "summary":
+    "The agent's public key, to seal credentials to. Needs no token."}},
+  "/reach":
+  {"post":
+   {"operationId":"reach",
+    "parameters":
+    [{"$ref":"#/components/parameters/requestKey"},
+     {"$ref":"#/components/parameters/waitMs"}],
+    "requestBody":
+    {"content":
+     {"application/edn":
+      {"schema":
+       {"properties":
+        {"params":{"items":{}, "type":"array"},
+         "query":{"type":"string"},
+         "span":{},
+         "spec":
+         {"properties":
+          {"agent":{"anyOf":[{"type":"string"}, {"type":"string"}]},
+           "config":{"additionalProperties":{}, "type":"object"},
+           "secret-cipher":{"type":"string"},
+           "source-name":{"type":"string"},
+           "type":{"anyOf":[{"type":"string"}, {"type":"string"}]}},
+          "type":"object"},
+         "timeout-ms":{"minimum":1, "type":"integer"}},
+        "required":["spec"],
+        "type":"object"}}},
+     "required":true},
+    "responses":
+    {"200":
+     {"content":
+      {"application/edn":
+       {"schema":
+        {"oneOf":
+         [{"properties":
+           {"ok":{"const":true},
+            "result":
+            {"anyOf":
+             [{"properties":
+               {"rows":
+                {"items":{"additionalProperties":{}, "type":"object"},
+                 "type":"array"}},
+               "required":["rows"],
+               "type":"object"},
+              {"properties":{"path":{"type":"string"}},
+               "required":["path"],
+               "type":"object"}]}},
+           "required":["ok", "result"],
+           "type":"object"},
+          {"properties":
+           {"data":{"type":"object"},
+            "error":{"type":"string"},
+            "ok":{"const":false}},
+           "required":["ok", "error"],
+           "type":"object"}]}}},
+      "description":"Done."},
+     "400":
+     {"content":
+      {"application/edn":
+       {"schema":{"$ref":"#/components/schemas/Envelope"}}},
+      "description":"Refused or failed: {:ok false}."},
+     "401":{"description":"Missing or wrong agent token."},
+     "404":{"description":"No such route."}},
+    "security":[{"agentToken":[]}],
+    "summary":
+    "Read rows of a JDBC source by query, or land a file source and name its path."}},
+  "/rest":
+  {"post":
+   {"operationId":"rest",
+    "parameters":
+    [{"$ref":"#/components/parameters/requestKey"},
+     {"$ref":"#/components/parameters/waitMs"}],
+    "requestBody":
+    {"content":
+     {"application/edn":
+      {"schema":
+       {"properties":
+        {"op":
+         {"enum":["tables", "columns", "scan-profile", "scan"],
+          "type":"string"},
+         "scan":{"properties":{}, "type":"object"},
+         "span":{},
+         "spec":
+         {"properties":
+          {"agent":{"anyOf":[{"type":"string"}, {"type":"string"}]},
+           "config":{"additionalProperties":{}, "type":"object"},
+           "secret-cipher":{"type":"string"},
+           "source-name":{"type":"string"},
+           "type":{"anyOf":[{"type":"string"}, {"type":"string"}]}},
+          "type":"object"},
+         "table":{"anyOf":[{"type":"string"}, {"type":"string"}]},
+         "timeout-ms":{"minimum":1, "type":"integer"}},
+        "required":["spec", "op"],
+        "type":"object"}}},
+     "required":true},
+    "responses":
+    {"200":
+     {"content":
+      {"application/edn":
+       {"schema":
+        {"oneOf":
+         [{"properties":
+           {"ok":{"const":true},
+            "result":
+            {"properties":{"result":{}},
+             "required":["result"],
+             "type":"object"}},
+           "required":["ok", "result"],
+           "type":"object"},
+          {"properties":
+           {"data":{"type":"object"},
+            "error":{"type":"string"},
+            "ok":{"const":false}},
+           "required":["ok", "error"],
+           "type":"object"}]}}},
+      "description":"Done."},
+     "400":
+     {"content":
+      {"application/edn":
+       {"schema":{"$ref":"#/components/schemas/Envelope"}}},
+      "description":"Refused or failed: {:ok false}."},
+     "401":{"description":"Missing or wrong agent token."},
+     "404":{"description":"No such route."}},
+    "security":[{"agentToken":[]}],
+    "summary":"Catalogue and scan a REST source."}},
+  "/secret":
+  {"post":
+   {"operationId":"secret",
+    "parameters":
+    [{"$ref":"#/components/parameters/requestKey"},
+     {"$ref":"#/components/parameters/waitMs"}],
+    "requestBody":
+    {"content":
+     {"application/edn":
+      {"schema":
+       {"properties":
+        {"span":{},
+         "spec":
+         {"properties":
+          {"agent":{"anyOf":[{"type":"string"}, {"type":"string"}]},
+           "config":{"additionalProperties":{}, "type":"object"},
+           "secret-cipher":{"type":"string"},
+           "source-name":{"type":"string"},
+           "type":{"anyOf":[{"type":"string"}, {"type":"string"}]}},
+          "type":"object"},
+         "timeout-ms":{"minimum":1, "type":"integer"}},
+        "required":["spec"],
+        "type":"object"}}},
+     "required":true},
+    "responses":
+    {"200":
+     {"content":
+      {"application/edn":
+       {"schema":
+        {"oneOf":
+         [{"properties":
+           {"ok":{"const":true},
+            "result":
+            {"properties":
+             {"fields":{"additionalProperties":{}, "type":"object"}},
+             "required":["fields"],
+             "type":"object"}},
+           "required":["ok", "result"],
+           "type":"object"},
+          {"properties":
+           {"data":{"type":"object"},
+            "error":{"type":"string"},
+            "ok":{"const":false}},
+           "required":["ok", "error"],
+           "type":"object"}]}}},
+      "description":"Done."},
+     "400":
+     {"content":
+      {"application/edn":
+       {"schema":{"$ref":"#/components/schemas/Envelope"}}},
+      "description":"Refused or failed: {:ok false}."},
+     "401":{"description":"Missing or wrong agent token."},
+     "404":{"description":"No such route."}},
+    "security":[{"agentToken":[]}],
+    "summary":
+    "The decrypted credential fields of a source marked :external-transform."}},
+  "/status":
+  {"post":
+   {"operationId":"status",
+    "parameters":
+    [{"$ref":"#/components/parameters/requestKey"},
+     {"$ref":"#/components/parameters/waitMs"}],
+    "requestBody":
+    {"content":
+     {"application/edn":
+      {"schema":
+       {"properties":
+        {"span":{}, "timeout-ms":{"minimum":1, "type":"integer"}},
+        "type":"object"}}},
+     "required":true},
+    "responses":
+    {"200":
+     {"content":
+      {"application/edn":
+       {"schema":
+        {"oneOf":
+         [{"properties":
+           {"ok":{"const":true},
+            "result":
+            {"properties":
+             {"agent":{"type":"string"},
+              "alg":{"type":"string"},
+              "connectors":
+              {"additionalProperties":
+               {"additionalProperties":{}, "type":"object"},
+               "type":"object"},
+              "fingerprint":{"type":"string"},
+              "heap":{"properties":{}, "type":"object"},
+              "java":{"type":"string"},
+              "sessions":
+              {"items":
+               {"properties":
+                {"age-ms":{"type":"integer"},
+                 "expires-in-ms":{"type":"integer"},
+                 "source":
+                 {"oneOf":[{"type":"string"}, {"type":"null"}]},
+                 "tx":{"type":"string"}},
+                "required":
+                ["tx", "source", "age-ms", "expires-in-ms"],
+                "type":"object"},
+               "type":"array"},
+              "started-at":
+              {"oneOf":[{"type":"integer"}, {"type":"null"}]},
+              "trace":{"properties":{}, "type":"object"},
+              "uptime-ms":
+              {"oneOf":[{"type":"integer"}, {"type":"null"}]}},
+             "required":
+             ["agent", "alg", "fingerprint", "sessions", "connectors"],
+             "type":"object"}},
+           "required":["ok", "result"],
+           "type":"object"},
+          {"properties":
+           {"data":{"type":"object"},
+            "error":{"type":"string"},
+            "ok":{"const":false}},
+           "required":["ok", "error"],
+           "type":"object"}]}}},
+      "description":"Done."},
+     "400":
+     {"content":
+      {"application/edn":
+       {"schema":{"$ref":"#/components/schemas/Envelope"}}},
+      "description":"Refused or failed: {:ok false}."},
+     "401":{"description":"Missing or wrong agent token."},
+     "404":{"description":"No such route."}},
+    "security":[{"agentToken":[]}],
+    "summary":
+    "Who the agent is, its key fingerprint, open write sessions, connectors."}},
+  "/trace":
+  {"post":
+   {"operationId":"trace",
+    "parameters":
+    [{"$ref":"#/components/parameters/requestKey"},
+     {"$ref":"#/components/parameters/waitMs"}],
+    "requestBody":
+    {"content":
+     {"application/edn":
+      {"schema":
+       {"properties":
+        {"after":{"type":"integer"},
+         "span":{},
+         "timeout-ms":{"minimum":1, "type":"integer"}},
+        "required":["after"],
+        "type":"object"}}},
+     "required":true},
+    "responses":
+    {"200":
+     {"content":
+      {"application/edn":
+       {"schema":
+        {"oneOf":
+         [{"properties":{"ok":{"const":true}, "result":{}},
+           "required":["ok", "result"],
+           "type":"object"},
+          {"properties":
+           {"data":{"type":"object"},
+            "error":{"type":"string"},
+            "ok":{"const":false}},
+           "required":["ok", "error"],
+           "type":"object"}]}}},
+      "description":"Done."},
+     "400":
+     {"content":
+      {"application/edn":
+       {"schema":{"$ref":"#/components/schemas/Envelope"}}},
+      "description":"Refused or failed: {:ok false}."},
+     "401":{"description":"Missing or wrong agent token."},
+     "404":{"description":"No such route."}},
+    "security":[{"agentToken":[]}],
+    "summary":"Traced statements after a cursor (operator)."}},
+  "/trace-arm":
+  {"post":
+   {"operationId":"trace_arm",
+    "parameters":
+    [{"$ref":"#/components/parameters/requestKey"},
+     {"$ref":"#/components/parameters/waitMs"}],
+    "requestBody":
+    {"content":
+     {"application/edn":
+      {"schema":
+       {"properties":
+        {"capture-params?":{"type":"boolean"},
+         "file":{"oneOf":[{"type":"string"}, {"type":"null"}]},
+         "on":{"type":"boolean"},
+         "span":{},
+         "timeout-ms":{"minimum":1, "type":"integer"}},
+        "required":["on"],
+        "type":"object"}}},
+     "required":true},
+    "responses":
+    {"200":
+     {"content":
+      {"application/edn":
+       {"schema":
+        {"oneOf":
+         [{"properties":{"ok":{"const":true}, "result":{}},
+           "required":["ok", "result"],
+           "type":"object"},
+          {"properties":
+           {"data":{"type":"object"},
+            "error":{"type":"string"},
+            "ok":{"const":false}},
+           "required":["ok", "error"],
+           "type":"object"}]}}},
+      "description":"Done."},
+     "400":
+     {"content":
+      {"application/edn":
+       {"schema":{"$ref":"#/components/schemas/Envelope"}}},
+      "description":"Refused or failed: {:ok false}."},
+     "401":{"description":"Missing or wrong agent token."},
+     "404":{"description":"No such route."}},
+    "security":[{"agentToken":[]}],
+    "summary":"Arm or disarm the agent's SQL trace (operator)."}},
+  "/trace-kill":
+  {"post":
+   {"operationId":"trace_kill",
+    "parameters":
+    [{"$ref":"#/components/parameters/requestKey"},
+     {"$ref":"#/components/parameters/waitMs"}],
+    "requestBody":
+    {"content":
+     {"application/edn":
+      {"schema":
+       {"properties":
+        {"all":{"type":"boolean"},
+         "seq":{"type":"integer"},
+         "span":{},
+         "timeout-ms":{"minimum":1, "type":"integer"}},
+        "type":"object"}}},
+     "required":true},
+    "responses":
+    {"200":
+     {"content":
+      {"application/edn":
+       {"schema":
+        {"oneOf":
+         [{"properties":{"ok":{"const":true}, "result":{}},
+           "required":["ok", "result"],
+           "type":"object"},
+          {"properties":
+           {"data":{"type":"object"},
+            "error":{"type":"string"},
+            "ok":{"const":false}},
+           "required":["ok", "error"],
+           "type":"object"}]}}},
+      "description":"Done."},
+     "400":
+     {"content":
+      {"application/edn":
+       {"schema":{"$ref":"#/components/schemas/Envelope"}}},
+      "description":"Refused or failed: {:ok false}."},
+     "401":{"description":"Missing or wrong agent token."},
+     "404":{"description":"No such route."}},
+    "security":[{"agentToken":[]}],
+    "summary":"Cancel a traced statement, or all (operator)."}},
+  "/webhook":
+  {"post":
+   {"operationId":"webhook",
+    "parameters":
+    [{"$ref":"#/components/parameters/requestKey"},
+     {"$ref":"#/components/parameters/waitMs"}],
+    "requestBody":
+    {"content":
+     {"application/edn":
+      {"schema":
+       {"properties":
+        {"cloudevent":{"additionalProperties":{}, "type":"object"},
+         "idempotency-key":{"type":"string"},
+         "params":{},
+         "span":{},
+         "spec":
+         {"properties":
+          {"agent":{"anyOf":[{"type":"string"}, {"type":"string"}]},
+           "config":{"additionalProperties":{}, "type":"object"},
+           "secret-cipher":{"type":"string"},
+           "source-name":{"type":"string"},
+           "type":{"anyOf":[{"type":"string"}, {"type":"string"}]}},
+          "type":"object"},
+         "timeout-ms":{"minimum":1, "type":"integer"},
+         "webhook-id":
+         {"anyOf":[{"type":"string"}, {"type":"string"}]}},
+        "required":["spec", "webhook-id"],
+        "type":"object"}}},
+     "required":true},
+    "responses":
+    {"200":
+     {"content":
+      {"application/edn":
+       {"schema":
+        {"oneOf":
+         [{"properties":{"ok":{"const":true}, "result":{}},
+           "required":["ok", "result"],
+           "type":"object"},
+          {"properties":
+           {"data":{"type":"object"},
+            "error":{"type":"string"},
+            "ok":{"const":false}},
+           "required":["ok", "error"],
+           "type":"object"}]}}},
+      "description":"Done."},
+     "400":
+     {"content":
+      {"application/edn":
+       {"schema":{"$ref":"#/components/schemas/Envelope"}}},
+      "description":"Refused or failed: {:ok false}."},
+     "401":{"description":"Missing or wrong agent token."},
+     "404":{"description":"No such route."}},
+    "security":[{"agentToken":[]}],
+    "summary":
+    "Call a webhook of a REST source; CloudEvents attributes ride as ce-* headers."}},
+  "/write":
+  {"post":
+   {"operationId":"write",
+    "parameters":
+    [{"$ref":"#/components/parameters/requestKey"},
+     {"$ref":"#/components/parameters/waitMs"}],
+    "requestBody":
+    {"content":
+     {"application/edn":
+      {"schema":
+       {"properties":
+        {"span":{},
+         "spec":
+         {"properties":
+          {"agent":{"anyOf":[{"type":"string"}, {"type":"string"}]},
+           "config":{"additionalProperties":{}, "type":"object"},
+           "secret-cipher":{"type":"string"},
+           "source-name":{"type":"string"},
+           "type":{"anyOf":[{"type":"string"}, {"type":"string"}]}},
+          "type":"object"},
+         "timeout-ms":{"minimum":1, "type":"integer"},
+         "tx":{"type":"string"},
+         "write-spec":{"properties":{}, "type":"object"}},
+        "required":["spec", "write-spec"],
+        "type":"object"}}},
+     "required":true},
+    "responses":
+    {"200":
+     {"content":
+      {"application/edn":
+       {"schema":
+        {"oneOf":
+         [{"properties":{"ok":{"const":true}, "result":{}},
+           "required":["ok", "result"],
+           "type":"object"},
+          {"properties":
+           {"data":{"type":"object"},
+            "error":{"type":"string"},
+            "ok":{"const":false}},
+           "required":["ok", "error"],
+           "type":"object"}]}}},
+      "description":"Done."},
+     "400":
+     {"content":
+      {"application/edn":
+       {"schema":{"$ref":"#/components/schemas/Envelope"}}},
+      "description":"Refused or failed: {:ok false}."},
+     "401":{"description":"Missing or wrong agent token."},
+     "404":{"description":"No such route."}},
+    "security":[{"agentToken":[]}],
+    "summary":
+    "Apply a write plan to a JDBC source, alone or inside an open session :tx."}},
+  "/write-begin":
+  {"post":
+   {"operationId":"write_begin",
+    "parameters":
+    [{"$ref":"#/components/parameters/requestKey"},
+     {"$ref":"#/components/parameters/waitMs"}],
+    "requestBody":
+    {"content":
+     {"application/edn":
+      {"schema":
+       {"properties":
+        {"span":{},
+         "spec":
+         {"properties":
+          {"agent":{"anyOf":[{"type":"string"}, {"type":"string"}]},
+           "config":{"additionalProperties":{}, "type":"object"},
+           "secret-cipher":{"type":"string"},
+           "source-name":{"type":"string"},
+           "type":{"anyOf":[{"type":"string"}, {"type":"string"}]}},
+          "type":"object"},
+         "timeout-ms":{"minimum":1, "type":"integer"}},
+        "required":["spec"],
+        "type":"object"}}},
+     "required":true},
+    "responses":
+    {"200":
+     {"content":
+      {"application/edn":
+       {"schema":
+        {"oneOf":
+         [{"properties":
+           {"ok":{"const":true},
+            "result":
+            {"properties":{"tx":{"type":"string"}},
+             "required":["tx"],
+             "type":"object"}},
+           "required":["ok", "result"],
+           "type":"object"},
+          {"properties":
+           {"data":{"type":"object"},
+            "error":{"type":"string"},
+            "ok":{"const":false}},
+           "required":["ok", "error"],
+           "type":"object"}]}}},
+      "description":"Done."},
+     "400":
+     {"content":
+      {"application/edn":
+       {"schema":{"$ref":"#/components/schemas/Envelope"}}},
+      "description":"Refused or failed: {:ok false}."},
+     "401":{"description":"Missing or wrong agent token."},
+     "404":{"description":"No such route."}},
+    "security":[{"agentToken":[]}],
+    "summary":
+    "Open a write session (one transaction, \u2264120 s idle) on a JDBC source."}},
+  "/write-end":
+  {"post":
+   {"operationId":"write_end",
+    "parameters":
+    [{"$ref":"#/components/parameters/requestKey"},
+     {"$ref":"#/components/parameters/waitMs"}],
+    "requestBody":
+    {"content":
+     {"application/edn":
+      {"schema":
+       {"properties":
+        {"commit":{"type":"boolean"},
+         "span":{},
+         "timeout-ms":{"minimum":1, "type":"integer"},
+         "tx":{"type":"string"}},
+        "required":["tx"],
+        "type":"object"}}},
+     "required":true},
+    "responses":
+    {"200":
+     {"content":
+      {"application/edn":
+       {"schema":
+        {"oneOf":
+         [{"properties":
+           {"ok":{"const":true},
+            "result":
+            {"properties":
+             {"ended":{"type":"string"}, "gone":{"type":"boolean"}},
+             "required":["ended"],
+             "type":"object"}},
+           "required":["ok", "result"],
+           "type":"object"},
+          {"properties":
+           {"data":{"type":"object"},
+            "error":{"type":"string"},
+            "ok":{"const":false}},
+           "required":["ok", "error"],
+           "type":"object"}]}}},
+      "description":"Done."},
+     "400":
+     {"content":
+      {"application/edn":
+       {"schema":{"$ref":"#/components/schemas/Envelope"}}},
+      "description":"Refused or failed: {:ok false}."},
+     "401":{"description":"Missing or wrong agent token."},
+     "404":{"description":"No such route."}},
+    "security":[{"agentToken":[]}],
+    "summary":"Commit or roll back a write session."}}}}

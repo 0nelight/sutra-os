@@ -1,0 +1,3 @@
+{:schema
+ {:objects
+  {:irrlaeufer {:title :x :attributes [[:x :string] [:x :long]]}}}}

@@ -1,0 +1,51 @@
+[{:id :names-unique?, :rule :schema/duplicate-name}
+ {:id :no-dangling-refs?, :rule :schema/dangling-reference}
+ {:id :link-types-valid?, :rule :link-type/invalid}
+ {:id :actions-valid?, :rule :action/invalid}
+ {:id :object-sets-valid?, :rule :object-set/invalid}
+ {:id :media-sets-declared?, :rule :media-set/undeclared}
+ {:id :media-set-sources?, :rule :media-set/source}
+ {:id :transforms-valid?, :rule :transform/invalid}
+ {:id :models-registered?, :rule :transform/unregistered-model}
+ {:id :compute-graph-valid?, :rule :transform/compute-graph-invalid}
+ {:id :shared-property-value-types?, :rule :shared-property/value-type}
+ {:id :title-keys-valid?, :rule :object-type/unknown-title-key}
+ {:id :columns-valid?, :rule :object-type/illegal-column}
+ {:id :lint-gate-clean?, :rule :lint/gate}
+ {:id :implements-known?,
+  :rule :interface/unknown-implements,
+  :relational? false,
+  :interface-gate? true}
+ {:id :property-superset?,
+  :rule :interface/property-superset,
+  :relational? false,
+  :interface-gate? true}
+ {:id :marking-constraints-met?, :rule :project/marking-constraint}
+ {:id :project-classification-met?, :rule :project/classification-required}
+ {:id :ontology-references-local?, :rule :ontology/cross-reference}
+ {:id :project-organizations-in-space?, :rule :project/organization-outside-space}
+ {:id :primary-organization-unique?, :rule :organization/primary-twice}
+ {:id :stream-types-unedited?, :rule :object-type/edit-on-stream}
+ {:id :stream-types-single-datasource?, :rule :object-type/stream-supplement}
+ {:id :stream-backing-settings-valid?, :rule :object-type/stream-backing-setting}
+ {:id :stream-derivations-valid?, :rule :dataset/stream-derive}
+ {:id :link-constraints-met?,
+  :rule :interface/link-constraint,
+  :relational? false,
+  :interface-gate? true}
+ {:id :interface-properties-agree?,
+  :rule :interface/property-conflict,
+  :relational? false,
+  :interface-gate? true}
+ {:id :interface-links-agree?,
+  :rule :interface/link-conflict,
+  :relational? false,
+  :interface-gate? true}
+ {:id :extends-known?,
+  :rule :interface/unknown-extends,
+  :relational? false,
+  :interface-gate? true}
+ {:id :extends-acyclic?,
+  :rule :interface/extends-cycle,
+  :relational? false,
+  :interface-gate? true}]

@@ -1,0 +1,110 @@
+{:name     "papers"
+ :viewport [1440 900]
+ :beat     700
+ :travel   26
+ :type-delay 85
+ :css      ".fab, .assistant-fab, [class*='ask-fab'], [class*='note-fab'] { display: none !important; }"
+
+ :setup
+ {:project     :papers
+  :description "A freelancer's paperwork"
+  :files       {"{{eingang}}/bank-october.csv" "papers/bank-october.csv"}
+  :push        {:ontologie       {"papers.objects.ent" "papers/papers.objects.ent"
+                                  "papers.ingest.ent"  "papers/papers.ingest.ent"}
+                :code-repository {"ohne-repository.ent" "papers/papers.transforms.ent"}}
+  :cli
+  [["commit" "--yes"]
+   ["source" "secret" "mailbox" "--user" "alex" "--password" "film" "--yes"]
+   ["source" "secret" "llm" "--field" "api-key" "--value" "local-stand-in" "--yes"]
+   ["llm" "register" "invoice-reader" "--in" "0" "--out" "0" "--source" "llm"
+    "--provider" "openai-chat" "--window" "128000" "--tool-calling" "--yes"]
+   ["--yes" "{{scene}}/papers/automation.entr"]
+   ["build" "run" "--only" "bank-transaction,mail,document" "--strategy" "ancestors"]
+   ["action" "unmatch-payment" "payment=tx-1003" "--yes"]
+   ["automation" "read-new-invoices" "--do" "run"]
+   ["action" "discard-invoice" "invoice=DC-1026-14" "--yes"]
+   ["automation" "read-new-invoices" "--do" "pause"]]}
+
+ :steps
+ [[:card {:title "Your paperwork already has a schema."
+          :sub   "A mailbox full of invoice PDFs. A bank export. Sutra makes them one model you can query, link and act on."
+          :ms 4200}]
+  [:card {:title "Two sources, declared."
+          :sub   "No importer to write: the IMAP connector and a CSV in the inbox folder."
+          :code  ":sources\n{:mailbox {:type :imap :host \"127.0.0.1\" :port 3143\n          :config {:folders \"INBOX\"}}\n :bank    {:type :csv\n          :path \"~/.local/share/sutra/eingang/bank-october.csv\"}}"
+          :ms 5200}]
+
+  [:goto "/object-workspace/mail?lang=en-US"]
+  [:caption "Five mails, read in place over IMAP."]
+  [:highlight {:css "table"} {:ms 1800}]
+  [:click {:css ".explorer-sidebar__type-name" :has "Attachments"} {:settle 1500}]
+  [:caption "Their PDFs — the bytes landed by a ten-line Python transform."]
+  [:wait 1600]
+  [:click {:css ".explorer-sidebar__type-name" :has "Bank transactions"} {:settle 1500}]
+  [:caption "Nine lines from the bank's CSV export. Nobody typed any of this."]
+  [:wait 2000]
+
+  [:goto "/data-lineage/object-type/invoice?lang=en-US"]
+  [:caption "Links are declared once, then followed everywhere."]
+  [:click "Upstream" {:settle 700}]
+  [:click "All the way" {:settle 2000}]
+  [:click "Downstream" {:settle 700}]
+  [:click "All the way" {:settle 2200}]
+  [:caption "Bank line → invoice → original PDF → the mail it came in."]
+  [:wait 3000]
+  [:caption nil]
+  [:card {:title "The pipeline is code you can review."
+          :sub   "The transform that lands each PDF's bytes — versioned, rebuildable, run in a sandbox:"
+          :code  "@transform(inputs={'atts': Input(kind='dataset', dataset='mail_attachments')},\n           output=Output(kind='dataset', dataset='attachment_files'))\ndef land(atts):\n    return [{'attachment_id': a['key'],\n             'file': put_media_item(base64.b64decode(a['content_b64']))}\n            for a in atts if a.get('content_b64')]"
+          :ms 6000}]
+
+  [:goto "/object-workspace/invoice?lang=en-US"]
+  [:caption "Four invoices were read on arrival: an automation shows each new PDF to a model."]
+  [:wait 2600]
+  [:caption "The fifth is still waiting. Let's read it by hand."]
+  [:click {:css ".explorer-sidebar__type-name" :has "Attachments"} {:settle 1500}]
+  [:click {:text "deskco.pdf" :exact true} {:settle 2000}]
+  [:click "Actions"]
+  [:click "Read invoice" {:settle 800}]
+  [:click {:css ".bp-button" :has "Run"} {:settle 3500}]
+  [:caption "The model's answer is checked against a declared structure before anything is written."]
+  [:goto "/object-workspace/invoice?lang=en-US"]
+  [:highlight {:text "Desk & Co Coworking" :exact true} {:ms 2200}]
+
+  [:caption "Paid is what the bank says. Three transfers quoted the invoice number — linked without a click."]
+  [:highlight {:text "Open" :exact true} {:ms 2600}]
+  [:caption "StreamTube was a card payment. No reference, so it's still open."]
+  [:highlight {:text "StreamTube LLC" :exact true} {:ms 2200}]
+
+  [:click {:css ".explorer-sidebar__type-name" :has "Bank transactions"} {:settle 1500}]
+  [:click {:text "Green Basket Market" :exact true} {:settle 2000}]
+  [:caption "Match the wrong bank line — the groceries — to it?"]
+  [:click "Actions"]
+  [:click "Match to invoice" {:settle 800}]
+  [:select {:field "Invoice"} "StreamTube LLC"]
+  [:wait 800]
+  [:click {:css ".bp-button" :has "Preview"} {:settle 1800}]
+  [:caption "Refused: it would pay more than is open. The rule lives in the model, not in this screen."]
+  [:wait 3200]
+  [:click {:css ".bp-button" :has "Cancel"}]
+
+  [:goto "/object-workspace/bank-transaction?lang=en-US"]
+  [:click {:text "STREAMTUBE*PREMIUM" :exact true} {:settle 2000}]
+  [:caption "The card charge itself fits."]
+  [:click "Actions"]
+  [:click "Match to invoice" {:settle 800}]
+  [:select {:field "Invoice"} "StreamTube LLC"]
+  [:wait 800]
+  [:click {:css ".bp-button" :has "Run"} {:settle 2500}]
+  [:goto "/object/invoice/ST-88123-1003?lang=en-US"]
+  [:caption "Open: $0.00. Derived from the links — there is no \"paid\" flag to forget."]
+  [:highlight {:text "Open" :exact true} {:ms 2800 :color "#22c55e"}]
+  [:caption nil]
+
+  [:card {:title "The same rule, everywhere."
+          :sub   "Web UI, CLI, Python SDK, an AI agent — the server refuses the overpayment for all of them:"
+          :code  ":submission-criteria\n[{:test    {:o [:get :payment :outflow]\n            :r [:get :invoice :open]}\n  :pred    [:<= :o :r]\n  :message \"This would pay more than is still open.\"}]"
+          :ms 5500}]
+  [:card {:title "Sutra-OS"
+          :sub   "Ontology, pipelines and actions for your own data · open source · runs on your machine"
+          :ms 3500}]]}

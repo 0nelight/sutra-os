@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Regenerates media/sdk/*.gif: VHS types into stock Neovim with pyright, against an SDK
+# generated from the farm schema the server serves (clients/python-platform-sdk/tests/fixtures).
+#   media/sdk/record                 all three
+#   media/sdk/record sdk-filter      one
+# Needs: vhs, ttyd, ffmpeg, nvim >= 0.11, pyright, bb, python3 with the SDK's dependencies.
+set -euo pipefail
+here=$(cd "$(dirname "$0")" && pwd)
+sdk=$(cd "$here/../../clients/python-platform-sdk" && pwd)
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+
+PYTHONPATH=$sdk python3 -c '
+import sys
+from sutra_platform_sdk.generate import generate_from_export
+generate_from_export(sys.argv[1], sys.argv[2], ontology="farm")
+' "$sdk/tests/fixtures/farm-schema.transit.json" "$work/farm_sdk.py"
+printf '{"extraPaths": ["%s"]}\n' "$sdk" > "$work/pyrightconfig.json"
+cp "$here/editor.tape" "$work/editor.tape"
+
+export SDK_GIF_INIT=$here/nvim/init.lua
+export ENT_LSP_CONFIG=$(cd "$here/../../clients/ent-lsp" && pwd)/bb.edn
+unset VSCODE_NLS_CONFIG
+export LANG=C.UTF-8 LC_ALL=C.UTF-8 LANGUAGE=en
+export XDG_CONFIG_HOME=$work/.config XDG_DATA_HOME=$work/.data XDG_STATE_HOME=$work/.state
+
+scenes=("$@")
+[ ${#scenes[@]} -gt 0 ] || scenes=(sdk-action sdk-literal sdk-filter)
+for scene in "${scenes[@]}"; do
+  cp "$here/start/$scene.py" "$work/farm.py"
+  (cd "$work" && vhs -q "$here/$scene.tape" -o "$here/$scene.gif")
+  echo "media/sdk/$scene.gif"
+done

@@ -1,0 +1,77 @@
+;; Rechnungen — "Ich erfasse eine Rechnung, sehe was offen ist, und bezahle sie."
+;;
+{:name         :rechnungen
+ :display-name "Rechnungen"
+ :description  "Rechnungen erfassen, sehen was offen ist, und bezahlen."
+ :icon         "🧾"
+ :promoted     true
+ :collection   :alltag
+ :project      :anwendungen
+ :repository   :startanwendungen
+ :object-types [:eingangsrechnung :organisation :bankkonto :bankbuchung]
+ :actions      [{:action :rechnung-erfassen}
+                {:action :organisation-anlegen}
+                {:action :ueberweisung-vorbereiten}
+                {:action :rechnung-ausgleichen}]
+ :layout
+ {:kind  :rows
+  :title "Rechnungen"
+  :vars  {:ansicht     {:type :keyword :default :offen}
+          :offene      {:from :eingangsrechnung :where [[:offen :> 0]]}
+          :alle        {:source :eingangsrechnung}
+          :summe-offen {:agg [:sum :offen] :of :offene}
+          :anzahl      {:agg [:count :rechnung-id] :of :offene}
+          :rechnung    {:default nil}
+          :rechnung-id {:object-property :id :of :rechnung :type :string}
+          :rest        {:object-property :offen :of :rechnung :type :number}}
+  :items
+  [{:widget :kpi-row
+    :items  [{:label "Noch zu zahlen" :value {:val :summe-offen} :fmt :eur}
+             {:label "Offene Rechnungen" :value {:val :anzahl} :fmt :int}]}
+   {:kind   :columns
+    :detail {:var :rechnung}
+    :items
+    [{:kind   :tabs
+      :select {:var :ansicht}
+      :tabs   [{:id    :offen
+                :label "Offen"
+                :body  {:widget :object-table
+                        :rows   {:val :offene}
+                        :cols   [{:prop :belegnummer} {:prop :faellig-am}
+                                 {:prop :betrag} {:prop :offen}]
+                        :sort   [[:faellig-am :asc]]
+                        :active {:var :rechnung}}}
+               {:id    :alle
+                :label "Alle"
+                :body  {:widget :object-table
+                        :rows   {:val :alle}
+                        :cols   [{:prop :belegnummer} {:prop :belegdatum}
+                                 {:prop :betrag} {:prop :offen}]
+                        :sort   [[:belegdatum :desc]]
+                        :active {:var :rechnung}}}]}
+     {:kind :rows
+      :items
+      [{:widget         :property-list
+        :object         {:val :rechnung}
+        :props          [{:prop :belegnummer :label "Rechnung"} {:prop :offen :label "Offen" :fmt :eur}
+                         {:prop :faellig-am :label "Faellig am"} {:prop :betrag :label "Betrag" :fmt :eur}]
+        :label-position :below
+        :columns        2}
+       {:kind  :section
+        :title "Bezahlen"
+        :body  {:widget   :action-form
+                :action   :ueberweisung-vorbereiten
+                :label    "Ueberweisung vorbereiten"
+                :defaults {:rechnung {:val :rechnung-id}}}}
+       {:kind  :section
+        :title "Schon bezahlt? Mit der Buchung abgleichen"
+        :body  {:widget   :action-form
+                :action   :rechnung-ausgleichen
+                :label    "Abgleichen"
+                :defaults {:rechnung {:val :rechnung-id} :betrag {:val :rest}}}}]}]}
+   {:kind  :section
+    :title "Neue Rechnung erfassen"
+    :body  {:widget :action-form :action :rechnung-erfassen :label "Erfassen"}}
+   {:kind  :section
+    :title "Absender fehlt in der Liste?"
+    :body  {:widget :action-form :action :organisation-anlegen :label "Anlegen"}}]}}

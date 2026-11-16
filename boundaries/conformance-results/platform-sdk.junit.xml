@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="platform-sdk" tests="4" failures="0" skipped="0">
+  <testcase classname="platform-sdk" name="sdk.table"></testcase>
+  <testcase classname="platform-sdk" name="sdk.openapi"></testcase>
+  <testcase classname="platform-sdk" name="sdk.paths"></testcase>
+  <testcase classname="platform-sdk" name="sdk.auth"></testcase>
+</testsuite>

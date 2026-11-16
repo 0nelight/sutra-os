@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+root="$(git -C "$(dirname "$0")" rev-parse --show-toplevel 2>/dev/null || pwd)"
+LOG="${FE_LOG:-$root/.run/frontend.log}"
+cap="${CAP:-300}"
+lens="${1:-errors}"
+n="${2:-80}"
+
+case "$lens" in
+  errors) cond='/^[0-9:.]+ +(API✗|ERR|REJECT|RENDER✗|UNCAUGHT) /' ;;
+  api)    cond='/^[0-9:.]+ +(API|API✗) / || /request body:|response:/' ;;
+  state)  cond='/^[0-9:.]+ +STATE /' ;;
+  perf)   cond='/^[0-9:.]+ +PERF /' ;;
+  clicks) cond='/^[0-9:.]+ +CLICK /' ;;
+  vis)    cond='/^[0-9:.]+ +(VIS|VIS✗|CLICK) /' ;;
+  warn)   cond='/^[0-9:.]+ +(WARN|RENDER✗|VIS✗) /' ;;
+  all)    cond='1' ;;
+  *) echo "fe-log: unknown lens '$lens' (errors|api|state|clicks|vis|perf|warn|all)" >&2; exit 2 ;;
+esac
+
+[ -r "$LOG" ] || { echo "fe-log: cannot read $LOG (set FE_LOG?)" >&2; exit 1; }
+
+check=1; [ "$lens" = all ] && check=0
+awk -v cap="$cap" -v check="$check" -v path="$LOG" "
+  /^[0-9:.]+ +[^ ]+ / { typed++ }
+  NF { lines++ }
+  { if (length>cap) \$0=substr(\$0,1,cap) \"…\" }
+  $cond
+  END { if (check && lines && !typed) {
+          print \"fe-log: \" path \" has \" lines \" lines, none in the 'HH:MM:SS LEVEL' format — not a shadow-cljs dev log\" > \"/dev/stderr\"
+          exit 3 } }" "$LOG" | tail -n "$n"

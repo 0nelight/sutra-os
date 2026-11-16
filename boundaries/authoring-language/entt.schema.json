@@ -1,0 +1,343 @@
+{
+  "$comment": "Generated from the Malli grammar of sutra.parser.ent; do not edit. The texts are EDN; this schema describes them under the mapping: map \u2192 object, vector/list/set \u2192 array, keyword \u2192 string of its name with namespace (no colon). x-sutra-check marks a rule the parser checks in code. A $defs entry named h-<hash> is a subschema the grammar repeats.",
+  "$id": "urn:sutra:interface:authoring-language:entt:1.0.0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "allOf": [
+    {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "engine": {
+          "enum": [
+            "jinja2"
+          ],
+          "type": "string"
+        },
+        "format": {
+          "enum": [
+            "html",
+            "markdown",
+            "text"
+          ],
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "ignore-inherited": {
+          "type": "boolean"
+        },
+        "limits": {
+          "additionalProperties": false,
+          "properties": {
+            "max-objects": {
+              "maximum": 10000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "max-rows": {
+              "maximum": 10000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "seconds": {
+              "maximum": 120,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "name": {
+          "type": "string"
+        },
+        "page": {
+          "additionalProperties": false,
+          "properties": {
+            "base-css": {
+              "type": "boolean"
+            },
+            "css": {
+              "type": "string"
+            },
+            "footer": {
+              "type": "string"
+            },
+            "header": {
+              "type": "string"
+            },
+            "margin": {
+              "type": "string"
+            },
+            "orientation": {
+              "enum": [
+                "portrait",
+                "landscape"
+              ],
+              "type": "string"
+            },
+            "size": {
+              "enum": [
+                "a1",
+                "a2",
+                "a3",
+                "a4",
+                "a5",
+                "letter",
+                "legal",
+                "tabloid"
+              ],
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "parameters": {
+          "additionalProperties": {
+            "allOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "default": {},
+                  "description": {
+                    "type": "string"
+                  },
+                  "edge": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "minItems": 1,
+                        "type": "array"
+                      },
+                      {
+                        "x-sutra-check": "should be a keyword or a vector"
+                      }
+                    ]
+                  },
+                  "layout": {
+                    "type": "string"
+                  },
+                  "object-set": {
+                    "type": "string"
+                  },
+                  "object-type": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "x-sutra-check": "checked by the Sutra parser beyond this schema"
+                          }
+                        ]
+                      },
+                      {
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "allOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "x-sutra-check": "checked by the Sutra parser beyond this schema"
+                                }
+                              ]
+                            },
+                            {
+                              "x-sutra-check": "should be a keyword or a string"
+                            }
+                          ]
+                        },
+                        "minItems": 1,
+                        "type": "array"
+                      },
+                      {
+                        "x-sutra-check": "should be a keyword or a string or a vector"
+                      }
+                    ]
+                  },
+                  "of": {
+                    "type": "string"
+                  },
+                  "options-from": {
+                    "allOf": [
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "args": {
+                            "additionalProperties": {
+                              "type": "string"
+                            },
+                            "type": "object"
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "object-set": {
+                            "type": "string"
+                          },
+                          "object-type": {
+                            "type": "string"
+                          },
+                          "property": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "x-sutra-check": ":options-from needs exactly one source \u2014 :object-set (a saved set) or :object-type (every object of that type)"
+                      }
+                    ]
+                  },
+                  "preview": {},
+                  "required": {
+                    "type": "boolean"
+                  },
+                  "richtung": {
+                    "type": "string"
+                  },
+                  "search-around": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "minItems": 1,
+                        "type": "array"
+                      },
+                      {
+                        "x-sutra-check": "should be a keyword or a vector"
+                      }
+                    ]
+                  },
+                  "type": {
+                    "enum": [
+                      "string",
+                      "number",
+                      "boolean",
+                      "date",
+                      "timestamp",
+                      "object",
+                      "object-set",
+                      "graph"
+                    ],
+                    "type": "string"
+                  },
+                  "via": {}
+                },
+                "required": [
+                  "type"
+                ],
+                "type": "object"
+              },
+              {
+                "x-sutra-check": "an :object / :object-set / :graph parameter must name its :object-type \u2014 without it nothing can say which properties the body may reach, and a typo becomes an empty render instead of an error"
+              },
+              {
+                "x-sutra-check": ":object-type belongs to an :object, :object-set or :graph parameter"
+              },
+              {
+                "x-sutra-check": ":object-set belongs to an :object or :object-set parameter"
+              },
+              {
+                "x-sutra-check": ":edge belongs to a :graph parameter and names the link SIDE the edges run along, as seen from the :object-type"
+              },
+              {
+                "x-sutra-check": "a :graph parameter names the link side its edges run along (:edge) \u2014 objects without a link between them are a list, and a list is an :object-set"
+              },
+              {
+                "x-sutra-check": ":layout / :richtung belong to a :graph parameter \u2014 they say how it is arranged, and nothing else is arranged"
+              },
+              {
+                "x-sutra-check": "only a :graph parameter may name SEVERAL :object-type / :edge \u2014 an :object is one object and an :object-set one type's objects; a CHAIN of types is a drawing"
+              },
+              {
+                "x-sutra-check": "a :graph parameter takes no :required, :default or :preview \u2014 it is READ from the ontology, never passed in, so there is nothing to demand of a caller and nothing to stand in for it"
+              },
+              {
+                "x-sutra-check": ":via is now :search-around and names link SIDES \u2014 their API names as seen from the reached type"
+              },
+              {
+                "x-sutra-check": ":search-around and :of travel together \u2014 :search-around names the link sides to walk and :of the :object parameter to walk them from. One without the other says where to go and not from where, or the reverse."
+              },
+              {
+                "x-sutra-check": ":search-around/:of belong to an :object-set parameter. A single :object is named by its id; a SET that follows a link is the thing that cannot be."
+              }
+            ]
+          },
+          "type": "object"
+        },
+        "project": {
+          "type": "string"
+        },
+        "releases": {
+          "additionalProperties": {},
+          "type": "object"
+        },
+        "repository": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "source-file": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "published"
+          ],
+          "type": "string"
+        },
+        "sutra/grammar": {
+          "pattern": "^\\d+(\\.\\d+){0,2}$",
+          "type": "string"
+        },
+        "targets": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "title": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    {
+      "x-sutra-check": "checked by the Sutra parser beyond this schema"
+    },
+    {
+      "x-sutra-check": "a .entt names itself: `:name :monatsbericht`"
+    },
+    {
+      "x-sutra-check": "a template needs exactly ONE body: `:source-file` (the usual form \u2014 the body is html/markdown with `{{ }}` in it, and it belongs in its own file where a reviewer reads it as the document it is) or an inline `:source`"
+    }
+  ],
+  "title": "Sutra .entt grammar 1.0.0",
+  "x-sutra-grammar-version": "1.0.0"
+}

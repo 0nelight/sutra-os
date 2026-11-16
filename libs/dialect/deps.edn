@@ -1,0 +1,4 @@
+{:paths ["src" "resources"]
+ :deps  {org.clojure/clojure {:mvn/version "1.12.0"}
+         sutra/kernel        {:local/root "../kernel"}
+         metosin/malli       {:mvn/version "0.16.4"}}}

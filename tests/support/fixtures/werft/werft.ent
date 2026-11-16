@@ -1,0 +1,107 @@
+{:schema
+ {:projects {:werft {}}
+
+  :value-types
+  {:flug-kategorie {:type        :string
+                    :description "Einsatzart eines Luftfahrzeugs (aus der Einsatz-Spalte des Flugbuchs)."
+                    :constraints {:one-of ["Linienflug" "Charter" "Überführung" "Testflug" "Schulung"]}
+                    :render-hints [:selectable :low-cardinality]}
+   :import-status  {:type        :string
+                    :description "Lebenszyklus eines Flugbuch-Imports."
+                    :constraints {:one-of ["hochgeladen" "verarbeitet" "fehler"]}
+                    :render-hints [:selectable :low-cardinality]}
+   :blockzeit      {:type        :decimal
+                    :description "Blockzeit in Stunden (Monatssumme eines Luftfahrzeugs)."}}
+
+  :objects
+  {
+   :flugbuch-import
+   {:symbol      "📥"
+    :name        "Flugbuch-Import"
+    :plural      "Flugbuch-Importe"
+    :description "Eine hochgeladene Flugbuch-CSV des Betreibers — das 'uploaded file'-Bauelement und die Wurzel der Lineage."
+    :title       :dateiname
+    :groups      [:werft]
+    :status      :active
+    :attributes
+    [[:import-id      :string]
+     [:dateiname      :string {:name "Dateiname" :render-hints [:searchable :identifier]}]
+     [:jahr           :integer {:name "Betriebsjahr"}]
+     [:art            :string {:name "Belegart" :description "blockzeiten | landungen"}]
+     [:hochgeladen-am :string  {:name "Hochgeladen am" :render-hints [:sortable]}]
+     [:status         :import-status {:description "hochgeladen → verarbeitet → fehler."}]
+     [:quelle         :media-reference {:name "Quell-CSV" :description "sha256 der CSV im CAS (Media-Reference)."}]]}
+
+   :luftfahrzeug
+   {:symbol      "✈️"
+    :name        "Luftfahrzeug"
+    :plural      "Luftfahrzeuge"
+    :description "Ein betreutes Luftfahrzeug — die Dimension, an der Flugbuch-Auswertungen, künftige Einzelflüge und Wartungsintervalle zusammentreffen."
+    :title       :bezeichnung
+    :groups      [:werft]
+    :visibility  :prominent
+    :status      :active
+    :attributes
+    [[:kennzeichen     :string {:render-hints [:searchable :identifier]}]
+     [:bezeichnung     :string {:name "Bezeichnung" :render-hints [:searchable]}]
+     [:kategorie       :flug-kategorie {:description "Einsatzart aus der Einsatz-Spalte (im Build materialisiert, flugbuch::kategorie)."}]
+     [:ist-gewerblich  :boolean {:name "Gewerblich?"
+                                 :description "Nicht in NICHTGEWERBLICH (Werksmaschinen) ⇒ Teil der Auslastungs-Auswertung ('aktuelles Diagramm')."}]
+     [:muster          :string {:name "Muster" :render-hints [:searchable]}]]}
+
+   :monatswert
+   {:symbol      "📊"
+    :name        "Monatswert"
+    :plural      "Monatswerte"
+    :description "Die Blockzeit EINES Luftfahrzeugs in EINEM Monat — die getidyte Lang-Form, die das Auslastungs-Diagramm treibt."
+    :title       :bezeichnung
+    :groups      [:werft]
+    :status      :active
+    :attributes
+    [[:wert-id     :string]
+     [:kennzeichen :string {:name "Kennzeichen" :render-hints [:searchable :identifier]
+                            :description "FK → :wert-luftfahrzeug (= :luftfahrzeug.kennzeichen)."}]
+     [:import-id   :string {:description "FK → :wert-import (Lineage zum Quell-Upload)."}]
+     [:bezeichnung :string {:name "Luftfahrzeug" :render-hints [:searchable]
+                            :description "Serien-Label 'D-AINA - A320' (Flugbuch Muster-Spalte)."}]
+     [:jahr        :integer {:name "Jahr" :render-hints [:sortable]}]
+     [:monat       :integer {:name "Monat" :description "1–12 (numerisch, natürlich geordnet)." :render-hints [:sortable]}]
+     [:datum       :date    {:name "Monatserster" :render-hints [:sortable]}]
+     [:blockzeit   :blockzeit]
+     [:kategorie   :flug-kategorie {:description "Denormalisiert von :luftfahrzeug — das Diagramm braucht keinen Join."}]
+     [:herkunft    :string {:name "Herkunft"
+                            :description "Quelle des Werts: 'flugbuch-aggregat' (heute) | 'flug-rollup' (kuenftig, Einzelflüge)."}]]}}
+
+  :links
+  [[:wert-luftfahrzeug :monatswert :luftfahrzeug :many-to-one
+    {:fk {:attribute :kennzeichen :on-null :skip :on-unresolved :skip}
+     :description "Monatswert gehört zu einem Luftfahrzeug (Star-Schema-Join)." :reverse-name "Monatswerte"}]
+   [:wert-import :monatswert :flugbuch-import :many-to-one
+    {:fk {:attribute :import-id :on-null :skip :on-unresolved :skip}
+     :description "Monatswert stammt aus diesem Import (Lineage)." :reverse-name "Monatswerte"}]]
+
+  :datasets
+  {:flugbuch_uploads
+   {:description "Hochgeladene Flugbuch-CSVs (1 Zeile/Upload); media_ref = sha256 ins CAS."
+    :project :werft
+    :kind :standalone
+    :columns [{:attribute-name :import_id      :attribute-type :string}
+              {:attribute-name :dateiname      :attribute-type :string}
+              {:attribute-name :jahr           :attribute-type :integer}
+              {:attribute-name :art            :attribute-type :string}
+              {:attribute-name :hochgeladen_am :attribute-type :string}
+              {:attribute-name :media_ref      :attribute-type :media-reference}]}}
+
+  :transforms
+  {
+   :map-imports
+   {:language  :python
+    :code-file "transforms/map_imports.py"}
+
+   :parse-flugbuch
+   {:language  :python
+    :code-file "transforms/parse_flugbuch.py"}
+
+   :derive-luftfahrzeuge
+   {:language  :python
+    :code-file "transforms/derive_luftfahrzeuge.py"}}}}

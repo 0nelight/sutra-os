@@ -1,0 +1,48 @@
+{
+  "name": "ent-lsp",
+  "displayName": "Sutra .ent",
+  "description": "Language Server für .ent/.entv/.enta/.entp — Grammatik der Plattform, Besitz, Importe, Layout",
+  "version": "0.1.0",
+  "publisher": "sutra",
+  "license": "UNLICENSED",
+  "private": true,
+  "engines": { "vscode": "^1.90.0" },
+  "main": "./extension.js",
+  "activationEvents": ["workspaceContains:**/*.ent", "onLanguage:python"],
+  "contributes": {
+    "languages": [{
+      "id": "ent",
+      "aliases": ["Sutra Ent", "ent"],
+      "extensions": [".ent", ".entv", ".enta", ".entp"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "ent",
+      "scopeName": "source.ent",
+      "path": "./ent.tmLanguage.json"
+    }],
+    "configuration": {
+      "title": "Sutra .ent",
+      "properties": {
+        "ent.server.command": {
+          "type": "string",
+          "default": "bb",
+          "description": "babashka-Binary, mit dem der Server startet."
+        },
+        "ent.server.config": {
+          "type": "string",
+          "default": "",
+          "description": "Pfad zur bb.edn von ent-lsp. Leer = die bb.edn neben dieser Erweiterung."
+        },
+        "ent.python.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Python-Dateien ueber ent-lsp (pyright, Vervollstaendigungen nach ihrer Art im Modell). Neben Pylance aus lassen, sonst doppelte Vorschlaege."
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  }
+}

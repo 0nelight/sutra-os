@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sutra.local/interfaces/events/cloudevent.schema.json",
+  "title": "Sutra CloudEvent context (B-12, version 1.0.0)",
+  "description": "The CloudEvents 1.0 context attributes Sutra sets on every outgoing webhook. They travel in HTTP binary content mode as ce-<attribute> headers; the request body is the webhook's own body, unchanged. Source of truth: src/sutra/sources/cloudevents.clj.",
+  "type": "object",
+  "required": ["specversion", "id", "source", "type", "time"],
+  "additionalProperties": false,
+  "properties": {
+    "specversion": {"const": "1.0"},
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique per delivery. A delivery from the action outbox keeps its outbox key across retries, so it equals the Idempotency-Key header; a receiver de-duplicates on source + id."
+    },
+    "source": {
+      "type": "string",
+      "format": "uri-reference",
+      "pattern": "^/sources/[A-Za-z0-9._~-]+$",
+      "description": "The data connection source the webhook belongs to."
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "com.sutra.actions.webhook",
+        "com.sutra.sources.webhook",
+        "com.sutra.sources.writeback-create"
+      ]
+    },
+    "time": {"type": "string", "format": "date-time"},
+    "subject": {
+      "type": "string",
+      "description": "The webhook's name within the source."
+    }
+  },
+  "$defs": {
+    "types": {
+      "description": "The event type catalogue.",
+      "com.sutra.actions.webhook": "an action called a source's webhook",
+      "com.sutra.sources.webhook": "a webhook called outside an action",
+      "com.sutra.sources.writeback-create": "a writeback created a record through a webhook"
+    }
+  }
+}

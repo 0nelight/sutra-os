@@ -1,0 +1,2096 @@
+{"every-reference"
+ {:rename-types
+  [[[:actions :kunde-aktivieren :action-log :object-type]
+    :rechnung
+    :zz-rechnung]
+   [[:actions :kunde-aktivieren :edits 0 :object-type]
+    :rechnung
+    :zz-rechnung]
+   [[:actions :kunde-aktivieren :on] :kunde :zz-kunde]
+   [[:actions :kunde-aktivieren :params :k :options-from :object-type]
+    :auftrag
+    :zz-auftrag]
+   [[:actions :kunde-aktivieren :params :k :type] :kunde :zz-kunde]
+   [[:actions :kunde-aktivieren :params :s :type] "kunde" "zz-kunde"]
+   [[:actions :kunde-aktivieren :rules 0 :object-type]
+    :kunde
+    :zz-kunde]
+   [[:actions :kunde-aktivieren :rules 4 :object-type]
+    :auftrag
+    :zz-auftrag]
+   [[:actions :rechnung-stellen :rules 0 :object-type]
+    :rechnung
+    :zz-rechnung]
+   [[:agents :ag :retrieval :object-type] :kunde :zz-kunde]
+   [[:agents :ag :tools 2 :object-type] :auftrag :zz-auftrag]
+   [[:applications :app :layout :export :object-type]
+    :auftrag
+    :zz-auftrag]
+   [[:applications :app :object-type] :kunde :zz-kunde]
+   [[:custom-applications :ca :scope :object-types 0] :kunde :zz-kunde]
+   [[:datasets :kunden-roh :object-type] :kunde :zz-kunde]
+   [[:functions :pruefen :inputs :order :object-type]
+    :auftrag
+    :zz-auftrag]
+   [[:functions :pruefen :target-type] :kunde :zz-kunde]
+   [[:interfaces :buchbar :link-constraints 0 :to-object-type]
+    :kunde
+    :zz-kunde]
+   [[:links 0 1] :auftrag :zz-auftrag]
+   [[:links 0 2] :kunde :zz-kunde]
+   [[:links 1 1] :rechnung :zz-rechnung]
+   [[:links 1 2] :auftrag :zz-auftrag]
+   [[:object-sets :os :root] :kunde :zz-kunde]
+   [[:objects] :key :auftrag :zz-auftrag]
+   [[:objects] :key :rechnung :zz-rechnung]
+   [[:pipelines :p :imports 1] :kunde :zz-kunde]
+   [[:templates :tp :parameters :p :object-type] :kunde :zz-kunde]
+   [[:transforms :t1 :inputs :e :object-type] :auftrag :zz-auftrag]
+   [[:transforms :t1 :output :object-type] :kunde :zz-kunde]
+   [[:transforms :t2 :outputs 0 :object-type] :rechnung :zz-rechnung]
+   [[:workspaces :ws :home 0 :items 0 :object-type] :kunde :zz-kunde]],
+  :with-prefix
+  [[[:actions :pfx-kunde-aktivieren :action-log :object-type]
+    :rechnung
+    :pfx-rechnung]
+   [[:actions :pfx-kunde-aktivieren :edits 0 :object-type]
+    :rechnung
+    :pfx-rechnung]
+   [[:actions :pfx-kunde-aktivieren :on] :kunde :pfx-kunde]
+   [[:actions
+     :pfx-kunde-aktivieren
+     :params
+     :k
+     :options-from
+     :object-type]
+    :auftrag
+    :pfx-auftrag]
+   [[:actions :pfx-kunde-aktivieren :params :k :type]
+    :kunde
+    :pfx-kunde]
+   [[:actions :pfx-kunde-aktivieren :params :s :type]
+    "kunde"
+    "pfx-kunde"]
+   [[:actions :pfx-kunde-aktivieren :rules 0 :object-type]
+    :kunde
+    :pfx-kunde]
+   [[:actions :pfx-kunde-aktivieren :rules 0 :then 0 :link-type]
+    :auftrag-kunde
+    :pfx-auftrag-kunde]
+   [[:actions :pfx-kunde-aktivieren :rules 0 :then 1 :name]
+    :rechnung-stellen
+    :pfx-rechnung-stellen]
+   [[:actions :pfx-kunde-aktivieren :rules 4 :object-type]
+    :auftrag
+    :pfx-auftrag]
+   [[:actions :pfx-rechnung-stellen :rules 0 :object-type]
+    :rechnung
+    :pfx-rechnung]
+   [[:actions] :key :kunde-aktivieren :pfx-kunde-aktivieren]
+   [[:actions] :key :rechnung-stellen :pfx-rechnung-stellen]
+   [[:agents :ag :retrieval :object-type] :kunde :pfx-kunde]
+   [[:agents :ag :tools 0 :action]
+    :kunde-aktivieren
+    :pfx-kunde-aktivieren]
+   [[:agents :ag :tools 2 :object-type] :auftrag :pfx-auftrag]
+   [[:applications :app :layout :export :object-type]
+    :auftrag
+    :pfx-auftrag]
+   [[:applications :app :object-type] :kunde :pfx-kunde]
+   [[:custom-applications :ca :scope :actions 0]
+    :kunde-aktivieren
+    :pfx-kunde-aktivieren]
+   [[:custom-applications :ca :scope :object-types 0]
+    :kunde
+    :pfx-kunde]
+   [[:datasets :kunden-roh :object-type] :kunde :pfx-kunde]
+   [[:functions :pruefen :inputs :order :object-type]
+    :auftrag
+    :pfx-auftrag]
+   [[:functions :pruefen :target-type] :kunde :pfx-kunde]
+   [[:interfaces :buchbar :link-constraints 0 :to-object-type]
+    :kunde
+    :pfx-kunde]
+   [[:links 0 0] :auftrag-kunde :pfx-auftrag-kunde]
+   [[:links 0 1] :auftrag :pfx-auftrag]
+   [[:links 0 2] :kunde :pfx-kunde]
+   [[:links 1 0] :rechnung-auftrag :pfx-rechnung-auftrag]
+   [[:links 1 1] :rechnung :pfx-rechnung]
+   [[:links 1 2] :auftrag :pfx-auftrag]
+   [[:object-sets :os :include 0 :link]
+    :auftrag-kunde
+    :pfx-auftrag-kunde]
+   [[:object-sets :os :root] :kunde :pfx-kunde]
+   [[:objects :pfx-kunde :lifecycle :transitions 0 :action]
+    :kunde-aktivieren
+    :pfx-kunde-aktivieren]
+   [[:objects] :key :auftrag :pfx-auftrag]
+   [[:objects] :key :kunde :pfx-kunde]
+   [[:objects] :key :rechnung :pfx-rechnung]
+   [[:pipelines :p :imports 1] :kunde :pfx-kunde]
+   [[:templates :tp :parameters :p :object-type] :kunde :pfx-kunde]
+   [[:transforms :t1 :inputs :e :object-type] :auftrag :pfx-auftrag]
+   [[:transforms :t1 :output :object-type] :kunde :pfx-kunde]
+   [[:transforms :t2 :outputs 0 :object-type] :rechnung :pfx-rechnung]
+   [[:transforms :t2 :outputs 1 :link-type]
+    :auftrag-kunde
+    :pfx-auftrag-kunde]
+   [[:workspaces :ws :home 0 :items 0 :object-type]
+    :kunde
+    :pfx-kunde]],
+  :with-suffix
+  [[[:actions :kunde-aktivieren :action-log :project]
+    :vertrieb
+    :vertrieb-sfx]
+   [[:objects :auftrag :project] :vertrieb :vertrieb-sfx]
+   [[:projects :vertrieb-sfx :imports 0] :basis :basis-sfx]
+   [[:projects] :key :basis :basis-sfx]
+   [[:projects] :key :vertrieb :vertrieb-sfx]],
+  :bind
+  {:actions
+   [[[:actions :kunde-aktivieren :rules 0 :then 1 :name]
+     :rechnung-stellen
+     :zz-rechnung-stellen]
+    [[:agents :ag :tools 0 :action]
+     :kunde-aktivieren
+     :zz-kunde-aktivieren]
+    [[:custom-applications :ca :scope :actions 0]
+     :kunde-aktivieren
+     :zz-kunde-aktivieren]
+    [[:objects :kunde :lifecycle :transitions 0 :action]
+     :kunde-aktivieren
+     :zz-kunde-aktivieren]],
+   :datasets
+   [[[:applications :app :layout :upload :dataset]
+     :kunden-roh
+     :zz-kunden-roh]
+    [[:objects :kunde :backing :dataset] :kunden-roh :zz-kunden-roh]
+    [[:pipelines :p :imports 0] :kunden-roh :zz-kunden-roh]
+    [[:transforms :t1 :inputs :a :dataset]
+     :kunden-roh
+     :zz-kunden-roh]],
+   :functions
+   [[[:actions :kunde-aktivieren :function] :pruefen :zz-pruefen]
+    [[:actions :kunde-aktivieren :rules 1 :function]
+     :pruefen
+     :zz-pruefen]
+    [[:agents :ag :tools 1 :function] :pruefen :zz-pruefen]
+    [[:custom-applications :ca :scope :functions 0]
+     :pruefen
+     :zz-pruefen]],
+   :interfaces
+   [[[:actions :kunde-aktivieren :rules 5 :rules 0 :interface]
+     :buchbar
+     :zz-buchbar]
+    [[:links 0 4 :satisfies 0 :interface] :buchbar :zz-buchbar]
+    [[:objects :kunde :implements 0] :buchbar :zz-buchbar]],
+   :link-types
+   [[[:actions :kunde-aktivieren :rules 0 :then 0 :link-type]
+     :auftrag-kunde
+     :zz-auftrag-kunde]
+    [[:object-sets :os :include 0 :link]
+     :auftrag-kunde
+     :zz-auftrag-kunde]
+    [[:transforms :t2 :outputs 1 :link-type]
+     :auftrag-kunde
+     :zz-auftrag-kunde]],
+   :media-sets
+   [[[:transforms :t1 :inputs :d :media-set] :belege :zz-belege]],
+   :shared-properties
+   [[[:links 0 4 :external-source :shared-property] :sp :zz-sp]],
+   :sources
+   [[[:actions :kunde-aktivieren :rules 2 :source] :erp :zz-erp]
+    [[:actions :kunde-aktivieren :rules 3 :source] :llm :zz-llm]
+    [[:agents :ag :source] :llm :zz-llm]
+    [[:datasets :kunden-roh :external-source :datasource] :erp :zz-erp]
+    [[:datasets :kunden-roh :virtual :source] :erp :zz-erp]
+    [[:exports :x :source] :erp :zz-erp]
+    [[:links 0 4 :external-source :datasource] :erp :zz-erp]
+    [[:media-sets :belege :source] :erp :zz-erp]
+    [[:objects :kunde :external-source :datasource] :erp :zz-erp]
+    [[:objects :kunde :external-sources 0 :datasource] :crm :zz-crm]
+    [[:transforms :t1 :inputs :b :datasource] :erp :zz-erp]
+    [[:transforms :t1 :inputs :c :source] :llm :zz-llm]],
+   :value-types
+   [[[:shared-properties :sp :value-type]
+     :email-adresse
+     :zz-email-adresse]]},
+  :action-targets
+  {:kunde-aktivieren
+   [[:action :rechnung-stellen]
+    [:function :pruefen]
+    [:link-type :auftrag-kunde]
+    [:object-type :auftrag]
+    [:object-type :kunde]
+    [:object-type :rechnung]],
+   :rechnung-stellen [[:object-type :rechnung]]}},
+ "media/hero/farm/ingest.ent"
+ {:rename-types [],
+  :with-prefix [],
+  :with-suffix [[[] :key-new :projects]],
+  :bind
+  {:datasets [],
+   :sources
+   [[[:datasets :baling_log :external-source :datasource]
+     :baler
+     :zz-baler]
+    [[:datasets :buyer_list :external-source :datasource]
+     :buyer-list
+     :zz-buyer-list]
+    [[:datasets :field_register :external-source :datasource]
+     :field-register
+     :zz-field-register]]},
+  :action-targets {}},
+ "media/hero/farm/refused.ent"
+ {:rename-types [],
+  :with-prefix [],
+  :with-suffix [[[] :key-new :projects]],
+  :bind {},
+  :action-targets {}},
+ "media/hero/farm/seed.ent"
+ {:rename-types [],
+  :with-prefix [],
+  :with-suffix [[[] :key-new :projects]],
+  :bind {},
+  :action-targets {}},
+ "media/hero/farm/users.ent"
+ {:rename-types
+  [[[:actions :add-user :edits 0 :object-type] :user :zz-user]
+   [[:actions :add-user :rules 0 :object-type] :user :zz-user]],
+  :with-prefix
+  [[[:actions :pfx-add-user :edits 0 :object-type] :user :pfx-user]
+   [[:actions :pfx-add-user :rules 0 :object-type] :user :pfx-user]
+   [[:actions] :key :add-user :pfx-add-user]
+   [[:objects] :key :user :pfx-user]],
+  :with-suffix [[[] :key-new :projects]],
+  :bind {:actions []},
+  :action-targets {:add-user [[:object-type :user]]}},
+ "plugins/packages/resources/presets/standard/1_basis.ent"
+ {:rename-types
+  [[[:actions :organisation-anlegen :rules 0 :object-type]
+    :organisation
+    :zz-organisation]
+   [[:actions :person-anlegen :rules 0 :object-type]
+    :person
+    :zz-person]
+   [[:interfaces :beleg :link-constraints 1 :to-object-type]
+    :ausgleich
+    :zz-ausgleich]
+   [[:interfaces :beleg :link-constraints 2 :to-object-type]
+    :dokument
+    :zz-dokument]
+   [[:interfaces :besitz :link-constraints 1 :to-object-type]
+    :ort
+    :zz-ort]
+   [[:interfaces :kontobewegung :link-constraints 1 :to-object-type]
+    :ausgleich
+    :zz-ausgleich]],
+  :with-prefix
+  [[[:actions :pfx-organisation-anlegen :rules 0 :object-type]
+    :organisation
+    :pfx-organisation]
+   [[:actions :pfx-person-anlegen :rules 0 :object-type]
+    :person
+    :pfx-person]
+   [[:actions] :key :organisation-anlegen :pfx-organisation-anlegen]
+   [[:actions] :key :person-anlegen :pfx-person-anlegen]
+   [[:interfaces :beleg :link-constraints 1 :to-object-type]
+    :ausgleich
+    :pfx-ausgleich]
+   [[:interfaces :beleg :link-constraints 2 :to-object-type]
+    :dokument
+    :pfx-dokument]
+   [[:interfaces :besitz :link-constraints 1 :to-object-type]
+    :ort
+    :pfx-ort]
+   [[:interfaces :kontobewegung :link-constraints 1 :to-object-type]
+    :ausgleich
+    :pfx-ausgleich]
+   [[:objects] :key :ausgleich :pfx-ausgleich]
+   [[:objects] :key :dokument :pfx-dokument]
+   [[:objects] :key :organisation :pfx-organisation]
+   [[:objects] :key :ort :pfx-ort]
+   [[:objects] :key :person :pfx-person]],
+  :with-suffix [[[] :key-new :projects]],
+  :bind
+  {:actions [],
+   :interfaces
+   [[[:interfaces :beleg :link-constraints 0 :to-interface]
+     :partei
+     :zz-partei]
+    [[:interfaces :besitz :link-constraints 0 :to-interface]
+     :partei
+     :zz-partei]
+    [[:interfaces :geldkonto :link-constraints 0 :to-interface]
+     :partei
+     :zz-partei]
+    [[:interfaces :kontobewegung :link-constraints 0 :to-interface]
+     :geldkonto
+     :zz-geldkonto]
+    [[:interfaces :vertrag :extends 0] :befristet :zz-befristet]
+    [[:interfaces :vertrag :link-constraints 0 :to-interface]
+     :partei
+     :zz-partei]
+    [[:objects :organisation :implements 0] :partei :zz-partei]
+    [[:objects :person :implements 0] :partei :zz-partei]],
+   :shared-properties [],
+   :value-types
+   [[[:shared-properties :anschaffungspreis :value-type]
+     :betrag
+     :zz-betrag]
+    [[:shared-properties :betrag :value-type] :betrag :zz-betrag]
+    [[:shared-properties :gegen-iban :value-type] :iban-nr :zz-iban-nr]
+    [[:shared-properties :iban :value-type] :iban-nr :zz-iban-nr]]},
+  :action-targets
+  {:organisation-anlegen [[:object-type :organisation]],
+   :person-anlegen [[:object-type :person]]}},
+ "plugins/packages/resources/presets/standard/2_abgeleitet.ent"
+ {:rename-types
+  [[[:actions :bankkonto-anlegen :params :inhaber :type]
+    :person
+    :zz-person]
+   [[:actions :bankkonto-anlegen :rules 0 :object-type]
+    :bankkonto
+    :zz-bankkonto]
+   [[:actions :buchung-erfassen :params :konto :type]
+    :bankkonto
+    :zz-bankkonto]
+   [[:actions :buchung-erfassen :rules 0 :object-type]
+    :bankbuchung
+    :zz-bankbuchung]
+   [[:actions :dauervertrag-anlegen :params :partner :type]
+    :organisation
+    :zz-organisation]
+   [[:actions :dauervertrag-anlegen :rules 0 :object-type]
+    :dauervertrag
+    :zz-dauervertrag]
+   [[:actions :rechnung-ausgleichen :params :buchung :type]
+    :bankbuchung
+    :zz-bankbuchung]
+   [[:actions :rechnung-ausgleichen :params :rechnung :type]
+    :eingangsrechnung
+    :zz-eingangsrechnung]
+   [[:actions :rechnung-ausgleichen :rules 0 :object-type]
+    :ausgleich
+    :zz-ausgleich]
+   [[:actions :rechnung-erfassen :params :aussteller :type]
+    :organisation
+    :zz-organisation]
+   [[:actions :rechnung-erfassen :rules 0 :object-type]
+    :eingangsrechnung
+    :zz-eingangsrechnung]
+   [[:actions :ueberweisung-freigeben :params :ueberweisung :type]
+    :ueberweisung
+    :zz-ueberweisung]
+   [[:actions :ueberweisung-freigeben :rules 0 :object-type]
+    :ueberweisung
+    :zz-ueberweisung]
+   [[:actions :ueberweisung-senden :params :ueberweisung :type]
+    :ueberweisung
+    :zz-ueberweisung]
+   [[:actions :ueberweisung-senden :rules 1 :object-type]
+    :ueberweisung
+    :zz-ueberweisung]
+   [[:actions :ueberweisung-vorbereiten :params :konto :type]
+    :bankkonto
+    :zz-bankkonto]
+   [[:actions :ueberweisung-vorbereiten :params :rechnung :type]
+    :eingangsrechnung
+    :zz-eingangsrechnung]
+   [[:actions :ueberweisung-vorbereiten :rules 0 :object-type]
+    :ueberweisung
+    :zz-ueberweisung]
+   [[:actions :versicherung-anlegen :params :partner :type]
+    :organisation
+    :zz-organisation]
+   [[:actions :versicherung-anlegen :rules 0 :object-type]
+    :versicherung
+    :zz-versicherung]
+   [[:actions :vertrag-kuendigen :params :vertrag :type]
+    :dauervertrag
+    :zz-dauervertrag]
+   [[:actions :vertrag-kuendigen :rules 0 :object-type]
+    :dauervertrag
+    :zz-dauervertrag]
+   [[:links 0 1] :ort :zz-ort]
+   [[:links 0 2] :ort :zz-ort]
+   [[:links 1 1] :person :zz-person]
+   [[:links 1 2] :organisation :zz-organisation]
+   [[:links 10 1] :eingangsrechnung :zz-eingangsrechnung]
+   [[:links 10 2] :organisation :zz-organisation]
+   [[:links 11 1] :eingangsrechnung :zz-eingangsrechnung]
+   [[:links 11 2] :dokument :zz-dokument]
+   [[:links 12 1] :eingangsrechnung :zz-eingangsrechnung]
+   [[:links 12 2] :kategorie :zz-kategorie]
+   [[:links 13 1] :eingangsrechnung :zz-eingangsrechnung]
+   [[:links 13 2] :ausgleich :zz-ausgleich]
+   [[:links 14 1] :versicherung :zz-versicherung]
+   [[:links 14 2] :organisation :zz-organisation]
+   [[:links 15 1] :dauervertrag :zz-dauervertrag]
+   [[:links 15 2] :organisation :zz-organisation]
+   [[:links 16 1] :dauervertrag :zz-dauervertrag]
+   [[:links 16 2] :kategorie :zz-kategorie]
+   [[:links 17 1] :fahrzeug :zz-fahrzeug]
+   [[:links 17 2] :person :zz-person]
+   [[:links 18 1] :fahrzeug :zz-fahrzeug]
+   [[:links 18 2] :ort :zz-ort]
+   [[:links 19 1] :geraet :zz-geraet]
+   [[:links 19 2] :person :zz-person]
+   [[:links 2 1] :person :zz-person]
+   [[:links 2 2] :ort :zz-ort]
+   [[:links 20 1] :geraet :zz-geraet]
+   [[:links 20 2] :ort :zz-ort]
+   [[:links 21 1] :geraet :zz-geraet]
+   [[:links 21 2] :eingangsrechnung :zz-eingangsrechnung]
+   [[:links 22 1] :ueberweisung :zz-ueberweisung]
+   [[:links 22 2] :bankkonto :zz-bankkonto]
+   [[:links 23 1] :ueberweisung :zz-ueberweisung]
+   [[:links 23 2] :eingangsrechnung :zz-eingangsrechnung]
+   [[:links 3 1] :organisation :zz-organisation]
+   [[:links 3 2] :ort :zz-ort]
+   [[:links 4 1] :kategorie :zz-kategorie]
+   [[:links 4 2] :kategorie :zz-kategorie]
+   [[:links 5 1] :bankkonto :zz-bankkonto]
+   [[:links 5 2] :person :zz-person]
+   [[:links 6 1] :bankkonto :zz-bankkonto]
+   [[:links 6 2] :organisation :zz-organisation]
+   [[:links 7 1] :bankbuchung :zz-bankbuchung]
+   [[:links 7 2] :bankkonto :zz-bankkonto]
+   [[:links 8 1] :bankbuchung :zz-bankbuchung]
+   [[:links 8 2] :kategorie :zz-kategorie]
+   [[:links 9 1] :bankbuchung :zz-bankbuchung]
+   [[:links 9 2] :ausgleich :zz-ausgleich]],
+  :with-prefix
+  [[[:actions :pfx-bankkonto-anlegen :rules 0 :object-type]
+    :bankkonto
+    :pfx-bankkonto]
+   [[:actions :pfx-buchung-erfassen :params :konto :type]
+    :bankkonto
+    :pfx-bankkonto]
+   [[:actions :pfx-buchung-erfassen :rules 0 :object-type]
+    :bankbuchung
+    :pfx-bankbuchung]
+   [[:actions :pfx-dauervertrag-anlegen :rules 0 :object-type]
+    :dauervertrag
+    :pfx-dauervertrag]
+   [[:actions :pfx-rechnung-ausgleichen :params :buchung :type]
+    :bankbuchung
+    :pfx-bankbuchung]
+   [[:actions :pfx-rechnung-ausgleichen :params :rechnung :type]
+    :eingangsrechnung
+    :pfx-eingangsrechnung]
+   [[:actions :pfx-rechnung-erfassen :rules 0 :object-type]
+    :eingangsrechnung
+    :pfx-eingangsrechnung]
+   [[:actions :pfx-ueberweisung-freigeben :params :ueberweisung :type]
+    :ueberweisung
+    :pfx-ueberweisung]
+   [[:actions :pfx-ueberweisung-freigeben :rules 0 :object-type]
+    :ueberweisung
+    :pfx-ueberweisung]
+   [[:actions :pfx-ueberweisung-senden :params :ueberweisung :type]
+    :ueberweisung
+    :pfx-ueberweisung]
+   [[:actions :pfx-ueberweisung-senden :rules 1 :object-type]
+    :ueberweisung
+    :pfx-ueberweisung]
+   [[:actions :pfx-ueberweisung-vorbereiten :params :konto :type]
+    :bankkonto
+    :pfx-bankkonto]
+   [[:actions :pfx-ueberweisung-vorbereiten :params :rechnung :type]
+    :eingangsrechnung
+    :pfx-eingangsrechnung]
+   [[:actions :pfx-ueberweisung-vorbereiten :rules 0 :object-type]
+    :ueberweisung
+    :pfx-ueberweisung]
+   [[:actions :pfx-versicherung-anlegen :rules 0 :object-type]
+    :versicherung
+    :pfx-versicherung]
+   [[:actions :pfx-vertrag-kuendigen :params :vertrag :type]
+    :dauervertrag
+    :pfx-dauervertrag]
+   [[:actions :pfx-vertrag-kuendigen :rules 0 :object-type]
+    :dauervertrag
+    :pfx-dauervertrag]
+   [[:actions] :key :bankkonto-anlegen :pfx-bankkonto-anlegen]
+   [[:actions] :key :buchung-erfassen :pfx-buchung-erfassen]
+   [[:actions] :key :dauervertrag-anlegen :pfx-dauervertrag-anlegen]
+   [[:actions] :key :rechnung-ausgleichen :pfx-rechnung-ausgleichen]
+   [[:actions] :key :rechnung-erfassen :pfx-rechnung-erfassen]
+   [[:actions]
+    :key
+    :ueberweisung-freigeben
+    :pfx-ueberweisung-freigeben]
+   [[:actions] :key :ueberweisung-senden :pfx-ueberweisung-senden]
+   [[:actions]
+    :key
+    :ueberweisung-vorbereiten
+    :pfx-ueberweisung-vorbereiten]
+   [[:actions] :key :versicherung-anlegen :pfx-versicherung-anlegen]
+   [[:actions] :key :vertrag-kuendigen :pfx-vertrag-kuendigen]
+   [[:links 0 0] :ort-teil-von :pfx-ort-teil-von]
+   [[:links 1 0] :person-organisation :pfx-person-organisation]
+   [[:links 10 0]
+    :eingangsrechnung-aussteller
+    :pfx-eingangsrechnung-aussteller]
+   [[:links 10 1] :eingangsrechnung :pfx-eingangsrechnung]
+   [[:links 11 0]
+    :eingangsrechnung-original
+    :pfx-eingangsrechnung-original]
+   [[:links 11 1] :eingangsrechnung :pfx-eingangsrechnung]
+   [[:links 12 0]
+    :eingangsrechnung-kategorie
+    :pfx-eingangsrechnung-kategorie]
+   [[:links 12 1] :eingangsrechnung :pfx-eingangsrechnung]
+   [[:links 12 2] :kategorie :pfx-kategorie]
+   [[:links 13 0]
+    :eingangsrechnung-ausgleiche
+    :pfx-eingangsrechnung-ausgleiche]
+   [[:links 13 1] :eingangsrechnung :pfx-eingangsrechnung]
+   [[:links 14 0] :versicherung-partner :pfx-versicherung-partner]
+   [[:links 14 1] :versicherung :pfx-versicherung]
+   [[:links 15 0] :dauervertrag-partner :pfx-dauervertrag-partner]
+   [[:links 15 1] :dauervertrag :pfx-dauervertrag]
+   [[:links 16 0] :dauervertrag-kategorie :pfx-dauervertrag-kategorie]
+   [[:links 16 1] :dauervertrag :pfx-dauervertrag]
+   [[:links 16 2] :kategorie :pfx-kategorie]
+   [[:links 17 0] :fahrzeug-eigentuemer :pfx-fahrzeug-eigentuemer]
+   [[:links 17 1] :fahrzeug :pfx-fahrzeug]
+   [[:links 18 0] :fahrzeug-standort :pfx-fahrzeug-standort]
+   [[:links 18 1] :fahrzeug :pfx-fahrzeug]
+   [[:links 19 0] :geraet-eigentuemer :pfx-geraet-eigentuemer]
+   [[:links 19 1] :geraet :pfx-geraet]
+   [[:links 2 0] :partei-anschrift-person :pfx-partei-anschrift-person]
+   [[:links 20 0] :geraet-standort :pfx-geraet-standort]
+   [[:links 20 1] :geraet :pfx-geraet]
+   [[:links 21 0] :geraet-kaufbeleg :pfx-geraet-kaufbeleg]
+   [[:links 21 1] :geraet :pfx-geraet]
+   [[:links 21 2] :eingangsrechnung :pfx-eingangsrechnung]
+   [[:links 22 0] :ueberweisung-konto :pfx-ueberweisung-konto]
+   [[:links 22 1] :ueberweisung :pfx-ueberweisung]
+   [[:links 22 2] :bankkonto :pfx-bankkonto]
+   [[:links 23 0] :ueberweisung-rechnung :pfx-ueberweisung-rechnung]
+   [[:links 23 1] :ueberweisung :pfx-ueberweisung]
+   [[:links 23 2] :eingangsrechnung :pfx-eingangsrechnung]
+   [[:links 3 0]
+    :partei-anschrift-organisation
+    :pfx-partei-anschrift-organisation]
+   [[:links 4 0] :kategorie-ober :pfx-kategorie-ober]
+   [[:links 4 1] :kategorie :pfx-kategorie]
+   [[:links 4 2] :kategorie :pfx-kategorie]
+   [[:links 5 0]
+    :bankkonto-inhaber-person
+    :pfx-bankkonto-inhaber-person]
+   [[:links 5 1] :bankkonto :pfx-bankkonto]
+   [[:links 6 0]
+    :bankkonto-inhaber-organisation
+    :pfx-bankkonto-inhaber-organisation]
+   [[:links 6 1] :bankkonto :pfx-bankkonto]
+   [[:links 7 0] :bankbuchung-konto :pfx-bankbuchung-konto]
+   [[:links 7 1] :bankbuchung :pfx-bankbuchung]
+   [[:links 7 2] :bankkonto :pfx-bankkonto]
+   [[:links 8 0] :bankbuchung-kategorie :pfx-bankbuchung-kategorie]
+   [[:links 8 1] :bankbuchung :pfx-bankbuchung]
+   [[:links 8 2] :kategorie :pfx-kategorie]
+   [[:links 9 0] :bankbuchung-ausgleiche :pfx-bankbuchung-ausgleiche]
+   [[:links 9 1] :bankbuchung :pfx-bankbuchung]
+   [[:objects] :key :bankbuchung :pfx-bankbuchung]
+   [[:objects] :key :bankkonto :pfx-bankkonto]
+   [[:objects] :key :beitrag :pfx-beitrag]
+   [[:objects] :key :dauervertrag :pfx-dauervertrag]
+   [[:objects] :key :eingangsrechnung :pfx-eingangsrechnung]
+   [[:objects] :key :fahrzeug :pfx-fahrzeug]
+   [[:objects] :key :geraet :pfx-geraet]
+   [[:objects] :key :kategorie :pfx-kategorie]
+   [[:objects] :key :ueberweisung :pfx-ueberweisung]
+   [[:objects] :key :versicherung :pfx-versicherung]],
+  :with-suffix
+  [[[:projects] :key :anwendungen :anwendungen-sfx]
+   [[:projects] :key :kanaele :kanaele-sfx]
+   [[:repositories :startanwendungen :project]
+    :anwendungen
+    :anwendungen-sfx]
+   [[:sources :zahlungsdienst :project] :kanaele :kanaele-sfx]],
+  :bind
+  {:actions [],
+   :link-types [],
+   :sources
+   [[[:actions :ueberweisung-senden :rules 0 :source]
+     :zahlungsdienst
+     :zz-zahlungsdienst]]},
+  :action-targets
+  {:bankkonto-anlegen [[:object-type :bankkonto]],
+   :buchung-erfassen [[:object-type :bankbuchung]],
+   :dauervertrag-anlegen [[:object-type :dauervertrag]],
+   :rechnung-ausgleichen [[:object-type :ausgleich]],
+   :rechnung-erfassen [[:object-type :eingangsrechnung]],
+   :ueberweisung-freigeben [[:object-type :ueberweisung]],
+   :ueberweisung-senden [[:object-type :ueberweisung]],
+   :ueberweisung-vorbereiten [[:object-type :ueberweisung]],
+   :versicherung-anlegen [[:object-type :versicherung]],
+   :vertrag-kuendigen [[:object-type :dauervertrag]]}},
+ "plugins/packages/resources/presets/standard/3_betrieb.ent"
+ {:rename-types
+  [[[:actions :angebot-annehmen :params :angebot :type]
+    :angebot
+    :zz-angebot]
+   [[:actions :angebot-annehmen :rules 0 :object-type]
+    :angebot
+    :zz-angebot]
+   [[:actions :angebot-annehmen :rules 1 :object-type]
+    :auftrag
+    :zz-auftrag]
+   [[:actions :ausgangsrechnung-erfassen :params :kunde :type]
+    :kundenbeziehung
+    :zz-kundenbeziehung]
+   [[:actions :ausgangsrechnung-erfassen :rules 0 :object-type]
+    :ausgangsrechnung
+    :zz-ausgangsrechnung]
+   [[:actions :kunde-anlegen :params :organisation :type]
+    :organisation
+    :zz-organisation]
+   [[:actions :kunde-anlegen :rules 0 :object-type]
+    :kundenbeziehung
+    :zz-kundenbeziehung]
+   [[:actions :mahnung-entwerfen :params :rechnung :type]
+    :ausgangsrechnung
+    :zz-ausgangsrechnung]
+   [[:actions :mahnung-entwerfen :rules 0 :object-type]
+    :mahnung
+    :zz-mahnung]
+   [[:actions :mahnung-freigeben :params :mahnung :type]
+    :mahnung
+    :zz-mahnung]
+   [[:actions :mahnung-freigeben :rules 0 :object-type]
+    :mahnung
+    :zz-mahnung]
+   [[:actions :mahnung-senden :params :mahnung :type]
+    :mahnung
+    :zz-mahnung]
+   [[:actions :mahnung-senden :rules 1 :object-type]
+    :mahnung
+    :zz-mahnung]
+   [[:actions :stunden-buchen :params :anstellung :type]
+    :anstellung
+    :zz-anstellung]
+   [[:actions :stunden-buchen :params :projekt :type]
+    :projekt
+    :zz-projekt]
+   [[:actions :stunden-buchen :rules 0 :object-type]
+    :zeitbuchung
+    :zz-zeitbuchung]
+   [[:actions :zahlungseingang-ausgleichen :params :rechnung :type]
+    :ausgangsrechnung
+    :zz-ausgangsrechnung]
+   [[:actions :zahlungseingang-ausgleichen :rules 0 :object-type]
+    :ausgleich
+    :zz-ausgleich]
+   [[:links 0 1] :kundenbeziehung :zz-kundenbeziehung]
+   [[:links 0 2] :organisation :zz-organisation]
+   [[:links 1 1] :projekt :zz-projekt]
+   [[:links 1 2] :kundenbeziehung :zz-kundenbeziehung]
+   [[:links 10 1] :ausgangsrechnung :zz-ausgangsrechnung]
+   [[:links 10 2] :dokument :zz-dokument]
+   [[:links 11 1] :ausgangsrechnung :zz-ausgangsrechnung]
+   [[:links 11 2] :projekt :zz-projekt]
+   [[:links 12 1] :ausgangsrechnung :zz-ausgangsrechnung]
+   [[:links 12 2] :kundenbeziehung :zz-kundenbeziehung]
+   [[:links 13 1] :ausgangsrechnung :zz-ausgangsrechnung]
+   [[:links 13 2] :ausgleich :zz-ausgleich]
+   [[:links 14 1] :mahnung :zz-mahnung]
+   [[:links 14 2] :ausgangsrechnung :zz-ausgangsrechnung]
+   [[:links 2 1] :projekt :zz-projekt]
+   [[:links 2 2] :ort :zz-ort]
+   [[:links 3 1] :angebot :zz-angebot]
+   [[:links 3 2] :projekt :zz-projekt]
+   [[:links 4 1] :auftrag :zz-auftrag]
+   [[:links 4 2] :projekt :zz-projekt]
+   [[:links 5 1] :auftrag :zz-auftrag]
+   [[:links 5 2] :angebot :zz-angebot]
+   [[:links 6 1] :anstellung :zz-anstellung]
+   [[:links 6 2] :person :zz-person]
+   [[:links 7 1] :zeitbuchung :zz-zeitbuchung]
+   [[:links 7 2] :anstellung :zz-anstellung]
+   [[:links 8 1] :zeitbuchung :zz-zeitbuchung]
+   [[:links 8 2] :projekt :zz-projekt]
+   [[:links 9 1] :ausgangsrechnung :zz-ausgangsrechnung]
+   [[:links 9 2] :organisation :zz-organisation]],
+  :with-prefix
+  [[[:actions :pfx-angebot-annehmen :params :angebot :type]
+    :angebot
+    :pfx-angebot]
+   [[:actions :pfx-angebot-annehmen :rules 0 :object-type]
+    :angebot
+    :pfx-angebot]
+   [[:actions :pfx-angebot-annehmen :rules 1 :object-type]
+    :auftrag
+    :pfx-auftrag]
+   [[:actions :pfx-ausgangsrechnung-erfassen :params :kunde :type]
+    :kundenbeziehung
+    :pfx-kundenbeziehung]
+   [[:actions :pfx-ausgangsrechnung-erfassen :rules 0 :object-type]
+    :ausgangsrechnung
+    :pfx-ausgangsrechnung]
+   [[:actions :pfx-kunde-anlegen :rules 0 :object-type]
+    :kundenbeziehung
+    :pfx-kundenbeziehung]
+   [[:actions :pfx-mahnung-entwerfen :params :rechnung :type]
+    :ausgangsrechnung
+    :pfx-ausgangsrechnung]
+   [[:actions :pfx-mahnung-entwerfen :rules 0 :object-type]
+    :mahnung
+    :pfx-mahnung]
+   [[:actions :pfx-mahnung-freigeben :params :mahnung :type]
+    :mahnung
+    :pfx-mahnung]
+   [[:actions :pfx-mahnung-freigeben :rules 0 :object-type]
+    :mahnung
+    :pfx-mahnung]
+   [[:actions :pfx-mahnung-senden :params :mahnung :type]
+    :mahnung
+    :pfx-mahnung]
+   [[:actions :pfx-mahnung-senden :rules 1 :object-type]
+    :mahnung
+    :pfx-mahnung]
+   [[:actions :pfx-stunden-buchen :params :anstellung :type]
+    :anstellung
+    :pfx-anstellung]
+   [[:actions :pfx-stunden-buchen :params :projekt :type]
+    :projekt
+    :pfx-projekt]
+   [[:actions :pfx-stunden-buchen :rules 0 :object-type]
+    :zeitbuchung
+    :pfx-zeitbuchung]
+   [[:actions :pfx-zahlungseingang-ausgleichen :params :rechnung :type]
+    :ausgangsrechnung
+    :pfx-ausgangsrechnung]
+   [[:actions] :key :angebot-annehmen :pfx-angebot-annehmen]
+   [[:actions]
+    :key
+    :ausgangsrechnung-erfassen
+    :pfx-ausgangsrechnung-erfassen]
+   [[:actions] :key :kunde-anlegen :pfx-kunde-anlegen]
+   [[:actions] :key :mahnung-entwerfen :pfx-mahnung-entwerfen]
+   [[:actions] :key :mahnung-freigeben :pfx-mahnung-freigeben]
+   [[:actions] :key :mahnung-senden :pfx-mahnung-senden]
+   [[:actions] :key :stunden-buchen :pfx-stunden-buchen]
+   [[:actions]
+    :key
+    :zahlungseingang-ausgleichen
+    :pfx-zahlungseingang-ausgleichen]
+   [[:links 0 0]
+    :kundenbeziehung-organisation
+    :pfx-kundenbeziehung-organisation]
+   [[:links 0 1] :kundenbeziehung :pfx-kundenbeziehung]
+   [[:links 1 0] :projekt-kunde :pfx-projekt-kunde]
+   [[:links 1 1] :projekt :pfx-projekt]
+   [[:links 1 2] :kundenbeziehung :pfx-kundenbeziehung]
+   [[:links 10 0]
+    :ausgangsrechnung-original
+    :pfx-ausgangsrechnung-original]
+   [[:links 10 1] :ausgangsrechnung :pfx-ausgangsrechnung]
+   [[:links 11 0]
+    :ausgangsrechnung-projekt
+    :pfx-ausgangsrechnung-projekt]
+   [[:links 11 1] :ausgangsrechnung :pfx-ausgangsrechnung]
+   [[:links 11 2] :projekt :pfx-projekt]
+   [[:links 12 0] :ausgangsrechnung-kunde :pfx-ausgangsrechnung-kunde]
+   [[:links 12 1] :ausgangsrechnung :pfx-ausgangsrechnung]
+   [[:links 12 2] :kundenbeziehung :pfx-kundenbeziehung]
+   [[:links 13 0]
+    :ausgangsrechnung-ausgleiche
+    :pfx-ausgangsrechnung-ausgleiche]
+   [[:links 13 1] :ausgangsrechnung :pfx-ausgangsrechnung]
+   [[:links 14 0] :mahnung-rechnung :pfx-mahnung-rechnung]
+   [[:links 14 1] :mahnung :pfx-mahnung]
+   [[:links 14 2] :ausgangsrechnung :pfx-ausgangsrechnung]
+   [[:links 2 0] :projekt-ort :pfx-projekt-ort]
+   [[:links 2 1] :projekt :pfx-projekt]
+   [[:links 3 0] :angebot-projekt :pfx-angebot-projekt]
+   [[:links 3 1] :angebot :pfx-angebot]
+   [[:links 3 2] :projekt :pfx-projekt]
+   [[:links 4 0] :auftrag-projekt :pfx-auftrag-projekt]
+   [[:links 4 1] :auftrag :pfx-auftrag]
+   [[:links 4 2] :projekt :pfx-projekt]
+   [[:links 5 0] :auftrag-angebot :pfx-auftrag-angebot]
+   [[:links 5 1] :auftrag :pfx-auftrag]
+   [[:links 5 2] :angebot :pfx-angebot]
+   [[:links 6 0] :anstellung-person :pfx-anstellung-person]
+   [[:links 6 1] :anstellung :pfx-anstellung]
+   [[:links 7 0] :zeitbuchung-anstellung :pfx-zeitbuchung-anstellung]
+   [[:links 7 1] :zeitbuchung :pfx-zeitbuchung]
+   [[:links 7 2] :anstellung :pfx-anstellung]
+   [[:links 8 0] :zeitbuchung-projekt :pfx-zeitbuchung-projekt]
+   [[:links 8 1] :zeitbuchung :pfx-zeitbuchung]
+   [[:links 8 2] :projekt :pfx-projekt]
+   [[:links 9 0]
+    :ausgangsrechnung-aussteller
+    :pfx-ausgangsrechnung-aussteller]
+   [[:links 9 1] :ausgangsrechnung :pfx-ausgangsrechnung]
+   [[:objects] :key :angebot :pfx-angebot]
+   [[:objects] :key :anstellung :pfx-anstellung]
+   [[:objects] :key :auftrag :pfx-auftrag]
+   [[:objects] :key :ausgangsrechnung :pfx-ausgangsrechnung]
+   [[:objects] :key :kundenbeziehung :pfx-kundenbeziehung]
+   [[:objects] :key :mahnung :pfx-mahnung]
+   [[:objects] :key :projekt :pfx-projekt]
+   [[:objects] :key :zeitbuchung :pfx-zeitbuchung]],
+  :with-suffix [[[] :key-new :projects]],
+  :bind
+  {:actions [],
+   :link-types [],
+   :sources
+   [[[:actions :mahnung-senden :rules 0 :source]
+     :mahnversand
+     :zz-mahnversand]]},
+  :action-targets
+  {:angebot-annehmen [[:object-type :angebot] [:object-type :auftrag]],
+   :ausgangsrechnung-erfassen [[:object-type :ausgangsrechnung]],
+   :kunde-anlegen [[:object-type :kundenbeziehung]],
+   :mahnung-entwerfen [[:object-type :mahnung]],
+   :mahnung-freigeben [[:object-type :mahnung]],
+   :mahnung-senden [[:object-type :mahnung]],
+   :stunden-buchen [[:object-type :zeitbuchung]],
+   :zahlungseingang-ausgleichen [[:object-type :ausgleich]]}},
+ "plugins/packages/resources/presets/standard/3_privat.ent"
+ {:rename-types
+  [[[:actions :buchung-kategorisieren :params :kategorie :type]
+    :kategorie
+    :zz-kategorie]
+   [[:links 0 1] :budget :zz-budget]
+   [[:links 0 2] :kategorie :zz-kategorie]
+   [[:links 1 1] :kategorie-regel :zz-kategorie-regel]
+   [[:links 1 2] :kategorie :zz-kategorie]
+   [[:links 2 1] :ausweis :zz-ausweis]
+   [[:links 2 2] :person :zz-person]
+   [[:links 3 1] :steuerposten :zz-steuerposten]
+   [[:links 3 2] :eingangsrechnung :zz-eingangsrechnung]
+   [[:links 4 1] :schadensfall :zz-schadensfall]
+   [[:links 4 2] :versicherung :zz-versicherung]],
+  :with-prefix
+  [[[:actions] :key :beitrag-entwerfen :pfx-beitrag-entwerfen]
+   [[:actions] :key :beitrag-freigeben :pfx-beitrag-freigeben]
+   [[:actions]
+    :key
+    :beitrag-veroeffentlichen
+    :pfx-beitrag-veroeffentlichen]
+   [[:actions]
+    :key
+    :buchung-kategorisieren
+    :pfx-buchung-kategorisieren]
+   [[:links 0 0] :budget-kategorie :pfx-budget-kategorie]
+   [[:links 0 1] :budget :pfx-budget]
+   [[:links 1 0] :regel-kategorie :pfx-regel-kategorie]
+   [[:links 1 1] :kategorie-regel :pfx-kategorie-regel]
+   [[:links 2 0] :ausweis-inhaber :pfx-ausweis-inhaber]
+   [[:links 2 1] :ausweis :pfx-ausweis]
+   [[:links 3 0] :steuerposten-beleg :pfx-steuerposten-beleg]
+   [[:links 3 1] :steuerposten :pfx-steuerposten]
+   [[:links 4 0]
+    :schadensfall-versicherung
+    :pfx-schadensfall-versicherung]
+   [[:links 4 1] :schadensfall :pfx-schadensfall]
+   [[:objects] :key :ausweis :pfx-ausweis]
+   [[:objects] :key :budget :pfx-budget]
+   [[:objects] :key :kategorie-regel :pfx-kategorie-regel]
+   [[:objects] :key :schadensfall :pfx-schadensfall]
+   [[:objects] :key :steuerposten :pfx-steuerposten]],
+  :with-suffix [[[] :key-new :projects]],
+  :bind
+  {:actions [],
+   :link-types [],
+   :sources
+   [[[:actions :beitrag-veroeffentlichen :rules 0 :source] :x :zz-x]]},
+  :action-targets
+  {:beitrag-entwerfen [[:object-type :beitrag]],
+   :beitrag-freigeben [[:object-type :beitrag]],
+   :beitrag-veroeffentlichen [[:object-type :beitrag]],
+   :buchung-kategorisieren [[:object-type :bankbuchung]]}},
+ "plugins/packages/resources/presets/standard/4_einzelunternehmen.ent"
+ {:rename-types [],
+  :with-prefix [],
+  :with-suffix [[[] :key-new :projects]],
+  :bind {},
+  :action-targets {}},
+ "plugins/packages/resources/presets/standard/5_mail.ent"
+ {:rename-types
+  [[[:links 0 1] :anhang :zz-anhang]
+   [[:links 0 2] :mail :zz-mail]
+   [[:links 1 1] :mail :zz-mail]
+   [[:links 1 2] :mail :zz-mail]
+   [[:transforms :shape-anhang :output :object-type]
+    :anhang
+    :zz-anhang]
+   [[:transforms :shape-mail :output :object-type] :mail :zz-mail]],
+  :with-prefix
+  [[[:links 0 0] :anhang-mail :pfx-anhang-mail]
+   [[:links 0 1] :anhang :pfx-anhang]
+   [[:links 0 2] :mail :pfx-mail]
+   [[:links 1 0] :mail-antwort-auf :pfx-mail-antwort-auf]
+   [[:links 1 1] :mail :pfx-mail]
+   [[:links 1 2] :mail :pfx-mail]
+   [[:objects] :key :anhang :pfx-anhang]
+   [[:objects] :key :mail :pfx-mail]
+   [[:transforms :shape-anhang :output :object-type]
+    :anhang
+    :pfx-anhang]
+   [[:transforms :shape-mail :output :object-type] :mail :pfx-mail]],
+  :with-suffix
+  [[[:datasets :postfach_anhaenge :project] :mail :mail-sfx]
+   [[:datasets :postfach_mails :project] :mail :mail-sfx]
+   [[:objects :anhang :project] :mail :mail-sfx]
+   [[:objects :mail :project] :mail :mail-sfx]
+   [[:projects] :key :mail :mail-sfx]
+   [[:transforms :shape-anhang :project] :mail :mail-sfx]
+   [[:transforms :shape-mail :project] :mail :mail-sfx]],
+  :bind
+  {:datasets
+   [[[:transforms :shape-anhang :inputs :anhaenge :dataset]
+     :postfach_anhaenge
+     :zz-postfach_anhaenge]
+    [[:transforms :shape-mail :inputs :mails :dataset]
+     :postfach_mails
+     :zz-postfach_mails]],
+   :link-types []},
+  :action-targets {}},
+ "resources/presets/_identity/identity.ent"
+ {:rename-types
+  [[[:links 0 1] :user :zz-user] [[:links 0 2] :marking :zz-marking]],
+  :with-prefix
+  [[[:links 0 0] :cleared-for :pfx-cleared-for]
+   [[:links 0 1] :user :pfx-user]
+   [[:links 0 2] :marking :pfx-marking]
+   [[:objects] :key :marking :pfx-marking]
+   [[:objects] :key :user :pfx-user]],
+  :with-suffix [[[] :key-new :projects]],
+  :bind {:link-types []},
+  :action-targets {}},
+ "resources/presets/beispiele/data-rights.ent"
+ {:rename-types
+  [[[:actions :add-organisation :rules 0 :object-type]
+    :organisation
+    :zz-organisation]
+   [[:actions :escalate :on] :data-request :zz-data-request]
+   [[:actions :escalate :params :request :type]
+    :data-request
+    :zz-data-request]
+   [[:actions :mark-overdue :on] :data-request :zz-data-request]
+   [[:actions :mark-overdue :params :request :type]
+    :data-request
+    :zz-data-request]
+   [[:actions :record-answer :on] :data-request :zz-data-request]
+   [[:actions :record-answer :params :request :type]
+    :data-request
+    :zz-data-request]
+   [[:actions :send-request :on] :organisation :zz-organisation]
+   [[:actions :send-request :params :organisation :type]
+    :organisation
+    :zz-organisation]
+   [[:actions :send-request :rules 0 :object-type]
+    :data-request
+    :zz-data-request]
+   [[:links 0 1] :data-request :zz-data-request]
+   [[:links 0 2] :organisation :zz-organisation]],
+  :with-prefix
+  [[[:actions :pfx-add-organisation :rules 0 :object-type]
+    :organisation
+    :pfx-organisation]
+   [[:actions :pfx-escalate :on] :data-request :pfx-data-request]
+   [[:actions :pfx-escalate :params :request :type]
+    :data-request
+    :pfx-data-request]
+   [[:actions :pfx-mark-overdue :on] :data-request :pfx-data-request]
+   [[:actions :pfx-mark-overdue :params :request :type]
+    :data-request
+    :pfx-data-request]
+   [[:actions :pfx-record-answer :on] :data-request :pfx-data-request]
+   [[:actions :pfx-record-answer :params :request :type]
+    :data-request
+    :pfx-data-request]
+   [[:actions :pfx-send-request :on] :organisation :pfx-organisation]
+   [[:actions :pfx-send-request :params :organisation :type]
+    :organisation
+    :pfx-organisation]
+   [[:actions :pfx-send-request :rules 0 :object-type]
+    :data-request
+    :pfx-data-request]
+   [[:actions] :key :add-organisation :pfx-add-organisation]
+   [[:actions] :key :escalate :pfx-escalate]
+   [[:actions] :key :mark-overdue :pfx-mark-overdue]
+   [[:actions] :key :record-answer :pfx-record-answer]
+   [[:actions] :key :send-request :pfx-send-request]
+   [[:links 0 0] :request-organisation :pfx-request-organisation]
+   [[:links 0 1] :data-request :pfx-data-request]
+   [[:links 0 2] :organisation :pfx-organisation]
+   [[:objects :pfx-data-request :lifecycle :transitions 0 :action]
+    :record-answer
+    :pfx-record-answer]
+   [[:objects :pfx-data-request :lifecycle :transitions 1 :action]
+    :mark-overdue
+    :pfx-mark-overdue]
+   [[:objects :pfx-data-request :lifecycle :transitions 2 :action]
+    :escalate
+    :pfx-escalate]
+   [[:objects] :key :data-request :pfx-data-request]
+   [[:objects] :key :organisation :pfx-organisation]],
+  :with-suffix [[[:projects] :key :rights :rights-sfx]],
+  :bind
+  {:actions
+   [[[:objects :data-request :lifecycle :transitions 0 :action]
+     :record-answer
+     :zz-record-answer]
+    [[:objects :data-request :lifecycle :transitions 1 :action]
+     :mark-overdue
+     :zz-mark-overdue]
+    [[:objects :data-request :lifecycle :transitions 2 :action]
+     :escalate
+     :zz-escalate]],
+   :link-types []},
+  :action-targets
+  {:add-organisation [[:object-type :organisation]],
+   :escalate [],
+   :mark-overdue [],
+   :record-answer [],
+   :send-request [[:object-type :data-request]]}},
+ "resources/presets/beispiele/farm.ent"
+ {:rename-types
+  [[[:actions :add-buyer :rules 0 :object-type] :buyer :zz-buyer]
+   [[:actions :add-field :rules 0 :object-type] :field :zz-field]
+   [[:actions :plant :on] :field :zz-field]
+   [[:actions :plant :params :field :type] :field :zz-field]
+   [[:actions :plant :rules 0 :object-type] :harvest :zz-harvest]
+   [[:actions :record-harvest :on] :harvest :zz-harvest]
+   [[:actions :record-harvest :params :harvest :type]
+    :harvest
+    :zz-harvest]
+   [[:actions :record-harvest :rules 0 :object-type]
+    :harvest
+    :zz-harvest]
+   [[:actions :record-payment :on] :harvest :zz-harvest]
+   [[:actions :record-payment :params :harvest :type]
+    :harvest
+    :zz-harvest]
+   [[:actions :sell-harvest :on] :harvest :zz-harvest]
+   [[:actions :sell-harvest :params :buyer :type] :buyer :zz-buyer]
+   [[:actions :sell-harvest :params :harvest :type]
+    :harvest
+    :zz-harvest]
+   [[:actions :sell-harvest :rules 0 :object-type]
+    :harvest
+    :zz-harvest]
+   [[:actions :sell-hay :edits 0 :object-type] :sale :zz-sale]
+   [[:actions :sell-hay :on] :lot :zz-lot]
+   [[:actions :sell-hay :params :lot :type] :lot :zz-lot]
+   [[:actions :sell-hay :rules 0 :object-type] :sale :zz-sale]
+   [[:links 0 1] :harvest :zz-harvest]
+   [[:links 0 2] :field :zz-field]
+   [[:links 1 1] :harvest :zz-harvest]
+   [[:links 1 2] :buyer :zz-buyer]
+   [[:links 2 1] :lot :zz-lot]
+   [[:links 2 2] :field :zz-field]
+   [[:links 3 1] :sale :zz-sale]
+   [[:links 3 2] :lot :zz-lot]],
+  :with-prefix
+  [[[:actions :pfx-add-buyer :rules 0 :object-type] :buyer :pfx-buyer]
+   [[:actions :pfx-add-field :rules 0 :object-type] :field :pfx-field]
+   [[:actions :pfx-plant :on] :field :pfx-field]
+   [[:actions :pfx-plant :params :field :type] :field :pfx-field]
+   [[:actions :pfx-plant :rules 0 :object-type] :harvest :pfx-harvest]
+   [[:actions :pfx-record-harvest :on] :harvest :pfx-harvest]
+   [[:actions :pfx-record-harvest :params :harvest :type]
+    :harvest
+    :pfx-harvest]
+   [[:actions :pfx-record-harvest :rules 0 :object-type]
+    :harvest
+    :pfx-harvest]
+   [[:actions :pfx-record-payment :on] :harvest :pfx-harvest]
+   [[:actions :pfx-record-payment :params :harvest :type]
+    :harvest
+    :pfx-harvest]
+   [[:actions :pfx-sell-harvest :on] :harvest :pfx-harvest]
+   [[:actions :pfx-sell-harvest :params :buyer :type]
+    :buyer
+    :pfx-buyer]
+   [[:actions :pfx-sell-harvest :params :harvest :type]
+    :harvest
+    :pfx-harvest]
+   [[:actions :pfx-sell-harvest :rules 0 :object-type]
+    :harvest
+    :pfx-harvest]
+   [[:actions :pfx-sell-hay :edits 0 :object-type] :sale :pfx-sale]
+   [[:actions :pfx-sell-hay :on] :lot :pfx-lot]
+   [[:actions :pfx-sell-hay :params :lot :type] :lot :pfx-lot]
+   [[:actions :pfx-sell-hay :rules 0 :object-type] :sale :pfx-sale]
+   [[:actions] :key :add-buyer :pfx-add-buyer]
+   [[:actions] :key :add-field :pfx-add-field]
+   [[:actions] :key :plant :pfx-plant]
+   [[:actions] :key :record-harvest :pfx-record-harvest]
+   [[:actions] :key :record-payment :pfx-record-payment]
+   [[:actions] :key :sell-harvest :pfx-sell-harvest]
+   [[:actions] :key :sell-hay :pfx-sell-hay]
+   [[:links 0 0] :harvest-field :pfx-harvest-field]
+   [[:links 0 1] :harvest :pfx-harvest]
+   [[:links 0 2] :field :pfx-field]
+   [[:links 1 0] :harvest-buyer :pfx-harvest-buyer]
+   [[:links 1 1] :harvest :pfx-harvest]
+   [[:links 1 2] :buyer :pfx-buyer]
+   [[:links 2 0] :lot-field :pfx-lot-field]
+   [[:links 2 1] :lot :pfx-lot]
+   [[:links 2 2] :field :pfx-field]
+   [[:links 3 0] :sale-lot :pfx-sale-lot]
+   [[:links 3 1] :sale :pfx-sale]
+   [[:links 3 2] :lot :pfx-lot]
+   [[:objects :pfx-harvest :lifecycle :transitions 0 :action]
+    :record-harvest
+    :pfx-record-harvest]
+   [[:objects :pfx-harvest :lifecycle :transitions 1 :action]
+    :sell-harvest
+    :pfx-sell-harvest]
+   [[:objects :pfx-harvest :lifecycle :transitions 2 :action]
+    :record-payment
+    :pfx-record-payment]
+   [[:objects] :key :buyer :pfx-buyer]
+   [[:objects] :key :field :pfx-field]
+   [[:objects] :key :harvest :pfx-harvest]
+   [[:objects] :key :lot :pfx-lot]
+   [[:objects] :key :sale :pfx-sale]],
+  :with-suffix [[[:projects] :key :farm :farm-sfx]],
+  :bind
+  {:actions
+   [[[:objects :harvest :lifecycle :transitions 0 :action]
+     :record-harvest
+     :zz-record-harvest]
+    [[:objects :harvest :lifecycle :transitions 1 :action]
+     :sell-harvest
+     :zz-sell-harvest]
+    [[:objects :harvest :lifecycle :transitions 2 :action]
+     :record-payment
+     :zz-record-payment]],
+   :link-types []},
+  :action-targets
+  {:add-buyer [[:object-type :buyer]],
+   :add-field [[:object-type :field]],
+   :plant [[:object-type :harvest]],
+   :record-harvest [[:object-type :harvest]],
+   :record-payment [],
+   :sell-harvest [[:object-type :harvest]],
+   :sell-hay [[:object-type :sale]]}},
+ "resources/presets/beispiele/household.ent"
+ {:rename-types
+  [[[:actions :add-commitment :on] :household :zz-household]
+   [[:actions :add-commitment :params :household :type]
+    :household
+    :zz-household]
+   [[:actions :add-commitment :rules 0 :object-type]
+    :commitment
+    :zz-commitment]
+   [[:actions :add-household :rules 0 :object-type]
+    :household
+    :zz-household]
+   [[:actions :log-payment :on] :commitment :zz-commitment]
+   [[:actions :log-payment :params :commitment :type]
+    :commitment
+    :zz-commitment]
+   [[:actions :log-payment :rules 0 :object-type] :payment :zz-payment]
+   [[:actions :stop-commitment :on] :commitment :zz-commitment]
+   [[:actions :stop-commitment :params :commitment :type]
+    :commitment
+    :zz-commitment]
+   [[:links 0 1] :commitment :zz-commitment]
+   [[:links 0 2] :household :zz-household]
+   [[:links 1 1] :payment :zz-payment]
+   [[:links 1 2] :commitment :zz-commitment]],
+  :with-prefix
+  [[[:actions :pfx-add-commitment :on] :household :pfx-household]
+   [[:actions :pfx-add-commitment :params :household :type]
+    :household
+    :pfx-household]
+   [[:actions :pfx-add-commitment :rules 0 :object-type]
+    :commitment
+    :pfx-commitment]
+   [[:actions :pfx-add-household :rules 0 :object-type]
+    :household
+    :pfx-household]
+   [[:actions :pfx-log-payment :on] :commitment :pfx-commitment]
+   [[:actions :pfx-log-payment :params :commitment :type]
+    :commitment
+    :pfx-commitment]
+   [[:actions :pfx-log-payment :rules 0 :object-type]
+    :payment
+    :pfx-payment]
+   [[:actions :pfx-stop-commitment :on] :commitment :pfx-commitment]
+   [[:actions :pfx-stop-commitment :params :commitment :type]
+    :commitment
+    :pfx-commitment]
+   [[:actions] :key :add-commitment :pfx-add-commitment]
+   [[:actions] :key :add-household :pfx-add-household]
+   [[:actions] :key :log-payment :pfx-log-payment]
+   [[:actions] :key :stop-commitment :pfx-stop-commitment]
+   [[:links 0 0] :commitment-household :pfx-commitment-household]
+   [[:links 0 1] :commitment :pfx-commitment]
+   [[:links 0 2] :household :pfx-household]
+   [[:links 1 0] :payment-commitment :pfx-payment-commitment]
+   [[:links 1 1] :payment :pfx-payment]
+   [[:links 1 2] :commitment :pfx-commitment]
+   [[:objects :pfx-commitment :lifecycle :transitions 0 :action]
+    :stop-commitment
+    :pfx-stop-commitment]
+   [[:objects] :key :commitment :pfx-commitment]
+   [[:objects] :key :household :pfx-household]
+   [[:objects] :key :payment :pfx-payment]],
+  :with-suffix [[[:projects] :key :home :home-sfx]],
+  :bind
+  {:actions
+   [[[:objects :commitment :lifecycle :transitions 0 :action]
+     :stop-commitment
+     :zz-stop-commitment]],
+   :link-types []},
+  :action-targets
+  {:add-commitment [[:object-type :commitment]],
+   :add-household [[:object-type :household]],
+   :log-payment [[:object-type :payment]],
+   :stop-commitment []}},
+ "resources/presets/beispiele/kostenstelle-logic.ent"
+ {:rename-types
+  [[[:actions :kostenstelle-zuordnen :on]
+    :eingangsrechnung
+    :zz-eingangsrechnung]
+   [[:actions :kostenstelle-zuordnen :params :rechnung :type]
+    :eingangsrechnung
+    :zz-eingangsrechnung]
+   [[:actions :kostenstelle-zuordnen :rules 0 :object-type]
+    :eingangsrechnung
+    :zz-eingangsrechnung]
+   [[:functions :kostenstelle-bestimmen :target-type]
+    :eingangsrechnung
+    :zz-eingangsrechnung]],
+  :with-prefix
+  [[[:actions :pfx-kostenstelle-zuordnen :on]
+    :eingangsrechnung
+    :pfx-eingangsrechnung]
+   [[:actions :pfx-kostenstelle-zuordnen :params :rechnung :type]
+    :eingangsrechnung
+    :pfx-eingangsrechnung]
+   [[:actions :pfx-kostenstelle-zuordnen :rules 0 :object-type]
+    :eingangsrechnung
+    :pfx-eingangsrechnung]
+   [[:actions] :key :kostenstelle-zuordnen :pfx-kostenstelle-zuordnen]
+   [[:functions :kostenstelle-bestimmen :target-type]
+    :eingangsrechnung
+    :pfx-eingangsrechnung]
+   [[:objects] :key :eingangsrechnung :pfx-eingangsrechnung]
+   [[:objects] :key :kostenstelle :pfx-kostenstelle]],
+  :with-suffix [[[] :key-new :projects]],
+  :bind {:actions [], :functions []},
+  :action-targets
+  {:kostenstelle-zuordnen [[:object-type :eingangsrechnung]]}},
+ "resources/presets/beispiele/teaser-rates.ent"
+ {:rename-types
+  [[[:actions :add-borrower :rules 0 :object-type]
+    :borrower
+    :zz-borrower]
+   [[:actions :add-loan :on] :borrower :zz-borrower]
+   [[:actions :add-loan :params :borrower :type]
+    :borrower
+    :zz-borrower]
+   [[:actions :add-loan :rules 0 :object-type] :loan :zz-loan]
+   [[:actions :mark-default :on] :loan :zz-loan]
+   [[:actions :mark-default :params :loan :type] :loan :zz-loan]
+   [[:actions :refinance :on] :loan :zz-loan]
+   [[:actions :refinance :params :loan :type] :loan :zz-loan]
+   [[:links 0 1] :loan :zz-loan]
+   [[:links 0 2] :borrower :zz-borrower]],
+  :with-prefix
+  [[[:actions :pfx-add-borrower :rules 0 :object-type]
+    :borrower
+    :pfx-borrower]
+   [[:actions :pfx-add-loan :on] :borrower :pfx-borrower]
+   [[:actions :pfx-add-loan :params :borrower :type]
+    :borrower
+    :pfx-borrower]
+   [[:actions :pfx-add-loan :rules 0 :object-type] :loan :pfx-loan]
+   [[:actions :pfx-mark-default :on] :loan :pfx-loan]
+   [[:actions :pfx-mark-default :params :loan :type] :loan :pfx-loan]
+   [[:actions :pfx-refinance :on] :loan :pfx-loan]
+   [[:actions :pfx-refinance :params :loan :type] :loan :pfx-loan]
+   [[:actions] :key :add-borrower :pfx-add-borrower]
+   [[:actions] :key :add-loan :pfx-add-loan]
+   [[:actions] :key :mark-default :pfx-mark-default]
+   [[:actions] :key :refinance :pfx-refinance]
+   [[:links 0 0] :loan-borrower :pfx-loan-borrower]
+   [[:links 0 1] :loan :pfx-loan]
+   [[:links 0 2] :borrower :pfx-borrower]
+   [[:objects :pfx-loan :lifecycle :transitions 0 :action]
+    :refinance
+    :pfx-refinance]
+   [[:objects :pfx-loan :lifecycle :transitions 1 :action]
+    :mark-default
+    :pfx-mark-default]
+   [[:objects] :key :borrower :pfx-borrower]
+   [[:objects] :key :loan :pfx-loan]],
+  :with-suffix [[[:projects] :key :teaser :teaser-sfx]],
+  :bind
+  {:actions
+   [[[:objects :loan :lifecycle :transitions 0 :action]
+     :refinance
+     :zz-refinance]
+    [[:objects :loan :lifecycle :transitions 1 :action]
+     :mark-default
+     :zz-mark-default]],
+   :link-types []},
+  :action-targets
+  {:add-borrower [[:object-type :borrower]],
+   :add-loan [[:object-type :loan]],
+   :mark-default [],
+   :refinance []}},
+ "resources/presets/grammar.ent"
+ {:rename-types
+  [[[:actions :mark-paid :edits 0 :object-type] :order :zz-order]
+   [[:actions :mark-paid :on] :order :zz-order]
+   [[:actions :mark-paid :params :order :type] :order :zz-order]
+   [[:actions :mark-paid :rules 0 :object-type] :order :zz-order]
+   [[:actions :open-order :edits 0 :object-type] :order :zz-order]
+   [[:actions :open-order :rules 0 :object-type] :order :zz-order]
+   [[:agents :invoice-clerk :retrieval :object-type] :order :zz-order]
+   [[:agents :invoice-clerk :tools 2 :object-type]
+    :invoice
+    :zz-invoice]
+   [[:applications :order-board :layout :export :object-type]
+    :invoice
+    :zz-invoice]
+   [[:applications :order-board :object-type] :order :zz-order]
+   [[:applications :order-detail :object-type] :order :zz-order]
+   [[:datasets :order_mat :object-type] :order :zz-order]
+   [[:functions :classify-cost-center :target-type]
+    :invoice
+    :zz-invoice]
+   [[:functions :close-order :target-type] :order :zz-order]
+   [[:functions :grossauftraege :inputs :order :object-type]
+    :order
+    :zz-order]
+   [[:functions :open-order-and-count :target-type] :order :zz-order]
+   [[:functions :reconcile :target-type] :order :zz-order]
+   [[:interfaces :document :link-constraints 0 :to-object-type]
+    :order
+    :zz-order]
+   [[:links 0 1] :order :zz-order]
+   [[:links 0 2] :event :zz-event]
+   [[:links 1 1] :invoice :zz-invoice]
+   [[:links 1 2] :order :zz-order]
+   [[:links 2 1] :order :zz-order]
+   [[:links 2 2] :order :zz-order]
+   [[:links 3 1] :order :zz-order]
+   [[:links 3 2] :supplier :zz-supplier]
+   [[:links 4 1] :order :zz-order]
+   [[:links 4 2] :supplier :zz-supplier]
+   [[:links 5 1] :invoice :zz-invoice]
+   [[:links 5 2] :order :zz-order]
+   [[:links 6 1] :order :zz-order]
+   [[:links 6 2] :order :zz-order]
+   [[:links 7 1] :invoice :zz-invoice]
+   [[:links 7 2] :supplier :zz-supplier]
+   [[:links 8 1] :invoice :zz-invoice]
+   [[:links 8 2] :supplier :zz-supplier]
+   [[:object-sets :open-orders :root] :order :zz-order]
+   [[:object-type-groups :master-data :members 0] :order :zz-order]
+   [[:pipelines :invoice-shaping :imports 1] :supplier :zz-supplier]
+   [[:pipelines :invoice-shaping :outputs 0] :invoice :zz-invoice]
+   [[:transforms :link-docs :sources 0 :from-type]
+    :invoice
+    :zz-invoice]
+   [[:transforms :link-docs :sources 0 :to-type] :order :zz-order]
+   [[:transforms :rollup-delta :outputs 0 :object-type]
+    :order
+    :zz-order]
+   [[:transforms :rollup-totals :outputs 0 :object-type]
+    :order
+    :zz-order]
+   [[:transforms :shape-invoices :output :object-type]
+    :invoice
+    :zz-invoice]
+   [[:workspaces :werkstatt :home 1 :items 0 :object-type]
+    :order
+    :zz-order]],
+  :with-prefix
+  [[[:actions :pfx-mark-paid :edits 0 :object-type] :order :pfx-order]
+   [[:actions :pfx-mark-paid :on] :order :pfx-order]
+   [[:actions :pfx-mark-paid :params :order :type] :order :pfx-order]
+   [[:actions :pfx-mark-paid :rules 0 :object-type] :order :pfx-order]
+   [[:actions :pfx-open-order :edits 0 :object-type] :order :pfx-order]
+   [[:actions :pfx-open-order :rules 0 :object-type] :order :pfx-order]
+   [[:actions] :key :mark-paid :pfx-mark-paid]
+   [[:actions] :key :open-order :pfx-open-order]
+   [[:agents :invoice-clerk :retrieval :object-type] :order :pfx-order]
+   [[:agents :invoice-clerk :tools 0 :action]
+    :mark-paid
+    :pfx-mark-paid]
+   [[:agents :invoice-clerk :tools 2 :object-type]
+    :invoice
+    :pfx-invoice]
+   [[:applications :order-board :layout :export :object-type]
+    :invoice
+    :pfx-invoice]
+   [[:applications :order-board :object-type] :order :pfx-order]
+   [[:applications :order-detail :object-type] :order :pfx-order]
+   [[:datasets :order_mat :object-type] :order :pfx-order]
+   [[:functions :classify-cost-center :target-type]
+    :invoice
+    :pfx-invoice]
+   [[:functions :close-order :target-type] :order :pfx-order]
+   [[:functions :grossauftraege :inputs :order :object-type]
+    :order
+    :pfx-order]
+   [[:functions :open-order-and-count :target-type] :order :pfx-order]
+   [[:functions :reconcile :target-type] :order :pfx-order]
+   [[:interfaces :document :link-constraints 0 :to-object-type]
+    :order
+    :pfx-order]
+   [[:links 0 0] :events :pfx-events]
+   [[:links 0 1] :order :pfx-order]
+   [[:links 1 0] :invoice-order :pfx-invoice-order]
+   [[:links 1 1] :invoice :pfx-invoice]
+   [[:links 1 2] :order :pfx-order]
+   [[:links 2 0] :order-parent :pfx-order-parent]
+   [[:links 2 1] :order :pfx-order]
+   [[:links 2 2] :order :pfx-order]
+   [[:links 3 0] :supplier-of :pfx-supplier-of]
+   [[:links 3 1] :order :pfx-order]
+   [[:links 3 2] :supplier :pfx-supplier]
+   [[:links 4 0] :placed-by :pfx-placed-by]
+   [[:links 4 1] :order :pfx-order]
+   [[:links 4 2] :supplier :pfx-supplier]
+   [[:links 5 0] :invoice-of :pfx-invoice-of]
+   [[:links 5 1] :invoice :pfx-invoice]
+   [[:links 5 2] :order :pfx-order]
+   [[:links 6 0] :related-orders :pfx-related-orders]
+   [[:links 6 1] :order :pfx-order]
+   [[:links 6 2] :order :pfx-order]
+   [[:links 7 0] :reconciled-supplier :pfx-reconciled-supplier]
+   [[:links 7 1] :invoice :pfx-invoice]
+   [[:links 7 2] :supplier :pfx-supplier]
+   [[:links 8 0] :invoice-supplier :pfx-invoice-supplier]
+   [[:links 8 1] :invoice :pfx-invoice]
+   [[:links 8 2] :supplier :pfx-supplier]
+   [[:object-sets :open-orders :root] :order :pfx-order]
+   [[:object-type-groups :master-data :members 0] :order :pfx-order]
+   [[:objects :pfx-order :lifecycle :transitions 0 :action]
+    :mark-paid
+    :pfx-mark-paid]
+   [[:objects] :key :invoice :pfx-invoice]
+   [[:objects] :key :order :pfx-order]
+   [[:objects] :key :supplier :pfx-supplier]
+   [[:pipelines :invoice-shaping :imports 1] :supplier :pfx-supplier]
+   [[:pipelines :invoice-shaping :outputs 0] :invoice :pfx-invoice]
+   [[:transforms :link-docs :sources 0 :from-type]
+    :invoice
+    :pfx-invoice]
+   [[:transforms :link-docs :sources 0 :to-type] :order :pfx-order]
+   [[:transforms :rollup-delta :outputs 0 :object-type]
+    :order
+    :pfx-order]
+   [[:transforms :rollup-totals :outputs 0 :object-type]
+    :order
+    :pfx-order]
+   [[:transforms :shape-invoices :output :object-type]
+    :invoice
+    :pfx-invoice]
+   [[:workspaces :werkstatt :home 1 :items 0 :object-type]
+    :order
+    :pfx-order]],
+  :with-suffix
+  [[[:agents :invoice-clerk :project] :procurement :procurement-sfx]
+   [[:applications :order-board :project]
+    :procurement
+    :procurement-sfx]
+   [[:collections :operations :project] :procurement :procurement-sfx]
+   [[:custom-applications :field-tool :project]
+    :procurement
+    :procurement-sfx]
+   [[:object-sets :open-orders :project] :master-data :master-data-sfx]
+   [[:object-type-groups :master-data :project]
+    :master-data
+    :master-data-sfx]
+   [[:objects :supplier :project] :master-data :master-data-sfx]
+   [[:pipelines :invoice-shaping :project]
+    :procurement
+    :procurement-sfx]
+   [[:projects :procurement-sfx :imports 0]
+    :master-data
+    :master-data-sfx]
+   [[:projects] :key :master-data :master-data-sfx]
+   [[:projects] :key :procurement :procurement-sfx]
+   [[:repositories :ingest :project] :procurement :procurement-sfx]
+   [[:workspaces :werkstatt :project] :procurement :procurement-sfx]],
+  :bind
+  {:actions
+   [[[:agents :invoice-clerk :tools 0 :action]
+     :mark-paid
+     :zz-mark-paid]
+    [[:objects :order :lifecycle :transitions 0 :action]
+     :mark-paid
+     :zz-mark-paid]],
+   :datasets
+   [[[:applications :order-board :layout :upload :dataset]
+     "raw-attachments"
+     "zz-raw-attachments"]
+    [[:transforms :normalize-invoices :inputs :parsed :dataset]
+     :invoices_parsed
+     :zz-invoices_parsed]
+    [[:transforms :parse-invoices :inputs :pdfs :dataset]
+     :raw-attachments
+     :zz-raw-attachments]
+    [[:transforms :parse-invoices :output :dataset]
+     :invoices_parsed
+     :zz-invoices_parsed]
+    [[:transforms :shape-invoices :inputs :parsed :dataset]
+     :invoices_parsed
+     :zz-invoices_parsed]],
+   :functions
+   [[[:agents :invoice-clerk :tools 1 :function]
+     :reconcile
+     :zz-reconcile]
+    [[:custom-applications :field-tool :scope :functions 0]
+     :reconcile
+     :zz-reconcile]],
+   :interfaces
+   [[[:actions :mark-paid :rules 1 :interface] :document :zz-document]
+    [[:interfaces :document :extends 0] :locatable :zz-locatable]
+    [[:links 1 4 :satisfies :interface] :document :zz-document]
+    [[:objects :invoice :implements 0] :document :zz-document]],
+   :link-types [],
+   :shared-properties [],
+   :sources
+   [[[:actions :open-order :rules 1 :source] :erp :zz-erp]
+    [[:datasets :invoices_raw :external-source :datasource]
+     :erp
+     :zz-erp]
+    [[:links 3 4 :external-source :datasource] :erp :zz-erp]
+    [[:objects :invoice :external-source :datasource] :erp :zz-erp]
+    [[:objects :supplier :external-sources 0 :datasource] :erp :zz-erp]
+    [[:objects :supplier :external-sources 1 :datasource] :crm :zz-crm]
+    [[:transforms :parse-invoices :inputs :raw :datasource]
+     :erp
+     :zz-erp]],
+   :value-types []},
+  :action-targets
+  {:mark-paid [[:object-type :order]],
+   :open-order [[:object-type :order]]}},
+ "resources/presets/template.ent"
+ {:rename-types
+  [[[:actions :angebot-annehmen :on] :angebot :zz-angebot]
+   [[:actions :angebot-annehmen :params :angebot :type]
+    :angebot
+    :zz-angebot]
+   [[:actions :angebot-annehmen :rules 0 :object-type]
+    :angebot
+    :zz-angebot]
+   [[:actions :angebot-annehmen :rules 1 :object-type]
+    :arbeitsauftrag
+    :zz-arbeitsauftrag]
+   [[:actions :angebot-erstellen :on] :betreiber :zz-betreiber]
+   [[:actions :angebot-erstellen :params :betreiber :type]
+    :betreiber
+    :zz-betreiber]
+   [[:actions :angebot-erstellen :rules 0 :object-type]
+    :angebot
+    :zz-angebot]
+   [[:actions :arbeitsauftrag-anlegen :params :betreiber :type]
+    :betreiber
+    :zz-betreiber]
+   [[:actions :arbeitsauftrag-anlegen :rules 0 :object-type]
+    :arbeitsauftrag
+    :zz-arbeitsauftrag]
+   [[:actions :arbeitsauftrag-beginnen :on]
+    :arbeitsauftrag
+    :zz-arbeitsauftrag]
+   [[:actions :arbeitsauftrag-beginnen :params :arbeitsauftrag :type]
+    :arbeitsauftrag
+    :zz-arbeitsauftrag]
+   [[:actions :arbeitsauftrag-beginnen :rules 0 :object-type]
+    :arbeitsauftrag
+    :zz-arbeitsauftrag]
+   [[:actions :arbeitsauftrag-fertigmelden :on]
+    :arbeitsauftrag
+    :zz-arbeitsauftrag]
+   [[:actions
+     :arbeitsauftrag-fertigmelden
+     :params
+     :arbeitsauftrag
+     :type]
+    :arbeitsauftrag
+    :zz-arbeitsauftrag]
+   [[:actions :arbeitsauftrag-fertigmelden :rules 0 :object-type]
+    :arbeitsauftrag
+    :zz-arbeitsauftrag]
+   [[:actions :arbeitsauftrag-stornieren :on]
+    :arbeitsauftrag
+    :zz-arbeitsauftrag]
+   [[:actions :arbeitsauftrag-stornieren :params :arbeitsauftrag :type]
+    :arbeitsauftrag
+    :zz-arbeitsauftrag]
+   [[:actions :arbeitsauftrag-stornieren :rules 0 :object-type]
+    :arbeitsauftrag
+    :zz-arbeitsauftrag]
+   [[:actions :betreiber-anlegen :rules 0 :object-type]
+    :betreiber
+    :zz-betreiber]
+   [[:actions :rechnung-stellen :on]
+    :arbeitsauftrag
+    :zz-arbeitsauftrag]
+   [[:actions :rechnung-stellen :params :arbeitsauftrag :type]
+    :arbeitsauftrag
+    :zz-arbeitsauftrag]
+   [[:actions :rechnung-stellen :rules 0 :object-type]
+    :rechnung
+    :zz-rechnung]
+   [[:actions :zahlung-erfassen :on] :rechnung :zz-rechnung]
+   [[:actions :zahlung-erfassen :params :rechnung :type]
+    :rechnung
+    :zz-rechnung]
+   [[:actions :zahlung-erfassen :rules 0 :object-type]
+    :zahlung
+    :zz-zahlung]
+   [[:links 0 1] :angebot :zz-angebot]
+   [[:links 0 2] :betreiber :zz-betreiber]
+   [[:links 1 1] :arbeitsauftrag :zz-arbeitsauftrag]
+   [[:links 1 2] :betreiber :zz-betreiber]
+   [[:links 2 1] :arbeitsauftrag :zz-arbeitsauftrag]
+   [[:links 2 2] :angebot :zz-angebot]
+   [[:links 3 1] :rechnung :zz-rechnung]
+   [[:links 3 2] :arbeitsauftrag :zz-arbeitsauftrag]
+   [[:links 4 1] :zahlung :zz-zahlung]
+   [[:links 4 2] :rechnung :zz-rechnung]
+   [[:links 5 1] :zeitbuchung :zz-zeitbuchung]
+   [[:links 5 2] :arbeitsauftrag :zz-arbeitsauftrag]
+   [[:links 6 1] :zeitbuchung :zz-zeitbuchung]
+   [[:links 6 2] :mechaniker :zz-mechaniker]],
+  :with-prefix
+  [[[:actions :pfx-angebot-annehmen :on] :angebot :pfx-angebot]
+   [[:actions :pfx-angebot-annehmen :params :angebot :type]
+    :angebot
+    :pfx-angebot]
+   [[:actions :pfx-angebot-annehmen :rules 0 :object-type]
+    :angebot
+    :pfx-angebot]
+   [[:actions :pfx-angebot-annehmen :rules 1 :object-type]
+    :arbeitsauftrag
+    :pfx-arbeitsauftrag]
+   [[:actions :pfx-angebot-erstellen :on] :betreiber :pfx-betreiber]
+   [[:actions :pfx-angebot-erstellen :params :betreiber :type]
+    :betreiber
+    :pfx-betreiber]
+   [[:actions :pfx-angebot-erstellen :rules 0 :object-type]
+    :angebot
+    :pfx-angebot]
+   [[:actions :pfx-arbeitsauftrag-anlegen :params :betreiber :type]
+    :betreiber
+    :pfx-betreiber]
+   [[:actions :pfx-arbeitsauftrag-anlegen :rules 0 :object-type]
+    :arbeitsauftrag
+    :pfx-arbeitsauftrag]
+   [[:actions :pfx-arbeitsauftrag-beginnen :on]
+    :arbeitsauftrag
+    :pfx-arbeitsauftrag]
+   [[:actions
+     :pfx-arbeitsauftrag-beginnen
+     :params
+     :arbeitsauftrag
+     :type]
+    :arbeitsauftrag
+    :pfx-arbeitsauftrag]
+   [[:actions :pfx-arbeitsauftrag-beginnen :rules 0 :object-type]
+    :arbeitsauftrag
+    :pfx-arbeitsauftrag]
+   [[:actions :pfx-arbeitsauftrag-fertigmelden :on]
+    :arbeitsauftrag
+    :pfx-arbeitsauftrag]
+   [[:actions
+     :pfx-arbeitsauftrag-fertigmelden
+     :params
+     :arbeitsauftrag
+     :type]
+    :arbeitsauftrag
+    :pfx-arbeitsauftrag]
+   [[:actions :pfx-arbeitsauftrag-fertigmelden :rules 0 :object-type]
+    :arbeitsauftrag
+    :pfx-arbeitsauftrag]
+   [[:actions :pfx-arbeitsauftrag-stornieren :on]
+    :arbeitsauftrag
+    :pfx-arbeitsauftrag]
+   [[:actions
+     :pfx-arbeitsauftrag-stornieren
+     :params
+     :arbeitsauftrag
+     :type]
+    :arbeitsauftrag
+    :pfx-arbeitsauftrag]
+   [[:actions :pfx-arbeitsauftrag-stornieren :rules 0 :object-type]
+    :arbeitsauftrag
+    :pfx-arbeitsauftrag]
+   [[:actions :pfx-betreiber-anlegen :rules 0 :object-type]
+    :betreiber
+    :pfx-betreiber]
+   [[:actions :pfx-rechnung-stellen :on]
+    :arbeitsauftrag
+    :pfx-arbeitsauftrag]
+   [[:actions :pfx-rechnung-stellen :params :arbeitsauftrag :type]
+    :arbeitsauftrag
+    :pfx-arbeitsauftrag]
+   [[:actions :pfx-rechnung-stellen :rules 0 :object-type]
+    :rechnung
+    :pfx-rechnung]
+   [[:actions :pfx-zahlung-erfassen :on] :rechnung :pfx-rechnung]
+   [[:actions :pfx-zahlung-erfassen :params :rechnung :type]
+    :rechnung
+    :pfx-rechnung]
+   [[:actions :pfx-zahlung-erfassen :rules 0 :object-type]
+    :zahlung
+    :pfx-zahlung]
+   [[:actions] :key :angebot-annehmen :pfx-angebot-annehmen]
+   [[:actions] :key :angebot-erstellen :pfx-angebot-erstellen]
+   [[:actions]
+    :key
+    :arbeitsauftrag-anlegen
+    :pfx-arbeitsauftrag-anlegen]
+   [[:actions]
+    :key
+    :arbeitsauftrag-beginnen
+    :pfx-arbeitsauftrag-beginnen]
+   [[:actions]
+    :key
+    :arbeitsauftrag-fertigmelden
+    :pfx-arbeitsauftrag-fertigmelden]
+   [[:actions]
+    :key
+    :arbeitsauftrag-stornieren
+    :pfx-arbeitsauftrag-stornieren]
+   [[:actions] :key :betreiber-anlegen :pfx-betreiber-anlegen]
+   [[:actions] :key :rechnung-stellen :pfx-rechnung-stellen]
+   [[:actions] :key :zahlung-erfassen :pfx-zahlung-erfassen]
+   [[:links 0 0] :angebot-betreiber :pfx-angebot-betreiber]
+   [[:links 0 1] :angebot :pfx-angebot]
+   [[:links 0 2] :betreiber :pfx-betreiber]
+   [[:links 1 0]
+    :arbeitsauftrag-betreiber
+    :pfx-arbeitsauftrag-betreiber]
+   [[:links 1 1] :arbeitsauftrag :pfx-arbeitsauftrag]
+   [[:links 1 2] :betreiber :pfx-betreiber]
+   [[:links 2 0] :arbeitsauftrag-angebot :pfx-arbeitsauftrag-angebot]
+   [[:links 2 1] :arbeitsauftrag :pfx-arbeitsauftrag]
+   [[:links 2 2] :angebot :pfx-angebot]
+   [[:links 3 0] :rechnung-arbeitsauftrag :pfx-rechnung-arbeitsauftrag]
+   [[:links 3 1] :rechnung :pfx-rechnung]
+   [[:links 3 2] :arbeitsauftrag :pfx-arbeitsauftrag]
+   [[:links 4 0] :zahlung-rechnung :pfx-zahlung-rechnung]
+   [[:links 4 1] :zahlung :pfx-zahlung]
+   [[:links 4 2] :rechnung :pfx-rechnung]
+   [[:links 5 0]
+    :zeitbuchung-arbeitsauftrag
+    :pfx-zeitbuchung-arbeitsauftrag]
+   [[:links 5 1] :zeitbuchung :pfx-zeitbuchung]
+   [[:links 5 2] :arbeitsauftrag :pfx-arbeitsauftrag]
+   [[:links 6 0] :zeitbuchung-mechaniker :pfx-zeitbuchung-mechaniker]
+   [[:links 6 1] :zeitbuchung :pfx-zeitbuchung]
+   [[:links 6 2] :mechaniker :pfx-mechaniker]
+   [[:objects :pfx-arbeitsauftrag :lifecycle :transitions 0 :action]
+    :arbeitsauftrag-beginnen
+    :pfx-arbeitsauftrag-beginnen]
+   [[:objects :pfx-arbeitsauftrag :lifecycle :transitions 1 :action]
+    :arbeitsauftrag-fertigmelden
+    :pfx-arbeitsauftrag-fertigmelden]
+   [[:objects :pfx-arbeitsauftrag :lifecycle :transitions 2 :action]
+    :rechnung-stellen
+    :pfx-rechnung-stellen]
+   [[:objects :pfx-arbeitsauftrag :lifecycle :transitions 3 :action]
+    :arbeitsauftrag-stornieren
+    :pfx-arbeitsauftrag-stornieren]
+   [[:objects] :key :angebot :pfx-angebot]
+   [[:objects] :key :arbeitsauftrag :pfx-arbeitsauftrag]
+   [[:objects] :key :betreiber :pfx-betreiber]
+   [[:objects] :key :mechaniker :pfx-mechaniker]
+   [[:objects] :key :rechnung :pfx-rechnung]
+   [[:objects] :key :zahlung :pfx-zahlung]
+   [[:objects] :key :zeitbuchung :pfx-zeitbuchung]],
+  :with-suffix
+  [[[:datasets :mechaniker_zeiterfassung :project] :werft :werft-sfx]
+   [[:datasets :zeitbuchungen_zeiterfassung :project]
+    :werft
+    :werft-sfx]
+   [[:objects :angebot :project] :werft :werft-sfx]
+   [[:objects :arbeitsauftrag :project] :werft :werft-sfx]
+   [[:objects :betreiber :project] :werft :werft-sfx]
+   [[:objects :mechaniker :project] :werft :werft-sfx]
+   [[:objects :rechnung :project] :werft :werft-sfx]
+   [[:objects :zahlung :project] :werft :werft-sfx]
+   [[:objects :zeitbuchung :project] :werft :werft-sfx]
+   [[:projects] :key :werft :werft-sfx]
+   [[:sources :zeiterfassung :project] :werft :werft-sfx]],
+  :bind
+  {:actions
+   [[[:objects :arbeitsauftrag :lifecycle :transitions 0 :action]
+     :arbeitsauftrag-beginnen
+     :zz-arbeitsauftrag-beginnen]
+    [[:objects :arbeitsauftrag :lifecycle :transitions 1 :action]
+     :arbeitsauftrag-fertigmelden
+     :zz-arbeitsauftrag-fertigmelden]
+    [[:objects :arbeitsauftrag :lifecycle :transitions 2 :action]
+     :rechnung-stellen
+     :zz-rechnung-stellen]
+    [[:objects :arbeitsauftrag :lifecycle :transitions 3 :action]
+     :arbeitsauftrag-stornieren
+     :zz-arbeitsauftrag-stornieren]],
+   :datasets
+   [[[:objects :mechaniker :backing :dataset]
+     :mechaniker_zeiterfassung
+     :zz-mechaniker_zeiterfassung]
+    [[:objects :zeitbuchung :backing :dataset]
+     :zeitbuchungen_zeiterfassung
+     :zz-zeitbuchungen_zeiterfassung]],
+   :link-types [],
+   :sources
+   [[[:datasets :mechaniker_zeiterfassung :external-source :datasource]
+     :zeiterfassung
+     :zz-zeiterfassung]
+    [[:datasets
+      :zeitbuchungen_zeiterfassung
+      :external-source
+      :datasource]
+     :zeiterfassung
+     :zz-zeiterfassung]],
+   :value-types []},
+  :action-targets
+  {:angebot-annehmen
+   [[:object-type :angebot] [:object-type :arbeitsauftrag]],
+   :angebot-erstellen [[:object-type :angebot]],
+   :arbeitsauftrag-anlegen [[:object-type :arbeitsauftrag]],
+   :arbeitsauftrag-beginnen [[:object-type :arbeitsauftrag]],
+   :arbeitsauftrag-fertigmelden [[:object-type :arbeitsauftrag]],
+   :arbeitsauftrag-stornieren [[:object-type :arbeitsauftrag]],
+   :betreiber-anlegen [[:object-type :betreiber]],
+   :rechnung-stellen [[:object-type :rechnung]],
+   :zahlung-erfassen [[:object-type :zahlung]]}},
+ "tests/frontend/szenen/haushalt.ent"
+ {:rename-types
+  [[[:actions :add-commitment :on] :household :zz-household]
+   [[:actions :add-commitment :params :household :type]
+    :household
+    :zz-household]
+   [[:actions :add-commitment :rules 0 :object-type]
+    :commitment
+    :zz-commitment]
+   [[:actions :add-household :rules 0 :object-type]
+    :household
+    :zz-household]
+   [[:actions :log-payment :on] :commitment :zz-commitment]
+   [[:actions :log-payment :params :commitment :type]
+    :commitment
+    :zz-commitment]
+   [[:actions :log-payment :rules 0 :object-type] :payment :zz-payment]
+   [[:actions :stop-commitment :on] :commitment :zz-commitment]
+   [[:actions :stop-commitment :params :commitment :type]
+    :commitment
+    :zz-commitment]
+   [[:links 0 1] :commitment :zz-commitment]
+   [[:links 0 2] :household :zz-household]
+   [[:links 1 1] :payment :zz-payment]
+   [[:links 1 2] :commitment :zz-commitment]],
+  :with-prefix
+  [[[:actions :pfx-add-commitment :on] :household :pfx-household]
+   [[:actions :pfx-add-commitment :params :household :type]
+    :household
+    :pfx-household]
+   [[:actions :pfx-add-commitment :rules 0 :object-type]
+    :commitment
+    :pfx-commitment]
+   [[:actions :pfx-add-household :rules 0 :object-type]
+    :household
+    :pfx-household]
+   [[:actions :pfx-log-payment :on] :commitment :pfx-commitment]
+   [[:actions :pfx-log-payment :params :commitment :type]
+    :commitment
+    :pfx-commitment]
+   [[:actions :pfx-log-payment :rules 0 :object-type]
+    :payment
+    :pfx-payment]
+   [[:actions :pfx-stop-commitment :on] :commitment :pfx-commitment]
+   [[:actions :pfx-stop-commitment :params :commitment :type]
+    :commitment
+    :pfx-commitment]
+   [[:actions] :key :add-commitment :pfx-add-commitment]
+   [[:actions] :key :add-household :pfx-add-household]
+   [[:actions] :key :log-payment :pfx-log-payment]
+   [[:actions] :key :stop-commitment :pfx-stop-commitment]
+   [[:links 0 0] :commitment-household :pfx-commitment-household]
+   [[:links 0 1] :commitment :pfx-commitment]
+   [[:links 0 2] :household :pfx-household]
+   [[:links 1 0] :payment-commitment :pfx-payment-commitment]
+   [[:links 1 1] :payment :pfx-payment]
+   [[:links 1 2] :commitment :pfx-commitment]
+   [[:objects :pfx-commitment :lifecycle :transitions 0 :action]
+    :stop-commitment
+    :pfx-stop-commitment]
+   [[:objects] :key :commitment :pfx-commitment]
+   [[:objects] :key :household :pfx-household]
+   [[:objects] :key :payment :pfx-payment]],
+  :with-suffix [[[:projects] :key :home :home-sfx]],
+  :bind
+  {:actions
+   [[[:objects :commitment :lifecycle :transitions 0 :action]
+     :stop-commitment
+     :zz-stop-commitment]],
+   :link-types []},
+  :action-targets
+  {:add-commitment [[:object-type :commitment]],
+   :add-household [[:object-type :household]],
+   :log-payment [[:object-type :payment]],
+   :stop-commitment []}},
+ "tests/frontend/szenen/papers/papers.ingest.ent"
+ {:rename-types [],
+  :with-prefix [],
+  :with-suffix [[[] :key-new :projects]],
+  :bind
+  {:datasets [],
+   :sources
+   [[[:datasets :bank_rows :virtual :source] :bank :zz-bank]
+    [[:datasets :mail_attachments :virtual :source]
+     :mailbox
+     :zz-mailbox]
+    [[:datasets :mail_messages :virtual :source]
+     :mailbox
+     :zz-mailbox]]},
+  :action-targets {}},
+ "tests/frontend/szenen/papers/papers.objects.ent"
+ {:rename-types
+  [[[:actions :discard-invoice :on] :invoice :zz-invoice]
+   [[:actions :discard-invoice :params :invoice :type]
+    :invoice
+    :zz-invoice]
+   [[:actions :discard-invoice :rules 0 :object-type]
+    :invoice
+    :zz-invoice]
+   [[:actions :match-payment :on]
+    :bank-transaction
+    :zz-bank-transaction]
+   [[:actions :match-payment :params :invoice :type]
+    :invoice
+    :zz-invoice]
+   [[:actions :match-payment :params :payment :type]
+    :bank-transaction
+    :zz-bank-transaction]
+   [[:actions :match-payment :rules 0 :object-type]
+    :bank-transaction
+    :zz-bank-transaction]
+   [[:actions :read-invoice :on] :document :zz-document]
+   [[:actions :read-invoice :params :document :type]
+    :document
+    :zz-document]
+   [[:actions :read-invoice :rules 1 :object-type]
+    :invoice
+    :zz-invoice]
+   [[:actions :unmatch-payment :on]
+    :bank-transaction
+    :zz-bank-transaction]
+   [[:actions :unmatch-payment :params :payment :type]
+    :bank-transaction
+    :zz-bank-transaction]
+   [[:actions :unmatch-payment :rules 0 :object-type]
+    :bank-transaction
+    :zz-bank-transaction]
+   [[:links 0 1] :document :zz-document]
+   [[:links 0 2] :mail :zz-mail]
+   [[:links 1 1] :invoice :zz-invoice]
+   [[:links 1 2] :document :zz-document]
+   [[:links 2 1] :bank-transaction :zz-bank-transaction]
+   [[:links 2 2] :invoice :zz-invoice]],
+  :with-prefix
+  [[[:actions :pfx-discard-invoice :on] :invoice :pfx-invoice]
+   [[:actions :pfx-discard-invoice :params :invoice :type]
+    :invoice
+    :pfx-invoice]
+   [[:actions :pfx-discard-invoice :rules 0 :object-type]
+    :invoice
+    :pfx-invoice]
+   [[:actions :pfx-match-payment :on]
+    :bank-transaction
+    :pfx-bank-transaction]
+   [[:actions :pfx-match-payment :params :invoice :type]
+    :invoice
+    :pfx-invoice]
+   [[:actions :pfx-match-payment :params :payment :type]
+    :bank-transaction
+    :pfx-bank-transaction]
+   [[:actions :pfx-match-payment :rules 0 :object-type]
+    :bank-transaction
+    :pfx-bank-transaction]
+   [[:actions :pfx-read-invoice :on] :document :pfx-document]
+   [[:actions :pfx-read-invoice :params :document :type]
+    :document
+    :pfx-document]
+   [[:actions :pfx-read-invoice :rules 1 :object-type]
+    :invoice
+    :pfx-invoice]
+   [[:actions :pfx-unmatch-payment :on]
+    :bank-transaction
+    :pfx-bank-transaction]
+   [[:actions :pfx-unmatch-payment :params :payment :type]
+    :bank-transaction
+    :pfx-bank-transaction]
+   [[:actions :pfx-unmatch-payment :rules 0 :object-type]
+    :bank-transaction
+    :pfx-bank-transaction]
+   [[:actions] :key :discard-invoice :pfx-discard-invoice]
+   [[:actions] :key :match-payment :pfx-match-payment]
+   [[:actions] :key :read-invoice :pfx-read-invoice]
+   [[:actions] :key :unmatch-payment :pfx-unmatch-payment]
+   [[:links 0 0] :attachment-mail :pfx-attachment-mail]
+   [[:links 0 1] :document :pfx-document]
+   [[:links 0 2] :mail :pfx-mail]
+   [[:links 1 0] :invoice-attachment :pfx-invoice-attachment]
+   [[:links 1 1] :invoice :pfx-invoice]
+   [[:links 1 2] :document :pfx-document]
+   [[:links 2 0] :payment-invoice :pfx-payment-invoice]
+   [[:links 2 1] :bank-transaction :pfx-bank-transaction]
+   [[:links 2 2] :invoice :pfx-invoice]
+   [[:objects] :key :bank-transaction :pfx-bank-transaction]
+   [[:objects] :key :document :pfx-document]
+   [[:objects] :key :invoice :pfx-invoice]
+   [[:objects] :key :mail :pfx-mail]],
+  :with-suffix
+  [[[:objects :bank-transaction :project] :papers :papers-sfx]
+   [[:objects :document :project] :papers :papers-sfx]
+   [[:objects :invoice :project] :papers :papers-sfx]
+   [[:objects :mail :project] :papers :papers-sfx]
+   [[:projects] :key :papers :papers-sfx]],
+  :bind {:actions [], :link-types []},
+  :action-targets
+  {:discard-invoice [[:object-type :invoice]],
+   :match-payment [[:object-type :bank-transaction]],
+   :read-invoice [[:object-type :invoice]],
+   :unmatch-payment [[:object-type :bank-transaction]]}},
+ "tests/frontend/szenen/papers/papers.transforms.ent"
+ {:rename-types [],
+  :with-prefix [],
+  :with-suffix [[[] :key-new :projects]],
+  :bind {},
+  :action-targets {}},
+ "tests/support/fixtures/werft/werft.ent"
+ {:rename-types
+  [[[:links 0 1] :monatswert :zz-monatswert]
+   [[:links 0 2] :luftfahrzeug :zz-luftfahrzeug]
+   [[:links 1 1] :monatswert :zz-monatswert]
+   [[:links 1 2] :flugbuch-import :zz-flugbuch-import]],
+  :with-prefix
+  [[[:links 0 0] :wert-luftfahrzeug :pfx-wert-luftfahrzeug]
+   [[:links 0 1] :monatswert :pfx-monatswert]
+   [[:links 0 2] :luftfahrzeug :pfx-luftfahrzeug]
+   [[:links 1 0] :wert-import :pfx-wert-import]
+   [[:links 1 1] :monatswert :pfx-monatswert]
+   [[:links 1 2] :flugbuch-import :pfx-flugbuch-import]
+   [[:objects] :key :flugbuch-import :pfx-flugbuch-import]
+   [[:objects] :key :luftfahrzeug :pfx-luftfahrzeug]
+   [[:objects] :key :monatswert :pfx-monatswert]],
+  :with-suffix
+  [[[:datasets :flugbuch_uploads :project] :werft :werft-sfx]
+   [[:projects] :key :werft :werft-sfx]],
+  :bind {:datasets [], :link-types [], :value-types []},
+  :action-targets {}}}

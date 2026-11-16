@@ -1,0 +1,66 @@
+{:kv {:history? true, :consistency :transactional},
+ :model {:history? true, :consistency :transactional},
+ :pg
+ {:history? true,
+  :consistency :transactional,
+  :scan
+  {:sources #{:records :rows :links},
+   :preds
+   {:starts-with :exact,
+    :<= :exact,
+    :not= :exact,
+    :> :exact,
+    :nil? :exact,
+    :>= :exact,
+    :has :exact,
+    := :exact,
+    :< :exact,
+    :in :exact},
+   :order? true,
+   :page? true,
+   :project? true,
+   :agg #{:group-by :count :pick},
+   :agg-mode :complete},
+  :plan
+  {:ops
+   #{:fk-join
+     :compute
+     :static
+     :search-around
+     :page
+     :filter
+     :project
+     :with
+     :order
+     :intersect
+     :scan
+     :aggregate
+     :union
+     :subtract},
+   :aggs
+   {:count :all,
+    :sum :all,
+    :avg :all,
+    :min :all,
+    :max :all,
+    :cardinality :all},
+   :folds #{:attribute :nested :expr},
+   :preds
+   {:starts-with :exact,
+    :<= :exact,
+    :contains :exact,
+    :not= :exact,
+    :> :exact,
+    :within-distance :exact,
+    :nil? :exact,
+    :contains-ci :exact,
+    :matches-tokens :exact,
+    :matches-tokens-in :exact,
+    :within-bounding-box :exact,
+    :>= :exact,
+    :having-all :exact,
+    :has :exact,
+    := :exact,
+    :< :exact,
+    :id-in :exact}},
+  :explain? true}}

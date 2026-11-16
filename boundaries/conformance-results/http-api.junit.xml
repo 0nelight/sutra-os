@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="http-api" tests="7" failures="0" skipped="0">
+  <testcase classname="http-api" name="openapi-served"></testcase>
+  <testcase classname="http-api" name="version-major"></testcase>
+  <testcase classname="http-api" name="operations-present"></testcase>
+  <testcase classname="http-api" name="version-header"></testcase>
+  <testcase classname="http-api" name="json-negotiation"></testcase>
+  <testcase classname="http-api" name="anonymous-refused"></testcase>
+  <testcase classname="http-api" name="no-server-error"></testcase>
+</testsuite>

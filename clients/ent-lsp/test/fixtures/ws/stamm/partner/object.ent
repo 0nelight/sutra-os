@@ -1,0 +1,8 @@
+{:schema
+ {:objects
+  {:partner {:project     :stamm
+             :title       :name
+             :description "Ein Geschäftspartner — Kunde oder Lieferant."
+             :attributes  [[:partner-id :string]
+                           [:name :string]
+                           [:waehrung :waehrung]]}}}}

@@ -1,0 +1,159 @@
+;;  1. Ich ordne neue Buchungen einer Kategorie zu (Regel schlaegt vor), damit
+;;     ich sehe, wohin das Geld geht.             Kategorie-Regel, Budget
+;;  2. Ich gleiche Rechnungen mit Buchungen ab, damit nichts doppelt oder gar
+;;     nicht bezahlt wird.                        Ausgleich (Stufe 1)
+;;  3. Ich bezahle eine offene Rechnung aus Sutra-OS heraus; die Bank fragt nach
+;;     meiner Freigabe.                           Ueberweisung + Kanal :zahlungsdienst
+;;     (2. und 3. stehen als Actions in Stufe 2 -- der Betrieb tut dasselbe.)
+;;  4. Ich sehe rechtzeitig, was ablaeuft: Pass, Pickerl, Garantie,
+;;     Kuendigungsfrist.                          :befristet (Stufe 1), Ausweis
+;;  5. Ich sammle ueber das Jahr, was ich absetzen kann.   Steuerposten
+;;  6. Ich melde einen Schaden und verfolge die Erstattung. Schadensfall
+;;  7. Ich poste etwas, nachdem ich es freigegeben habe.  Beitrag + Kanal :x
+;;
+;; AUSGANG: entwurf -> freigegeben (eigene Action, stempelt freigegeben-am) ->
+;; gesendet (Sende-Action, nur aus freigegeben). Freigeben und Senden sind zwei
+;; Handgriffe, damit niemand mit einem Klick entwirft UND hinausschickt.
+;;
+;; VERSANDKANAELE fuer Beitraege stehen an ZWEI Stellen, die gleich sein
+;; muessen: :one-of des Parameters :kanal in beitrag-entwerfen und die Liste im
+;; :in-Kriterium von beitrag-veroeffentlichen (tests/grammar/standard_presets_test
+;; haelt beide gleich). Ein neuer Kanal = beide Listen + eine :source.
+;;
+{:require ["2_abgeleitet.ent"]
+ :schema
+ {:objects
+  {:budget
+   {:symbol "📊" :name "Budget" :plural "Budgets" :title :bezeichnung
+    :description "Wie viel je Monat fuer eine Kategorie vorgesehen ist."
+    :status :experimental
+    :primary-key :budget-id
+    :attributes [[:budget-id :string] :bezeichnung
+                 [:monatsbetrag :betrag]
+                 [:gueltig-ab :date]
+                 [:kategorie-id :string]]}
+
+   :kategorie-regel
+   {:symbol "🪄" :name "Kategorie-Regel" :plural "Kategorie-Regeln" :title :muster
+    :description "Wenn das Feld einer neuen Buchung das Muster enthaelt, schlage diese Kategorie vor. Von Hand gepflegt; die erste passende Regel nach Rang gewinnt."
+    :status :experimental
+    :primary-key :regel-id
+    :attributes [[:regel-id :string]
+                 [:feld :string {:constraints {:one-of ["verwendungszweck" "gegenpartei" "gegen-iban"]}}]
+                 [:muster :string]
+                 [:rang :integer]
+                 [:kategorie-id :string]]}
+
+   :ausweis
+   {:symbol "🪪" :name "Ausweis" :plural "Ausweise" :title :nummer
+    :status :experimental
+    :implements [:befristet]
+    :primary-key :ausweis-id
+    :attributes [[:ausweis-id :string]
+                 [:art :string {:constraints {:one-of ["reisepass" "personalausweis" "fuehrerschein" "e-card" "aufenthaltstitel" "sonstige"]}}]
+                 [:nummer :string]
+                 :gueltig-bis :vorlauf-tage
+                 [:inhaber-id :string]]}
+
+   :steuerposten
+   {:symbol "🧮" :name "Steuerposten" :plural "Steuerposten" :title :bezeichnung
+    :description "Was ich in der Arbeitnehmerveranlagung geltend mache, mit Beleg."
+    :status :experimental
+    :primary-key :posten-id
+    :attributes [[:posten-id :string] :bezeichnung :betrag
+                 [:jahr :integer]
+                 [:art :string {:constraints {:one-of ["werbungskosten" "sonderausgaben" "aussergewoehnliche-belastung" "kinderbetreuung" "sonstige"]}}]
+                 [:rechnung-id :string]]}
+
+   :schadensfall
+   {:symbol "🩹" :name "Schadensfall" :plural "Schadensfaelle" :title :bezeichnung
+    :status :experimental
+    :implements [:vorgang]
+    :primary-key :schadensfall-id
+    :attributes [[:schadensfall-id :string] :bezeichnung :faellig-am :zustand :erledigt-am
+                 [:schadensnummer :string]
+                 [:schadenhoehe :betrag]
+                 [:erstattet :betrag]
+                 [:versicherung-id :string]]}}
+
+  :links
+  [[:budget-kategorie :budget :kategorie :many-to-one
+    {:forward-api-name :kategorie :reverse-api-name :budgets :fk :kategorie-id}]
+   [:regel-kategorie :kategorie-regel :kategorie :many-to-one
+    {:forward-api-name :kategorie :reverse-api-name :regeln :fk :kategorie-id}]
+   [:ausweis-inhaber :ausweis :person :many-to-one
+    {:forward-api-name :inhaber :reverse-api-name :ausweise :fk :inhaber-id}]
+   [:steuerposten-beleg :steuerposten :eingangsrechnung :many-to-one
+    {:forward-api-name :beleg :reverse-api-name :steuerposten
+     :fk {:attribute :rechnung-id :on-null :skip :on-unresolved :skip}}]
+   [:schadensfall-versicherung :schadensfall :versicherung :many-to-one
+    {:forward-api-name :versicherung :reverse-api-name :schadensfaelle
+     :fk {:attribute :versicherung-id :on-null :skip :on-unresolved :skip}}]]
+
+  ;; Das Projekt :kanaele und der Kanal :zahlungsdienst stehen in Stufe 2 --
+  ;; bezahlen tut der Betrieb genauso.
+  :sources
+  {:x
+   {:type        :rest
+    :project     :kanaele
+    :description "X (Twitter) API v2, Benutzerkontext (OAuth 2.0)."
+    :config      {:rest {:base-url "https://api.x.com"
+                         :auth     {:mode :bearer}}}
+    :egress      ["api.x.com:443"]
+    :access      :read-write
+    :webhooks    {:post-senden
+                  {:method          :post
+                   :path-template   "/2/tweets"
+                   :params          [:auftrag-id :text]
+                   :idempotency-key "{auftrag-id}"
+                   :body-template   {:text "{text}"}}}}}
+
+  :actions
+  {
+   :beitrag-entwerfen
+   {:display-name "Beitrag entwerfen" :status :experimental
+    :description  "Legt einen Beitrag als ENTWURF an. Nur Kanaele, fuer die ein Versand eingerichtet ist."
+    :params {:kanal      {:type :string :name "Kanal" :required true :default "x"
+                          :constraints {:one-of ["x"]}}
+             :text       {:type :string :name "Text" :required true :constraints {:max-length 280}}
+             :vorgang-id {:type :string :exposure :hidden :prefill :uuid}}
+    :rules [{:op :create :object-type :beitrag
+             :values {:auftrag-id [:get :vorgang-id] :auftragsstand "entwurf"
+                      :kanal [:get :kanal] :text [:get :text]}}]}
+
+   :buchung-kategorisieren
+   {:display-name "Buchung einordnen"
+    :description  "Einer Bankbuchung eine Kategorie geben. Aendert nur den Fremdschluessel, nie die Buchung selbst."
+    :status       :experimental
+    :visibility   :prominent
+    :action-log   true
+    :params       {:buchung   {:type :bankbuchung :name "Buchung" :required true :prefill :current-object}
+                   :kategorie {:type :kategorie :name "Kategorie" :required true}}
+    :rules        [{:op :update :object-type :bankbuchung :target [:get :buchung :id]
+                    :values {:kategorie-id [:get :kategorie :kategorie-id]}}]}
+
+   :beitrag-freigeben
+   {:display-name "Beitrag freigeben"
+    :description  "Gibt einen Entwurf zum Veroeffentlichen frei. Es wird noch nichts gesendet."
+    :status       :experimental
+    :action-log   true
+    :params       {:beitrag {:type :beitrag :name "Beitrag" :required true :prefill :current-object}}
+    :submission-criteria [{:test {:s [:get :beitrag :auftragsstand]} :pred [:= :s "entwurf"] :message "Nur ein Entwurf kann freigegeben werden."}]
+    :rules        [{:op :update :object-type :beitrag :target [:get :beitrag :id]
+                    :values {:auftragsstand "freigegeben" :freigegeben-am [:now]}}]}
+
+   :beitrag-veroeffentlichen
+   {:display-name "Beitrag veroeffentlichen"
+    :description  "Sendet einen freigegebenen Beitrag an seinen Kanal."
+    :status       :experimental
+    :action-log   true
+    :params       {:beitrag {:type :beitrag :name "Beitrag" :required true :prefill :current-object}}
+    :submission-criteria [{:test {:s [:get :beitrag :auftragsstand]} :pred [:= :s "freigegeben"] :message "Nur ein freigegebener Beitrag kann veroeffentlicht werden -- einen Entwurf erst freigeben; ein gesendeter ist schon draussen."}
+                          {:test {:k [:get :beitrag :kanal]} :pred [:in :k "x"] :message "Fuer diesen Kanal ist noch kein Versand eingerichtet."}]
+    :rules        [{:op :invoke-webhook :phase :writeback :source :x :webhook :post-senden :as :webhook-result
+                    :params {:auftrag-id [:get :beitrag :auftrag-id]
+                             :text       [:get :beitrag :text]}}
+                   {:op :update :object-type :beitrag :target [:get :beitrag :id]
+                    :values {:auftragsstand "gesendet"
+                             :gesendet-am   [:now]
+                             :antwort       [:get :webhook-result :body]}}]}}}}

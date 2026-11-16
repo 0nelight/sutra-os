@@ -1,0 +1,213 @@
+# {{repo}}
+
+A Sutra-OS **Source Repository**: the transforms, functions and applications that
+feed and surround the ontology. git carries the PYTHON (`transforms/*.py`);
+`{{repo}}.ent`, `.enta` and `.entp` change through the CLI
+(`sutra projection pull code-repository …` → `push --preview` → `push`), never
+through `git push` — see `AGENTS.md` and `AUTHORING.md` in the ontology checkout.
+
+This README is a crash course. It is seeded once and then yours — edit it.
+
+---
+
+## 1. Two planes
+
+- **Entity plane** — `{{repo}}.ent`, `transforms/**`, `exports/**`.
+  The platform INTERPRETS these; editing them edits the ontology.
+- **File plane** — this README, `.gitignore`, `sutra.repo.edn`, `tests/**`,
+  anything else. Stored and served verbatim; the platform does not read it.
+
+## 2. What a push does
+
+The git branch is the Sutra branch of the same name, and a push needs its open
+proposal FIRST: `sutra branch B` → commit → `sutra propose "…" --source B
+--target main` → `git pull --rebase` (the server commits declarations itself) →
+`git push`. Without the proposal the push says `no open changeset — NOTHING was
+written`. A `.py` no declaration names is removed by the server: push the file
+and its declaration together. Never chain `merge-proposal` to a push that may
+fail — an empty merge closes the branch.
+
+Your commit is adopted into git FIRST, then checked: `scope` · `retire` ·
+`lint` · `plan` · `test` · `ci/sutra-publish`. A commit that fails a check STAYS
+in git and simply has not taken effect.
+
+`retire` works here exactly as in the ontology repository, for this
+repository's OWN members (those whose `:repository` is this one) — a member of
+another repository is never touched. Leave a transform, function, pipeline or app
+out of this tree and the push removes it; to be allowed, it must not be
+`:active` (give it `:status :deprecated` with a `:deprecation {:reason …
+:deadline … :replacement …}` or `:status :experimental` in an earlier commit —
+unmarked counts as `:experimental`) and nothing that stays may still name it.
+`projection push <text> --preview` shows the removals before you push.
+
+The push prints the verdict, but that copy is perishable — a timeout takes it
+with it, and a second push only says `Everything up-to-date`. Read it back with
+`sutra checks [rev]`.
+
+---
+
+## 3. The layer rule — read this one twice
+
+    source → raw dataset → clean dataset → SHAPING hop → object type
+
+A transform that binds a source straight to an object type lands raw rows in the
+ontology with no curated layer in between. Split it:
+
+1. an **extract** — expensive, possibly `:python`, possibly a model or egress;
+   it lands a `:dataset`;
+2. a **shaping hop** — cheap, deterministic, `:sql`, no egress, no model; it
+   reads that dataset and writes the object type.
+
+The payoff is asymmetric and that is the point: when the ontology's shape
+changes you re-run only the cheap half. Bind the extract to the type directly
+and every reshape re-pays the extraction.
+
+The shaping hop is also where ETL columns STOP. `_ingested_at`, batch ids and
+raw un-normalised strings stay in the dataset — still there for debugging, just
+not selected into the type.
+
+---
+
+## 4. The three producer shapes
+
+Exactly ONE of these per transform (`declare/valid-schema?` enforces the mutex —
+pairing two is a validation error, not a widening):
+
+| shape | writes | use it for |
+|---|---|---|
+| `:output` / `:outputs` | an object type, a link type or a dataset | the normal case; `:outputs` for a multi-output run |
+| `:output-columns` | its own `t_<name>` table | an INTERMEDIATE: a chain link nobody needs to inspect on its own |
+
+Prefer a `:dataset` output over an intermediate when you want to build, inspect
+or rebuild the step by itself (`sutra build run --only <name>`).
+
+`:primary-key` is not decoration. On an object-type output it is the identity
+(§6). On an intermediate it is the incremental merge key — REQUIRED when
+`:incremental` is set and it must be absent when it is not.
+
+A transform naming a `:dataset` output must have that dataset DECLARED in the
+ontology. Only an unnamed producer-minted one is implicit.
+
+---
+
+## 5. Which language
+
+| language | reach for it when | why |
+|---|---|---|
+| `:sql` | projections, joins, aggregations over landed data | never leaves the engine; free to re-run |
+| `:python` | extraction, parsing, models, anything needing egress | the sandbox subprocess, with the runtime façade |
+| `:clojure` | small in-process shaping | runs in-process (SCI), no subprocess |
+
+Say WHY in `:rationale` — it is queryable, and *python (not sql): the PDF
+extraction needs the multimodal model* is the sentence the next person needs.
+
+---
+
+## 6. Incremental, and what the modes mean
+
+`:incremental true` desugars to `{:read-mode :added :write-mode :modify}` — the
+shipped default. The first-class form lets you say all of it:
+
+```clojure
+:incremental {:read-mode       :added      ; :added (default) | :current | :previous
+              :write-mode      :modify     ; :modify (default) | :replace
+              :static-inputs [:invoices] ; inputs that may snapshot without breaking incr
+              :strict-append   false}      ; force an APPEND transaction (no UPDATE)
+```
+
+The one that matters: **`:modify` never deletes.** It adds and updates. So an
+output built incrementally accumulates, and nothing you do downstream retracts a
+row that should no longer exist.
+
+### Changing how the primary key is derived
+
+A new key-minting rule does not overwrite the rows minted under the old one — it
+mints NEW rows beside them, and consumers that group on a string then see BOTH.
+Ship the change as a pair, here in the transform:
+
+- bump `:semantic-version` — forces one full, non-incremental run; **and**
+- set `:write-mode :replace` — makes that run authoritative, so the reconcile
+  retires what the run omits.
+
+For an expensive (LLM) transform, carry previous rows forward filtered against a
+live source of truth: under a replace write that costs no model call.
+
+**Guard the empty case.** An empty authority under a replace write DELETES
+EVERYTHING. Raise instead of returning nothing.
+
+---
+
+## 7. LLM transforms
+
+Three knobs decide what a run actually does, and getting them wrong is
+expensive rather than loud:
+
+- `:done-key` — the anti-join that IS the drain filter: pending = input keys
+  absent from the output.
+- `:max-per-run` — the per-build cap. Python reads it back via `cap_batch(…)`,
+  so the number the code caps at and the number the estimate projects are ONE
+  number.
+- `:prompt-key` — the drain question one level sharper. `:done-key` asks *is
+  there already a row with this key*; that is identity, not the question. Change
+  the prompt, switch the model or fix an input column and the stale answer still
+  counts as done. `:prompt-key` names the input columns the prompt is BUILT from
+  and hashes `:semantic-version` in FIRST, so a bump invalidates every key with
+  no second mechanism.
+
+The output object type must DECLARE the `:column` a `:prompt-key` stamps into,
+or the importer drops the column, the anti-join matches nothing, and it does so
+forever and silently.
+
+---
+
+## 8. Anti-patterns, and what each one costs
+
+| anti-pattern | the cost |
+|---|---|
+| **Source bound straight to an object type** | every reshape re-pays the extract; raw rows in the ontology |
+| **ETL columns selected into the type** | consumers see plumbing; the type stops being a domain concept |
+| **Identity change without `:semantic-version` + `:write-mode :replace`** | old rows stay beside the new ones, forever |
+| **Replace write with an empty result** | it deletes everything. Raise instead |
+| **Umlauts that do not round-trip** | `:anhänge` becomes the column `anhaenge` (ä→ae, ö→oe, ü→ue, ß→ss, `-`→`_`). Emit the wrong spelling and you get nil rows, with no error |
+| **Trusting a preview like a run** | a preview CAPS its inputs to a sample and says so. Over a sample an aggregation is simply WRONG — a cumulative balance over 3 of 1224 rows still renders a curve. Read the reported caps |
+| **A stray `:primary-key` on a non-incremental intermediate** | a validation error, not a hint — the field means the merge key |
+| **Naming a type the ontology does not have yet** | refused, with the push order in the message (§9) |
+
+---
+
+## 9. Order across the two repositories
+
+Types live in the ONTOLOGY repository; this repository may not declare one.
+Every push is validated against `live ∪ this commit`, so:
+
+- **adding** → push the ontology first, then this repository;
+- **removing** → this repository first, then the ontology.
+
+There is no transaction across the two, so **every intermediate state must be
+installable on its own.** A type rename is therefore three green pushes: stand
+the new one up, move the code, drop the old.
+
+---
+
+## 10. What this is not
+
+- No Gradle, conda or Spark profiles. `tests/` runs as a check, not `./gradlew check`.
+- No artifact repository and no library publishing.
+- No version-range resolution — a tag is an immutable release marker.
+- **No ontology types.** An `.ent` here declaring an object type, link or
+  interface FAILS `scope` by design.
+
+git records how a change was authored; `control_schema_history` records when the
+ontology moved. Different questions, and the two logs answer them separately.
+
+---
+
+## 11. Going deeper
+
+- An ontology checkout's `templates/` (laid in by the client, not committed) carries the scaffolds to copy from
+  (`template.ent`/`.enta`/`.entp`/`.entt`) and, beside them, THE annotated grammar
+  reference (`grammar.*`) — every transform key with prose, kept complete by a test.
+- `sutra transform preview <name> --limit 5` runs the real thing over a capped
+  sample and commits nothing. Use it until it is clean; never diagnose a
+  run-time failure by deploying and back-filling.
+- `sutra explain <verb|concept>`, `sutra describe <type>`, `sutra lineage show`.

@@ -1,0 +1,322 @@
+{:spec-license "Apache-2.0"
+ :code-license "AGPL-3.0-or-later"
+
+ :internal-capabilities
+ {:access/throttle        "login throttling inside access"
+  :auth/app-guard         "app scope check inside access"
+  :blobs/db               "blob store wiring of store-pg"
+  :blobs/drain            "blob store wiring of store-pg"
+  :blobs/pg               "blob store wiring of store-pg"
+  :blobs/read-through     "blob store wiring of store-pg"
+  :builds/landing         "landing step inside builds"
+  :cluster/broadcast      "process cluster wiring of serve"
+  :cluster/check-message  "process cluster wiring of serve"
+  :code/introspect-clojure "editor support inside compute"
+  :code/introspect-python "editor support inside compute"
+  :coord/db               "coordination store wiring of store-pg"
+  :datasets/db            "dataset store wiring of store-pg"
+  :datasets/restore-points "dataset store wiring of store-pg"
+  :documents/records      "record store inside documents"
+  :expr/field-refs        "expression analysis inside catalog"
+  :expr/unknown-ops       "expression analysis inside catalog"
+  :functions/run-query    "query function runner inside objects"
+  :git/dir                "repository directory inside repos"
+  :health/result-recorded "event hook inside health"
+  :jobs/tick              "job loop of serve"
+  :objects/publish-index  "index hook inside objects"
+  :objects/reads          "read path inside objects"
+  :objects/foreign-owned  "which objects a peer connection owns, for a build's sweep"
+  :objects/direct-writes  "how a direct datasource writes a type, for the change feed"
+  :observe/recordings     "observability wiring of serve"
+  :observe/reports        "observability wiring of serve"
+  :ops/commit             "operation dispatch inside foundation"
+  :ops/dispatch           "operation dispatch inside foundation"
+  :pg/ds                  "datasource of store-pg"
+  :rules/known-ops        "rule language inside actions"
+  :schedule/start         "scheduler wiring of schedules"
+  :schedules/around-write "scheduler wiring of schedules"
+  :schema/array-cols      "DDL helper inside catalog"
+  :schema/install         "install hook inside authoring"
+  :sql/explain            "query planner inside objects"
+  :store/db               "store wiring of store-pg"
+  :stream/wake            "stream wakeup inside store"
+  :streams/db             "stream store wiring of store-pg"
+  :telemetry/samples      "telemetry wiring of serve"
+  :telemetry/store        "telemetry wiring of serve"
+  :watch/wake             "watch wakeup inside store"
+  :world/install          "install hook inside authoring"}
+
+ :boundaries
+ {:boundary/http-api
+  {:n 1 :title "HTTP API" :class :external :owner :http :version "2.0.0"
+   :about "Every request a client, app or tool makes to an instance: the endpoint table with
+           its methods, effects, requirements and body contracts."
+   :spec {:form :openapi
+          :source ["libs/core/src/sutra/types/paths.cljc" "src/sutra/foundation/contracts.cljc"]
+          :generated ["boundaries/http-api/openapi.json"]}
+   :standards ["OpenAPI 3.1" "HTTP Semantics (RFC 9110)" "JSON (RFC 8259)"
+               "Transit (application/transit+json)"]
+   :conformance ["tests/grammar/openapi_test.clj" "tests/platform/json_wire_test.clj"
+                 "tests/platform/json_wire_opt_in_test.clj"
+                 "boundaries/conformance/src/conformance/kits/http_api.clj"
+                 "tests/platform/conformance_kits_test.clj"]
+   :covers {:url-prefixes ["/api/"]}
+   :status {:spec :partial :versioned :done :conformance :partial}
+   :rights :unlimited}
+
+  :boundary/identity
+  {:n 2 :title "Identity and authentication" :class :external :owner :access :version "1.1.0"
+   :about "Login, sessions, OAuth 2.0 clients and tokens, and the identity providers a
+           deployment plugs in."
+   :spec {:form :openapi
+          :source ["src/sutra/access/oauth.clj" "src/sutra/access/oidc.clj"
+                   "src/sutra/access/totp.clj" "src/sutra/access/mfa.clj"
+                   "libs/core/src/sutra/types/redirect_uri.cljc"]
+          :generated ["boundaries/http-api/openapi.json"]}
+   :standards ["OAuth 2.0 (RFC 6749)" "PKCE (RFC 7636)" "Bearer tokens (RFC 6750)"
+               "OpenID Connect Core 1.0" "OpenID Connect Discovery 1.0" "JWK (RFC 7517)"
+               "JWT (RFC 7519)" "Token Introspection (RFC 7662)"
+               "Token Revocation (RFC 7009)" "TOTP (RFC 6238)" "LDAP (RFC 4511)"
+               "SPNEGO (RFC 4178)"]
+   :conformance ["tests/platform/oidc_test.clj"
+                 "boundaries/conformance/src/conformance/kits/identity.clj"
+                 "tests/platform/conformance_kits_test.clj"]
+   :covers {:url-prefixes ["/api/oauth" "/api/auth" "/api/login" "/api/logout"
+                           "/api/password" "/api/sessions" "/api/register" "/api/me"
+                           "/api/principals" "/api/mfa"]}
+   :status {:spec :partial :versioned :done :conformance :partial}
+   :rights :unlimited}
+
+  :boundary/authoring-language
+  {:n 3 :title "Authoring languages" :class :external :owner :authoring :version "2.1.0"
+   :about "The texts an ontology, an app, a project and an object view are written in:
+           .ent, .enta, .entp, .entt, .entv."
+   :spec {:form :json-schema
+          :source ["libs/core/src/sutra/parser/ent.clj" "resources/presets/grammar.ent"
+                   "resources/presets/grammar.enta" "resources/presets/grammar.entp"
+                   "resources/presets/grammar.entt" "resources/presets/grammar.entv"]
+          :generated ["boundaries/http-api/openapi.json"
+                      "boundaries/authoring-language/ent.schema.json"
+                      "boundaries/authoring-language/enta.schema.json"
+                      "boundaries/authoring-language/entp.schema.json"
+                      "boundaries/authoring-language/entt.schema.json"
+                      "boundaries/authoring-language/entv.schema.json"]}
+   :standards ["EDN" "JSON Schema 2020-12"]
+   :conformance ["tests/grammar/grammar_version_test.clj"
+                 "tests/grammar/install_plan_test.clj"]
+   :covers {:url-prefixes ["/api/schema" "/api/install" "/api/ontology"]}
+   :status {:spec :done :versioned :done :conformance :partial}
+   :rights :unlimited}
+
+  :boundary/projection
+  {:n 4 :title "Projection and checkout protocol" :class :external :owner :checkouts
+   :version "1.1.0"
+   :about "Pull a set of texts or a slice across texts and code, edit it, push it back:
+           merged per element against the fingerprints of the pull."
+   :spec {:form :prose
+          :source ["libs/core/src/sutra/parser/checkout.clj" "libs/core/src/sutra/parser/projection.clj"]
+          :generated ["boundaries/http-api/openapi.json"]}
+   :standards ["EDN"]
+   :conformance ["tests/platform/checkout_test.clj" "tests/platform/projection_test.clj"
+                 "tests/platform/slice_test.clj"]
+   :covers {:url-prefixes ["/api/projections" "/api/slices"]}
+   :status {:spec :partial :versioned :done :conformance :partial}
+   :rights :unlimited}
+
+  :boundary/git
+  {:n 5 :title "Code repositories over git" :class :external :owner :branching
+   :version "1.1.0"
+   :about "Clone and push of a project's code repository; a push becomes a change on a
+           branch with an open proposal."
+   :spec {:form :prose
+          :source ["src/sutra/branching/http/git.clj"]
+          :generated ["boundaries/http-api/openapi.json"]}
+   :standards ["Git smart HTTP protocol v2"]
+   :conformance ["boundaries/conformance/src/conformance/kits/git.clj"
+                 "tests/platform/conformance_kits_more_test.clj"]
+   :covers {:url-prefixes ["/api/repositories"]}
+   :status {:spec :partial :versioned :done :conformance :partial}
+   :rights :unlimited}
+
+  :boundary/transform-runtime
+  {:n 6 :title "Transform runtime" :class :component :owner :compute :version "1.1.0"
+   :about "How the platform runs a transform outside the JVM: the files it hands the
+           sandboxed process, what the process writes back, and the @transform API the code
+           is written against."
+   :spec {:form :json-schema
+          :source ["src/sutra/compute/protocol.clj" "src/sutra/compute/external.clj"
+                   "src/data-plane/python/sutra_transforms.py"
+                   "src/data-plane/python/sutra_runtime.py"]
+          :generated ["boundaries/http-api/openapi.json"
+                      "boundaries/transform-runtime/protocol.schema.json"]}
+   :standards ["JSON (RFC 8259)" "JSON Schema 2020-12" "JSON Lines (stderr log)"]
+   :conformance ["tests/platform/transform_protocol_test.clj"
+                 "tests/python/test_protocol_version.py"
+                 "boundaries/conformance/src/conformance/kits/transform_runtime.clj"
+                 "tests/platform/conformance_kits_test.clj"]
+   :covers {:url-prefixes ["/api/transforms" "/api/container-images"]
+            :capabilities [:compute/runner]}
+   :status {:spec :done :versioned :done :conformance :partial}
+   :rights :unlimited}
+
+  :boundary/platform-sdk
+  {:n 7 :title "Platform SDK" :class :external :owner :objects :version "1.2.0"
+   :about "The Python client of an instance and the object SDK it generates from an
+           ontology."
+   :spec {:form :openapi
+          :source ["clients/python-platform-sdk"]
+          :generated ["boundaries/http-api/openapi.json"]}
+   :standards ["OpenAPI 3.1" "Python packaging (PEP 621)"]
+   :conformance ["boundaries/conformance/src/conformance/kits/platform_sdk.clj"
+                 "tests/platform/conformance_kits_more_test.clj"]
+   :covers {:url-prefixes ["/api/objects" "/api/object-types" "/api/links" "/api/views"
+                           "/api/object-view" "/api/object-counts" "/api/function"]}
+   :status {:spec :partial :versioned :done :conformance :partial}
+   :rights :unlimited}
+
+  :boundary/connectors
+  {:n 8 :title "Data connection" :class :component :owner :sources :version "1.1.0"
+   :about "What a connector implements to read from, write back to, or call an external
+           system; the egress agent that carries it across the network boundary."
+   :spec {:form :protocol
+          :source ["src/sutra/sources/protocols.clj" "src/sutra/sources/conformance.clj"
+                   "src/sutra/sources/egress_protocol.clj"]
+          :generated ["boundaries/http-api/openapi.json"
+                      "boundaries/connectors/egress.openapi.json"
+                      "boundaries/connectors/sidecar.openapi.json"]}
+   :standards ["JDBC 4.3" "HTTP" "IMAP (RFC 9051)" "SMB 3"]
+   :covers {:url-prefixes ["/api/datasources" "/api/datasource-test" "/api/source-types"
+                           "/api/sources" "/api/egress" "/api/writeback"]
+            :capabilities [:foreign/connect :foreign/datasources :foreign/export-rows
+                           :foreign/source-ops :writeback/create :writeback/delete
+                           :writeback/update :http/exchange]
+            :protocols [["src/sutra/sources/protocols.clj" "Source"]
+                        ["src/sutra/sources/protocols.clj" "Catalog"]
+                        ["src/sutra/sources/protocols.clj" "Scan"]
+                        ["src/sutra/sources/protocols.clj" "Sql"]
+                        ["src/sutra/sources/protocols.clj" "Land"]
+                        ["src/sutra/sources/protocols.clj" "Write"]
+                        ["src/sutra/sources/protocols.clj" "Invoke"]
+                        ["src/sutra/sources/protocols.clj" "Token"]]}
+   :conformance ["src/sutra/sources/conformance.clj"
+                 "tests/platform/egress_protocol_test.clj"
+                 "tests/platform/foreign_connector_sidecar_test.clj"]
+   :status {:spec :done :versioned :done :conformance :done}
+   :rights :unlimited}
+
+  :boundary/storage
+  {:n 9 :title "Storage engine" :class :component :owner :store :version "1.0.0"
+   :about "What a storage engine provides the platform: records, snapshots, pushdown and
+           the duties each driver is certified for."
+   :spec {:form :protocol
+          :source ["libs/store/src/sutra/store/spi.clj"
+                   "libs/store/resources/sutra/store/duties.edn"
+                   "libs/store/resources/sutra/store/driver.malli.edn"]
+          :generated []}
+   :standards ["SQL:2016 (via JDBC)" "PostgreSQL wire protocol 3.0"]
+   :covers {:protocols [["libs/store/src/sutra/store/spi.clj" "Engine"]
+                        ["libs/store/src/sutra/store/spi.clj" "Pushdown"]
+                        ["libs/store/src/sutra/store/spi.clj" "Snapshots"]
+                        ["libs/store/src/sutra/store/spi.clj" "Records"]
+                        ["libs/store/src/sutra/store/spi.clj" "RecordsClock"]]}
+   :conformance ["libs/store/resources/sutra/store/duties.edn"
+                 "libs/store/resources/sutra/store/certificates.edn"
+                 "tests/grammar/module_databases_test.clj"
+                 "tests/platform/module_database_test.clj"]
+   :status {:spec :done :versioned :done :conformance :done}
+   :rights :unlimited}
+
+  :boundary/llm
+  {:n 10 :title "Language model providers" :class :component :owner :llm :version "1.1.0"
+   :about "How the platform talks to a language model: the canonical chat wire, the
+           alternative wires a plugin adds, and the structured output schema."
+   :spec {:form :json-schema
+          :source ["src/sutra/llm/wire.clj" "libs/core/src/sutra/types/llm_output.cljc"]
+          :generated ["boundaries/http-api/openapi.json"]}
+   :standards ["OpenAI Chat Completions (de-facto)" "JSON Schema 2020-12"]
+   :conformance ["boundaries/conformance/src/conformance/kits/llm.clj"
+                 "tests/platform/conformance_kits_more_test.clj"]
+   :covers {:url-prefixes ["/api/llm" "/api/agent-proxy" "/api/doc-intel"]
+            :capabilities [:llm/chat :llm/complete :llm/embed :llm/relay-embed]}
+   :status {:spec :partial :versioned :done :conformance :partial}
+   :rights :unlimited}
+
+  :boundary/app-host
+  {:n 11 :title "App and widget host" :class :external :owner :apps :version "1.2.0"
+   :about "What a hosted app, a custom app and a custom widget may rely on: the consumer
+           endpoints, the widget-set manifest and the messages between host and widget
+           frame."
+   :spec {:form :json-schema
+          :source ["src/sutra/widget_sets/records.clj"
+                   "clients/frontend/src/sutra_ui/widget_frame/core.cljs"
+                   "libs/core/src/sutra/capps/custom_widget.cljc"
+                   "libs/core/src/sutra/capps/iframe_bridge.cljc"
+                   "libs/core/src/sutra/capps/pairing.cljc"]
+          :generated ["boundaries/http-api/openapi.json"
+                      "boundaries/app-host/widget-messages.schema.json"]}
+   :standards ["HTML Living Standard (postMessage, BroadcastChannel, iframe sandbox)"
+               "Content Security Policy Level 3" "OAuth 2.0 (RFC 6749)" "PKCE (RFC 7636)"
+               "EDN"]
+   :conformance ["tests/platform/widget_messages_test.clj"]
+   :covers {:url-prefixes ["/api/my-" "/api/widget-sets" "/api/custom-apps"
+                           "/api/applications" "/api/workspaces"]}
+   :status {:spec :done :versioned :done :conformance :partial}
+   :rights :unlimited}
+
+  :boundary/events
+  {:n 12 :title "Events, webhooks and telemetry" :class :external :owner :notifications
+   :version "1.1.0"
+   :about "What leaves the platform as an event: webhooks of actions and automations,
+           notifications, and the telemetry an operator scrapes."
+   :spec {:form :json-schema
+          :source ["src/sutra/sources/cloudevents.clj" "src/sutra/serve/openmetrics.clj"
+                   "src/sutra/actions/effects.clj" "src/sutra/notifications"]
+          :generated ["boundaries/http-api/openapi.json"
+                      "boundaries/events/cloudevent.schema.json"]}
+   :standards ["CloudEvents 1.0 (HTTP binary content mode)" "OpenMetrics 1.0"
+               "SMTP (RFC 5321) with STARTTLS (RFC 3207) and AUTH (RFC 4954)"]
+   :conformance ["tests/platform/cloudevents_test.clj"
+                 "tests/platform/openmetrics_test.clj"
+                 "boundaries/conformance/src/conformance/kits/events.clj"
+                 "tests/platform/conformance_kits_test.clj"]
+   :covers {:url-prefixes ["/api/notifications" "/api/telemetry" "/api/streams"
+                           "/api/live"]}
+   :status {:spec :done :versioned :done :conformance :partial}
+   :rights :unlimited}
+
+  :boundary/data-interchange
+  {:n 13 :title "Data interchange" :class :external :owner :builds :version "1.1.0"
+   :about "How a dataset leaves and enters the platform as a file: export, import, upload
+           and the schema that travels with it."
+   :spec {:form :json-schema
+          :source ["src/sutra/builds/interchange.clj" "src/sutra/builds/http/files.clj"
+                   "src/data-plane/python/sutra_interchange.py" "src/sutra/sources/export.clj"
+                   "src/sutra/builds/run/exports.clj"]
+          :generated ["boundaries/http-api/openapi.json"
+                      "boundaries/data-interchange/dataset-schema.schema.json"]}
+   :standards ["JSON (RFC 8259)" "Transit" "CSV (RFC 4180)" "Apache Parquet"
+               "Apache Arrow IPC (file format)" "JSON Schema draft-07"]
+   :conformance ["tests/platform/data_interchange_test.clj"
+                 "tests/platform/csv_rfc4180_test.clj"]
+   :covers {:url-prefixes ["/api/datasets" "/api/import" "/api/import-plan" "/api/media"
+                           "/api/blob" "/api/xfer"]}
+   :status {:spec :done :versioned :done :conformance :partial}
+   :rights :unlimited}
+
+  :boundary/operations
+  {:n 14 :title "Operations between modules" :class :component :owner :foundation
+   :version "1.2.0"
+   :about "Every capability one backend module offers another, with its Malli contract;
+           a topology (SUTRA_OPS_TOPOLOGY) decides whether a call stays in process or is sent
+           to the process that serves its module (POST /api/ops), checked against :out on
+           return."
+   :spec {:form :malli
+          :source ["resources/sutra/ops.edn" "src/sutra/foundation/contracts.cljc"]
+          :generated ["boundaries/http-api/openapi.json"
+                      "boundaries/operations/operations.schema.json"]}
+   :standards ["Transit" "JSON Schema 2020-12"]
+   :conformance ["tests/platform/ops_test.clj" "tests/platform/ops_topology_test.clj"
+                 "tests/platform/ops_remote_api_test.clj"]
+   :covers {:ops :all :url-prefixes ["/api/ops"]}
+   :status {:spec :done :versioned :done :conformance :partial}
+   :rights :unlimited}}}

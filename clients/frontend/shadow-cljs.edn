@@ -1,0 +1,58 @@
+{:source-paths ["src" "test" "../../libs/core/src" "../../libs/core/resources"
+                "../../libs/dialect/src"
+                "../../libs/kernel/src"
+                "vendor/blueprint-cljs/src"]
+
+ :http  {:port #shadow/env ["SUTRA_SHADOW_HTTP_PORT" :as :int :default 9630]}
+ :nrepl {:port #shadow/env ["SUTRA_SHADOW_NREPL_PORT" :as :int :default 0]}
+
+ :dependencies [[reagent              "2.0.1"]
+                [com.cognitect/transit-cljs "0.8.280"]
+                [org.babashka/sci    "0.9.44"]]
+
+ :builds
+ {:app
+  {:target     :browser
+   :output-dir "../../resources/public/js"
+   :asset-path "/js"
+   :modules    {:main    {:init-fn sutra-ui.core/init}
+                :object  {:entries    [sutra-ui.apps.object-view.feature]
+                          :depends-on #{:main}}
+                :assistant {:entries    [sutra-ui.apps.assistant.core]
+                            :depends-on #{:main}}
+                :sci     {:entries    [sutra-ui.apphost.sci-runtime]
+                          :depends-on #{:main}}
+                :rich-text {:entries    [sutra-ui.editor.rich-text.module]
+                            :depends-on #{:main}}
+                :builder {:entries    [sutra-ui.shell.builder]
+                          :depends-on #{:object :assistant :rich-text}}
+                :plotly  {:entries    [sutra-ui.vendor.plotly]
+                          :depends-on #{:main}}
+                :bp-icons {:entries    [blueprint-cljs.icons.all]
+                           :depends-on #{:main}}
+                :ui-kit  {:entries    [blueprint-cljs.gallery.all]
+                          :depends-on #{:bp-icons}}}
+   :module-loader true
+   :release    {:module-hash-names 8 :compiler-options {:source-map-comment false}}
+   :compiler-options {:source-map true}
+   :build-hooks [(sutra-ui.debug-pump/hook)
+                 (sutra-ui.index-html/hook)
+                 (sutra-ui.source-index/hook)
+                 (sutra-ui.pdf-worker/hook)
+                 (sutra-ui.vega-assets/hook)
+                 (sutra-ui.maplibre-assets/hook)]
+   :devtools   {:watch-dir "../../resources/public"}
+   :dev        {:compiler-options {:output-feature-set :es2017}}}
+
+  :widget-frame
+  {:target     :browser
+   :output-dir "../../resources/public/js/widget"
+   :asset-path "/js/widget"
+   :modules    {:runtime {:init-fn sutra-ui.widget-frame.core/init}}
+   :devtools   {:enabled false}}
+
+  :test
+  {:target    :node-test
+   :output-to "../../.run/fe-smoke.js"
+   :ns-regexp "smoke-test$"
+   :compiler-options {:output-feature-set :es2017}}}}

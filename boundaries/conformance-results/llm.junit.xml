@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="llm" tests="4" failures="1" skipped="0">
+  <testcase classname="llm" name="llm.chat"></testcase>
+  <testcase classname="llm" name="llm.chat-content"></testcase>
+  <testcase classname="llm" name="llm.structured"></testcase>
+  <testcase classname="llm" name="llm.structured-value"><failure message="the final_answer value follows its JSON Schema">value: : expected object, got nil</failure></testcase>
+</testsuite>

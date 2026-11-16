@@ -1,0 +1,3 @@
+{:schema
+ {:value-types
+  {:waehrung {:type :string :description "ISO-4217-Währungscode"}}}}

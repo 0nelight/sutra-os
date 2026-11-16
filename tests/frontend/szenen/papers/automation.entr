@@ -1,0 +1,10 @@
+;; Read every new PDF that arrives in the mailbox: a document with no invoice
+;; read from it yet gets the "Read invoice" action.
+{:title "papers — read new invoices"
+ :steps
+ [[:automations
+   [{:name     "read-new-invoices"
+     :on       :document
+     :when     [:= [:get :invoices-read] 0]
+     :effect   {:action :read-invoice :args {:document {:self :id}}}
+     :every-ms 10000}]]]}

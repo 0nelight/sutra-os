@@ -1,0 +1,90 @@
+#!/usr/bin/env node
+// Frontend against a live instance without a deploy: shadow-cljs watch hot-reloads the local
+// sources, this server serves resources/public and forwards /api/* (HTTP, SSE, WebSocket) to the
+// instance. Writes land on that instance — it is prod unless SUTRA_HTTP_URL names another.
+//   bin/fe-dev                  watch app + widget-frame, serve on :8700
+//   FE_DEV_PORT=9000 bin/fe-dev  SUTRA_HTTP_URL=https://staging… bin/fe-dev  FE_DEV_NO_WATCH=1 bin/fe-dev
+const fs = require('fs'), path = require('path'), http = require('http'), https = require('https');
+const { spawn } = require('child_process');
+
+const root = path.resolve(__dirname, '..');
+const pub = path.join(root, 'resources/public');
+const port = parseInt(process.env.FE_DEV_PORT || '8700', 10);
+
+function siteUrl() {
+  try {
+    const m = fs.readFileSync(path.join(root, '.sutra-site.edn'), 'utf8')
+      .match(/:prod-url\s+"([^"]+)"/);
+    return m && m[1];
+  } catch (_) { return null; }
+}
+const upstream = new URL(process.env.SUTRA_HTTP_URL || siteUrl() || '');
+const agent = upstream.protocol === 'https:' ? https : http;
+const local = `http://localhost:${port}`;
+
+const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css',
+  '.json': 'application/json', '.map': 'application/json', '.svg': 'image/svg+xml',
+  '.png': 'image/png', '.woff2': 'font/woff2', '.woff': 'font/woff', '.wasm': 'application/wasm',
+  '.ico': 'image/x-icon', '.mjs': 'text/javascript' };
+
+function upstreamHeaders(h) {
+  const out = { ...h, host: upstream.host };
+  if (out.origin) out.origin = upstream.origin;
+  if (out.referer) out.referer = out.referer.replace(local, upstream.origin);
+  return out;
+}
+
+function proxy(req, res) {
+  const up = agent.request({ host: upstream.hostname, port: upstream.port || undefined,
+    method: req.method, path: req.url, headers: upstreamHeaders(req.headers) }, (ur) => {
+    const h = { ...ur.headers };
+    if (h.location) h.location = h.location.replace(upstream.origin, local);
+    res.writeHead(ur.statusCode, h);
+    ur.pipe(res);
+  });
+  up.on('error', (e) => { if (!res.headersSent) res.writeHead(502); res.end(`fe-dev: ${e.message}\n`); });
+  req.pipe(up);
+}
+
+function serveFile(req, res) {
+  const rel = decodeURIComponent(new URL(req.url, local).pathname);
+  let file = path.join(pub, path.normalize(rel));
+  if (!file.startsWith(pub)) { res.writeHead(403); return res.end(); }
+  if (!fs.existsSync(file) || fs.statSync(file).isDirectory()) file = path.join(pub, 'index.html');
+  res.writeHead(200, { 'content-type': types[path.extname(file)] || 'application/octet-stream',
+    'cache-control': 'no-store' });
+  fs.createReadStream(file).pipe(res);
+}
+
+const server = http.createServer((req, res) =>
+  req.url.startsWith('/api/') ? proxy(req, res) : serveFile(req, res));
+
+server.on('upgrade', (req, sock, head) => {
+  const up = agent.request({ host: upstream.hostname, port: upstream.port || undefined,
+    method: req.method, path: req.url, headers: upstreamHeaders(req.headers) });
+  up.on('upgrade', (ur, usock, uhead) => {
+    const lines = [`HTTP/1.1 ${ur.statusCode} ${ur.statusMessage}`];
+    for (let i = 0; i < ur.rawHeaders.length; i += 2) lines.push(`${ur.rawHeaders[i]}: ${ur.rawHeaders[i + 1]}`);
+    sock.write(lines.join('\r\n') + '\r\n\r\n');
+    if (uhead.length) sock.write(uhead);
+    if (head.length) usock.write(head);
+    usock.pipe(sock).pipe(usock);
+    usock.on('error', () => sock.destroy()); sock.on('error', () => usock.destroy());
+  });
+  up.on('response', (ur) => { sock.end(`HTTP/1.1 ${ur.statusCode} ${ur.statusMessage}\r\n\r\n`); });
+  up.on('error', () => sock.destroy());
+  up.end();
+});
+
+if (!upstream.host) { console.error('fe-dev: no instance — set SUTRA_HTTP_URL or :prod-url in .sutra-site.edn'); process.exit(2); }
+
+if (!process.env.FE_DEV_NO_WATCH) {
+  const log = fs.openSync(path.join(root, '.run/shadow.log'), 'a');
+  const w = spawn('npx', ['shadow-cljs', 'watch', 'app', 'widget-frame'],
+    { cwd: path.join(root, 'clients/frontend'), stdio: ['ignore', log, log] });
+  w.on('exit', (c) => console.error(`fe-dev: shadow-cljs watch exited (${c}), see .run/shadow.log`));
+  process.on('SIGINT', () => { w.kill('SIGTERM'); process.exit(0); });
+  console.log('fe-dev: shadow-cljs watch app widget-frame → .run/shadow.log (first build ~1–2 min)');
+}
+
+server.listen(port, () => console.log(`fe-dev: ${local}  (/api → ${upstream.origin})`));

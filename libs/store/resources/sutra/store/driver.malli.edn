@@ -1,0 +1,230 @@
+{
+ :driver/attr       :keyword
+ :driver/key        some?
+ :driver/marking    some?
+ :driver/markings   [:set {:min 1} :driver/marking]
+ :driver/rev        :int
+ :driver/basis      [:map {:closed true} [:rev :driver/rev]
+                     [:root-rev {:optional true} [:or :driver/rev [:= :sutra.store.core/unknown]]]]
+ :driver/value-type some?
+ :driver/values     [:map-of
+                     [:and :keyword [:not [:enum :id :markings :object-type-ref :link-type-ref]]]
+                     any?]
+
+ :driver/text       [:and :string [:re "\\A[^\\x00\\p{Cs}]*\\z"]]
+ :driver/double     [:and :double [:>= -1.7976931348623157E308] [:<= 1.7976931348623157E308]]
+ :driver/ident      [:and :driver/text [:string {:min 1 :max 63}]]
+ :driver/value
+ [:or :nil :boolean :driver/text :driver/double
+  [:map-of [:ref :driver/value] [:ref :driver/value]]
+  [:sequential [:ref :driver/value]]
+  [:set [:ref :driver/value]]
+  [:and some? [:not [:or :string :double ratio? coll?]]]]
+
+ :driver/read-cx
+ [:map {:closed true}
+  [:ns :string]
+  [:sig map?]
+  [:as-of {:optional true} [:maybe :driver/basis]]
+  [:basis {:optional true} [:maybe :driver/basis]]
+  [:layout {:optional true} :string]
+  [:binding {:optional true} :driver/snapshot-binding]]
+ :driver/write-cx
+ [:map {:closed true}
+  [:ns :string] [:sig map?] [:rev :driver/rev] [:time inst?] [:actor any?]]
+ :driver/records-cx [:or :driver/read-cx :driver/write-cx]
+ :driver/fork-cx
+ [:map {:closed true} [:sig map?] [:rev :driver/rev]]
+ :driver/snapshot-binding
+ [:map {:closed true} [:rev :driver/rev] [:root-rev {:optional true} :driver/rev]
+  [:storage-snapshot some?]]
+
+ :driver/row
+ [:map {:closed true} [:id :driver/key] [:values :driver/values]
+  [:markings {:optional true} :driver/markings]]
+ :driver/link
+ [:map {:closed true} [:id :driver/key] [:from :driver/key] [:to :driver/key]
+  [:markings {:optional true} :driver/markings]
+  [:gone {:optional true} [:= true]]]
+ :driver/sig-attr   [:map {:closed true} [:name :keyword] [:type :driver/value-type]]
+ :driver/signature
+ [:map {:closed true}
+  [:types [:map-of some? [:map {:closed true}
+                          [:attrs [:vector :driver/sig-attr]]
+                          [:key {:optional true} [:vector :keyword]]
+                          [:index {:optional true} [:vector :keyword]]
+                          [:title {:optional true} :keyword]]]]
+  [:interfaces [:map-of some? [:map {:closed true}
+                               [:props [:vector :driver/sig-attr]]
+                               [:implementers [:vector some?]]]]]
+  [:links [:map-of some? [:map {:closed true}
+                          [:from some?] [:to some?] [:cardinality :keyword]
+                          [:fk {:optional true}
+                           [:map {:closed true} [:holder some?] [:target some?]
+                            [:side [:enum :from :to]]
+                            [:attr :keyword] [:target-attr {:optional true} [:maybe :keyword]]]]]]]]
+ :driver/layout
+ [:map {:closed true}
+  [:missing [:map [:object-types [:sequential some?]] [:link-types [:sequential some?]]
+             [:indexes {:optional true} [:sequential some?]]]]
+  [:orphans [:sequential [:map [:name :string] [:rows {:optional true} nat-int?]]]]
+  [:local [:set some?]]
+  [:inherited [:set some?]]]
+
+ :driver/scan-op    [:enum := :not= :< :<= :> :>= :in :nil? :starts-with :has]
+ :driver/pred
+ [:and vector?
+  [:or
+   [:cat [:enum :and :or] [:* [:schema [:ref :driver/pred]]]]
+   [:cat [:= :not] [:schema [:ref :driver/pred]]]
+   [:cat [:enum := :not= :< :<= :> :>= :has] :driver/attr any?]
+   [:cat [:= :in] :driver/attr [:or [:set any?] [:sequential any?]]]
+   [:cat [:= :nil?] :driver/attr :boolean]
+   [:cat [:= :starts-with] :driver/attr some?]]]
+ :driver/source     [:tuple [:enum :rows :links :records] some?]
+ :driver/order      [:sequential [:tuple :driver/attr [:enum :asc :desc]]]
+ :driver/agg        [:or [:map {:closed true} [:count? [:= true]]]
+                     [:map {:closed true} [:group-by :driver/attr]]
+                     [:map {:closed true} [:pick :driver/pick]]]
+ :driver/pick       [:or [:map {:closed true} [:by [:vector {:min 1} :driver/attr]]
+                      [:max [:vector {:min 1} :driver/attr]]]
+                     [:map {:closed true} [:by [:vector {:min 1} :driver/attr]]
+                      [:min [:vector {:min 1} :driver/attr]]]]
+ :driver/scan
+ [:map {:closed true}
+  [:source :driver/source]
+  [:where [:vector :driver/pred]]
+  [:project {:optional true} [:maybe [:set :driver/attr]]]
+  [:order {:optional true} [:maybe :driver/order]]
+  [:after {:optional true} any?]
+  [:limit {:optional true} [:maybe nat-int?]]
+  [:agg {:optional true} [:maybe :driver/agg]]]
+ :driver/entry      [:tuple :driver/key any?]
+ :driver/answer     [:or [:sequential :driver/entry]
+                     nat-int?
+                     [:map-of any? nat-int?]]
+
+ :driver/judgement  [:enum :exact :inexact :none]
+ :driver/scan-profile
+ [:map {:closed true}
+  [:sources [:set [:enum :rows :links :records]]]
+  [:preds [:map-of :driver/scan-op [:enum :exact :inexact]]]
+  [:order? {:optional true} :boolean]
+  [:page? {:optional true} :boolean]
+  [:project? {:optional true} :boolean]
+  [:compound? {:optional true} :boolean]
+  [:agg {:optional true} [:set [:enum :count :group-by :pick]]]
+  [:agg-mode {:optional true} [:enum :complete :partial]]]
+ :driver/agg-fn     [:enum :count :sum :avg :min :max :cardinality]
+ :driver/plan-op    [:enum :scan :static :filter :search-around :with :compute :union :intersect
+                     :subtract
+                     :order :page :project :aggregate :fk-join]
+ :driver/plan-profile
+ [:map {:closed true}
+  [:ops [:set :driver/plan-op]]
+  [:aggs {:optional true} [:map-of :driver/agg-fn [:or [:= :all] [:set :driver/value-type]]]]
+  [:folds {:optional true} [:set [:enum :attribute :expr :nested]]]
+  [:preds {:optional true} [:map-of :keyword [:= :exact]]]]
+ :driver/profile
+ [:map {:closed true}
+  [:driver {:optional true} :keyword]
+  [:history? {:optional true} :boolean]
+  [:consistency {:optional true} [:enum :transactional :snapshot]]
+  [:reads {:optional true} [:set :keyword]]
+  [:latency {:optional true} [:map {:closed true} [:startup-ms nat-int?]]]
+  [:scan {:optional true} :driver/scan-profile]
+  [:plan {:optional true} :driver/plan-profile]
+  [:explain? {:optional true} :boolean]
+  [:semantics-overrides {:optional true} [:map-of :keyword any?]]]
+ :driver/offer
+ [:map {:closed true}
+  [:where [:vector :driver/judgement]]
+  [:order :boolean] [:page :boolean] [:project :boolean]
+  [:agg [:enum :none :partial :complete]]]
+ :driver/residual
+ [:map {:closed true}
+  [:where [:vector :driver/pred]]
+  [:order {:optional true} :driver/order]
+  [:page {:optional true}
+   [:map {:closed true} [:after {:optional true} any?] [:limit {:optional true} nat-int?]]]
+  [:project {:optional true} [:set :driver/attr]]
+  [:agg {:optional true} :driver/agg]]
+ :driver/agg-states [:sequential :driver/agg-state]
+ :driver/agg-state
+ [:map-of any? [:map {:closed true}
+                [:count {:optional true} nat-int?]
+                [:sum {:optional true} number?]
+                [:min {:optional true} any?]
+                [:max {:optional true} any?]]]
+
+ :driver/path       [:vector nat-int?]
+ :driver/claims     [:vector :driver/path]
+ :driver/plan       [:map [:op :keyword] [:type {:optional true} some?]]
+ :driver/fragment
+ [:map {:closed true} [:ref some?] [:plan :driver/plan] [:denied [:set :driver/marking]]]
+ :driver/fragment-row
+ [:map [:id :driver/key] [:object-type-ref {:optional true} some?]
+  [:values {:optional true} [:map-of :keyword any?]] [:markings {:optional true} :driver/markings]]
+ :driver/fragment-answer
+ [:or [:= :sutra.store.spi/decline]
+  [:sequential map?]]
+
+ :driver/divergence
+ [:map {:closed true}
+  [:store/engine-contract [:= :pushdown]]
+  [:kind [:enum :scan :fragment]]
+  [:request any?]
+  [:offer {:optional true} :driver/offer]
+  [:pushed any?]
+  [:reference any?]
+  [:diff {:optional true}
+   [:map {:closed true}
+    [:only-pushed [:sequential any?]] [:only-reference [:sequential any?]]
+    [:order-differs? :boolean]]]]
+
+ :driver/finding
+ [:map {:closed true} [:duty :qualified-keyword] [:msg :string] [:data map?]]
+ :driver/check-result
+ [:or [:map {:closed true} [:status [:= :proven]] [:steps {:optional true} nat-int?]
+       [:records {:optional true} [:= :none]]]
+  [:map {:closed true} [:status [:= :failed]] [:duty :qualified-keyword] [:msg :string]
+   [:data map?]]]
+ :driver/certification
+ [:map {:closed true} [:passed? :boolean]
+  [:results [:map-of :qualified-keyword :driver/check-result]]
+  [:claims {:optional true} :driver/profile]]
+ :driver/certificates [:map-of :keyword :driver/profile]
+ :driver/duty-check
+ [:or [:tuple [:= :guard] :qualified-keyword] [:tuple [:= :certify] :qualified-keyword]
+  [:tuple [:= :shape] :qualified-keyword] [:tuple [:= :core] qualified-symbol?]
+  [:tuple [:= :port] [:enum :blobs :coord :streams :datasets] :qualified-keyword]]
+ :driver/duties
+ [:map {:closed true}
+  [:duties [:vector [:map {:closed true} [:id :qualified-keyword] [:text :string]
+                     [:port {:optional true} [:enum :blobs :coord :streams :datasets]]
+                     [:methods [:vector symbol?]] [:checks [:vector :driver/duty-check]]]]]]
+
+ :driver/store-op
+ [:or [:tuple [:= :put] [:= :objects] :string :string :driver/values]
+  [:tuple [:= :put] [:= :links] :string :string :string :string]
+  [:tuple [:= :del] [:enum :objects :links] :string :string]
+  [:tuple [:= :kv] :string [:maybe :int]]]
+ :driver/store-command
+ [:or [:tuple [:= :tx] :string [:vector :driver/store-op] :boolean]
+  [:tuple [:= :fork] :string :string]
+  [:tuple [:= :drop] :string]
+  [:tuple [:= :detach] :string [:tuple [:enum :objects :links] :string]]
+  [:tuple [:= :clear] :string :string :boolean]
+  [:tuple [:= :layout] :string]]
+ :driver/records-command
+ [:or [:tuple [:= :put] [:enum :keyed :auto] [:vector [:tuple some? [:maybe map?]]] :boolean]
+  [:tuple [:= :get] [:enum :keyed :auto] some?]
+  [:tuple [:= :scan] [:enum :keyed :auto]]]
+ :driver/blobs-command
+ [:tuple [:enum :put :open :exists :size :landed :delete :hashes] nat-int?]
+ :driver/coord-command
+ [:tuple [:enum :acquire :renew :release :holder :revoke] :string :string]
+ :driver/streams-command
+ [:or [:tuple [:= :append] [:vector [:tuple nat-int? nat-int?]]]
+  [:tuple [:enum :read :trim] map?]
+  [:tuple [:enum :ends :stats :reset]]]}

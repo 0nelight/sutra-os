@@ -1,0 +1,419 @@
+;; ════════════════════════════════════════════════════════════════════════════
+;; grammar.enta — THE authoritative `.enta` grammar, in one annotated file.
+;;
+;; ── Where it lives ──────────────────────────────────────────────────────────
+;; One file per app: `apps/<name>.enta`, beside an optional `apps/<name>.cljs`
+;; (a `:source-file` SCI view) exactly as a transform sits beside its code. The
+;; importer reads EVERY entity-plane `.ent`/`.entv`/`.enta` from the git tree and
+;; deep-merges them STRICTLY (a same-key collision throws — no silent winner).
+;; `apps/` is entity plane, so an `apps/*.cljs` edit publishes back THROUGH its
+;; `.enta` — the exporter (`emit-app-file`) round-trips the pair byte-stably. That
+;; also means the tree is DERIVED: a file the schema no longer produces is dropped
+;; from the next projection, and one it still produces is written back however
+;; often you delete it locally (see "HOW TO RETIRE ONE" below).
+;;
+;; ── OBJECT-ORIENTED, not a dashboard of wires ───────────────────────────────
+;; Start from the OBJECTS (OOUX, Sophia Prater): a list of them (`:object-table`
+;; with `:active`), the selected one's OWN view beside it (`:object-view` — the
+;; same page it has everywhere, with its Actions on it), and a page to create
+;; one (`:action-form` of a create Action). `template.enta` is exactly that. Hand-
+;; wired variables for every number are the exception, not the skeleton.
+;; An app is not the only door: a WORKSPACE (`:workspaces` in the `.ent`) can
+;; offer an object type directly — `{:kind :object-type :object-type :auftrag}`
+;; on its home page opens that type's list and views, no app needed.
+;;
+;; Writeback is level 2/3 only: a widget merely TRIGGERS it (`:action-button`,
+;; `:comments :action`, `:submit`) naming an Action authored in the `.ent`
+;; (`:actions`, ~L834; an edit `:functions` entry, ~L918). So `wartungskosten`
+;; is not "lossy": its €/Std is a level-1 `:expr` here; only a value the whole
+;; ontology reuses drops down to `:derived`.
+;;
+;;   :live false                        ; aus — die Ansicht zeigt den Stand vom Oeffnen
+;;   :live {:types [:anfrage-verlauf]}  ; nur diese, statt aller gebundenen Typen
+;;   :live {:min-seconds 10}            ; Boden zwischen zwei Lesezugriffen
+;;
+;; Was ANKOMMT, entscheidet der Server: kennt der Lauf seine geschriebenen Zeilen
+;; (eine Aktion fuehrt sie), schickt er `objectSetChanged` mit den Objekten;
+;; sonst `refreshObjectSet` — "reload the object set". Ein Build meldet immer das
+;; zweite: seine Zeilen sind ein Dataset, keine Nachricht.
+;;
+;; Wer das Abo selbst fuehrt (eine eingebettete Ansicht, ein eigener Client),
+;; nimmt `app-sdk/watch!` — dieselbe Tuer, die das Portal benutzt.
+;;
+;; ── The complete widget vocabulary (Dialect B — app_sdk `widget-registry`) ──
+;; A leaf is `{:widget <kw> …config}`; every value may be a reactive reference —
+;; `{:from <type>}` (payload object set) · `{:var <name>}` (state handle, an
+;; interactive `:sel`) · `{:val <name>}` (a variable's value). The KEY set per
+;; widget is what the grammar enforces (closed maps; a typo is a load error).
+;;
+;; Two more single-key maps are TEMPLATE FILLS, not reactive refs — substituted
+;; from a CONTEXT rather than resolved from the vars graph (see the containers
+;; below): `{:item <prop>}` / `{:item-not <prop>}` inside a `:loop` `:body` (the
+;; clicked/iterated object's field, and its boolean negation) · `{:arg <prop>}`
+;; inside an `:overlay` `:body` (the payload the overlay was opened with).
+;;
+;;   RIDERS  (on any node)
+;;     :title :hidden? :when                         ; :when a ref/handle → visibility
+;;     containers also :bg (:1..:5) :collapse :class
+;;     :box {:icon :help :w :min-w :max-w :grow?}     ; per-widget icon/help/sizing
+;;     :vars {…}  on any INNER container → a subtree-scoped filter SANDBOX
+;;                (layered over the root vars), not just at the root
+;;
+;;   WAS DIE TUER PRUEFT, bevor ein Push durchgeht (nicht erst zur Laufzeit):
+;;     • jede `{:val x}` / `{:var x}` muss eine Variable nennen, die in DIESEM
+;;       Bereich deklariert ist — innere `:vars` legen sich ueber aeussere. Ein
+;;       Name, der ins Leere zeigt, loeste zu nil auf: das Widget zeigte eine leere
+;;       Liste, und die ist von „es gibt wirklich nichts" nicht zu unterscheiden.
+;;       AUSNAHME: das `:select` eines Containers — dort duldet die Laufzeit einen
+;;       Namen ohne Variable, der Streifen faellt dann auf die erste Lasche zurueck.
+;;     • ein Parameter, der eine OBJEKTMENGE verlangt (`:rows`/`:items`/`:shapes`),
+;;       darf nicht an eine Variable gebunden sein, die nachweislich einen Skalar
+;;       haelt. Wo der Typ sich nicht bestimmen laesst, schweigt die Pruefung —
+;;       ein Tor, das gelegentlich irrt, ist schlimmer als keines.
+;;     • ein `:type`, der der Form widerspricht, und eine Definitionsart, die der
+;;       Typ nicht zulaesst (siehe unten).
+;;     • `{:from x}` bedeutet UEBERALL dasselbe: erst die Variable, dann die
+;;       Payload. Das war einmal verschieden — im `:vars`-Eintrag beides, auf dem
+;;       Blatt nur die Payload — und hat ein Auswahlfeld lange leer stehen lassen.
+;;
+;; This file is a reference, not an installable app. Config VALUES are illustrative;
+;; the KEY set per widget is what the grammar enforces. `bin/sutra` reads live
+;; wiring — do not treat this as prod state.
+;; ════════════════════════════════════════════════════════════════════════════
+{;; :name — REQUIRED. The app's identity (rename-safe: the file may be named
+ ;; anything). Lowered to the `:applications` entry key.
+ :name :maengel-konsole
+
+ :display-name "Defects Console"
+
+ ;; :description / :icon — OPTIONAL presentation. An app opens at its published
+ ;; version: the first install cuts version 1, :auto-publish true one on every
+ ;; save. :project — Pillar-4 ownership (the grant cascade).
+ :description "Open defects across the fleet — ground time, load per station, and where they sit."
+ :icon        "✈"
+ :project     :aviation
+
+ ;; :promoted / :collection — die Portal-Kuration. `:promoted true` stellt die App
+ ;; ins App-Portal und VERLANGT eine `:collection` (die Ueberschrift, unter
+ ;; der sie dort steht; die Sektion selbst wird in `:collections` des `.ent`
+ ;; deklariert, siehe grammar.ent). Ohne `:promoted` ist die App nicht unerreichbar,
+ ;; nur unbeworben — sie wird ueber den Workspace geoeffnet, der sie traegt.
+ ;; ⚠ Sobald die Instanz ihren ERSTEN Workspace fuehrt, ist der Lint-Riegel
+ ;; `:app-outside-every-workspace` scharf: eine `:promoted` App, die auf keinem Regal
+ ;; steht, wird abgewiesen — sie waere ein zweiter, unkuratierter Weg hinein.
+ :promoted    true
+ :collection  :operations
+
+ ;; :tags / :owner / :thumbnail — die Karte im Portal. `:tags` sind die Filter-
+ ;; schlagworte, `:owner` der zustaendige Mensch (frei, kein Principal-Verweis),
+ ;; `:thumbnail` das Bild auf der Kachel.
+ :tags        [:maengel :ops]
+ :owner       "Betrieb"
+ :thumbnail   "maengel-card.png"
+
+ ;; :repository — nur zu setzen, wenn der besitzende Klon nicht aus dem Pfad folgt.
+ ;; Eine `.entv` braucht ihn nie und darf ihn nicht tragen.
+ :repository  :aviation-apps
+
+ ;; :object-types — the SETS this app is served (their rows arrive in the payload,
+ ;; addressable as {:from <type>}). :aggregate-types — types the app may aggregate
+ ;; on the SERVER but is not served row-by-row. :functions — query Functions the app
+ ;; may run for a function-backed object set ({:function <name>} var). All folded
+ ;; into :layout by enta->schema (the server reads an app's scope from :layout).
+ ;;
+ ;; ── TESTING a {:function <name>} var (query Function) ───────────────────────
+ ;; A query Function is a CODE `:functions` entry in the code repository's `.ent`
+ ;; (python: `@function` from `functions.api`, not `@transform`; NO :output — it
+ ;; RETURNS rows). Test it in this order:
+ ;;   1. it lands — `projection push <text> --preview`, then push and commit;
+ ;;      `function show <name>` lists it.
+ ;;   2. its rows — `function run <name> k=v …` runs it on the server, read-only.
+ ;;      Arguments bind by the ATTRIBUTE name (`flug-id`), and a hidden attribute
+ ;;      never reaches it.
+ ;;   3. the app — whitelist it under `:functions` and open the app. `app-data`
+ ;;      does NOT run functions, so a green `app-data` tests nothing here.
+ :object-types    [:mangel :station]
+ :aggregate-types [:arbeitsschritt]
+ :functions       [:dringlichste-maengel]
+
+ :actions [{:action :station-anlegen}]
+
+ ;; Headless: `bin/enta derived <datei>.enta` lists them, `bin/enta derived-add …`
+ ;; is the panel's form on a terminal — same rules, same door.
+ :derived-properties
+ {:mangel {:arbeitsstunden     {:kind :aggregation :over :mangel-arbeitsschritt :agg :sum
+                                 :of :stunden :where [:= :jahr {:val :jahr}]}
+           :schritte           {:kind :aggregation :over :mangel-arbeitsschritt :agg :count}
+           :stunden-je-schritt {:kind :column-math :label "Stunden je Schritt"
+                                 :expression [:div :arbeitsstunden :schritte]}
+           ;; the column the :hits table binds as {:prop :liegezeit-minuten}
+           :liegezeit-minuten  {:kind :column-math :label "Min"
+                                 :expression [:* :liegezeit 60]}}}
+
+ ;; :layout — the Dialect-B node tree (the SHARED grammar). A standalone app's
+ ;; root is usually a container over object SETS with a :vars cross-filter graph.
+ :layout
+ {;; The reactive graph, read at the ROOT. A STATE handle an interactive widget
+  ;; writes; a DERIVED object set recomputed from the vars + payload.
+  ;; `:filter-pills` ist MEHRFACHAUSWAEHLEND und schreibt eine MENGE — `#{:vie}`,
+  ;; und `#{}` fuer „All". Daraus folgen beide Zeilen hier, und beide sind schon
+  ;; falsch gebaut worden: `:type :array` (also die EDN-Kodierung), weil
+  ;; `:keyword`/`:number`/`:boolean` eine Menge beim Gang durch die URL
+  ;; VERSTUEMMELN — `parseInt "#{3}"` ist NaN, und jede nichtleere Menge ist
+  ;; truthy, also schreibt `:bool` fuer `#{false}` dasselbe wie fuer `#{true}`.
+  ;; Und `:in` statt `:=`, weil `:=` STRIKT ist: eine Zahl ist nie gleich einer
+  ;; Menge, und die leere Auswahl muss WEITEN, nicht leeren.
+  :vars {:view        {:type :keyword :default :overview
+                       :external-id :view :in-url :when-visible}           ; the page shown
+         :profile     {:type :keyword :default :planer}               ; the variant shown
+         :station-sel {:type :array :default #{}
+                       :external-id :station :in-url :when-visible}        ; state handle
+         :maengel     {:from :mangel                                 ; filtered set
+                       :where [[:station :in {:var :station-sel}]]}
+         ;; Geo: [[:lage :within-distance {:center {:val :ort} :distance 300 :unit :km}]]
+         ;; or [[[:lat :lon] :within-bounding-box {:top-left [48.5 12] :bottom-right [46 17]}]];
+         ;; a center not yet chosen WEITET, wie eine leere :in-Auswahl.
+         :total       {:default-agg [:count :id :mangel]}            ; count of :mangel
+         :ranked      {:function :dringlichste-maengel :args {:station {:val :station-sel}}}
+         :by-station  {:aggregate {:find     :mangel
+                                   :aggs     [{:fn :count :name :maengel}]
+                                   :group-by [[:link :mangel-station] :status]}}}
+
+  :kind  :pages
+  :select {:var :view}
+  :header {:title "Defects console"}
+  :pages
+  [{:id :overview :label "Overview"
+    :body {:kind :rows
+           :items
+           [{:kind :toolbar
+             :items [{:widget :kpi :label "Defects" :value {:val :total}
+                      :on-click {:do :set :var {:var :station-sel} :to nil}}
+                     {:widget :filter-pills :sel {:var :station-sel}
+                      :items [{:value :vie :label "VIE"} {:value :szg :label "SZG"}]
+                      :all-label "All"}
+                     ;; [NEW FORM] the DOWNLOAD counterpart to :media-uploader —
+                     ;; POSTs the file-level :export request (its :params may be refs)
+                     {:widget :export :label "Export" :params {:station {:val :station-sel}}
+                      :filename "maengel"}]}
+            ;; a general chart (Plotly), from a payload set; :box adds help + grow
+            {:widget :chart :chart-kind :time-series
+             :rows {:val :maengel} :x :tag :y :count :group :ata-kapitel
+             :box {:help "Reports per day" :grow? true}}
+            ;; [NEW FORM] LAYERS — one chart, two shapes, TWO SCALES: the bars
+            ;; count defects against the left axis, the line reads average ground
+            ;; time in hours against the RIGHT one (:axis :right), and :kind :trend
+            ;; fits a straight line through the measure its :y names, on that
+            ;; measure's own axis. Without the second axis the hours would be
+            ;; drawn flat along a count scale — readable, and wrong.
+            {:widget :chart :rows {:val :maengel} :x :tag
+             :series [{:name "Defects" :y :count :kind :bar}
+                      {:name "Liegezeit ø" :y :liegezeit :kind :line :axis :right}
+                      {:name "Trend"   :y :count :kind :trend}]
+             :axes {:left  {:title "Defects" :fmt ",.0f"}
+                    :right {:title "h" :fmt ",.1f"}}
+             :box {:help "Volume vs. ground time" :grow? true}}
+            ;; a token-free map: each row carries its OWN :lat/:lon (a transform's
+            ;; job, not the view's); :color/:size are per-row props or constants
+            {:widget :map :rows {:from :station} :lat :lat :lon :lng
+             :label :name :color :load :style :carto-positron :height 340}]}}
+
+   {:id :neu :label "Neu"
+    :body {:kind :rows
+           :vars {:neuer-name {:default ""} :neuer-ort {:default ""}
+                  :anlege-fehler {:default ""}
+                  :regionen {:from :station}}
+           :items [{:widget :map :rows {:from :station} :lat :lat :lon :lng
+                    :pick :point :sel {:var :neuer-ort}
+                    :style :carto-positron :height 320}
+                   {:kind :toolbar
+                    :items [{:widget :text-input :sel {:var :neuer-name}
+                             :placeholder "Name der Station"}
+                            {:widget :action-button :label "Anlegen"
+                             :busy-label "…" :intent :primary
+                             :action :station-anlegen
+                             :params {:name {:val :neuer-name}
+                                      :standort {:val :neuer-ort}}
+                             :disabled? {:val :neuer-ort}}]}
+                   {:widget :action-form :action :station-anlegen
+                    :label "Anlegen" :busy-label "…" :cancel-label "Verwerfen"
+                    :defaults {:standort {:val :neuer-ort}}
+                    :options {:region {:val :regionen}}
+                    :on-done [{:do :set :var {:var :neuer-ort} :to nil}]
+                    :on-cancel [{:do :set :var {:var :neuer-ort} :to nil}]
+                    :error-var :anlege-fehler}]}}
+
+   {:id :explore :label "Explore"
+    ;; a SUBTREE-scoped sandbox: :vars HERE drive only this section's widgets
+    :body {:kind :section :title "Filter defects" :vars {:q {:default ""}
+                                                         :hits {:from :mangel
+                                                                :where [[:mangel-nr :contains {:var :q}]]}}
+           :tag {:widget :kpi :display :tag :label "Defects" :value {:val :total}}
+           :items [{:widget :filter-sidebar :title "Filters"
+                    :fields [{:label "Number" :kind :search :sel {:var :q}}]}
+                   {:widget :object-table :rows {:val :hits}
+                    :cols [{:label "No."  :prop :mangel-nr}
+                           {:label "Aircraft" :prop :kennzeichen}
+                           {:label "Ground h" :prop :liegezeit :fmt :menge :align :right}
+                           ;; A COMPUTED column is NOT an :expr here — `ColSpec`
+                           ;; refuses the key, because a column BINDS a value and
+                           ;; does not compute one. It is declared once under
+                           ;; :derived-properties (:kind :column-math) and bound
+                           ;; like any property, which is also what makes it
+                           ;; SORTABLE and FILTERABLE — a per-cell expression is
+                           ;; neither.
+                           {:label "Min" :prop :liegezeit-minuten :fmt :menge :align :right}
+                           ;; [NEW FORM] a value → :badge conditional-format column
+                           {:label "State" :prop :status
+                            :badge {"aog"     {:tone :warn :text "AOG"}
+                                    :default  {:tone :ok :text "flugfähig"}}}]}
+                   ;; MASTER/DETAIL — the table writes the row the reader is on
+                   ;; into :active (the first row is pre-selected unless
+                   ;; :auto-active? false); a :columns container names that same
+                   ;; handle as its :detail column, which on a phone becomes a
+                   ;; page of its own:
+                   ;;   {:kind :columns :detail {:var :auswahl}
+                   ;;    :items [{:widget :object-table :rows {:val :hits}
+                   ;;             :cols [{:label "No." :prop :mangel-nr}]
+                   ;;             :active {:var :auswahl} :auto-active? true}
+                   ;;            {:widget :object-view :object {:var :auswahl}}]}
+                   {:widget :markdown :text "> Type a defect number to filter."}]}}
+
+   ;; :profiles — the viewer's profile picks ONE variant (no strip).
+   ;; :visibility gates this whole tab to a role (empty list would = all).
+   {:id :ops :label "By role" :visibility {:roles [:ops :admin]}
+    :body {:kind :profiles :select {:var :profile} :default :planer
+           :variants [{:id :planer :body {:widget :kpi :label "Open" :value {:val :total}}}
+                      ;; The pivot over the SERVER aggregate: :row names the
+                      ;; linked-object dimension (its value is the station bucket
+                      ;; {:id … :title …} → the pivot labels by :title, groups by
+                      ;; :id), :col the scalar status, :value the metric. Each cell
+                      ;; is one server bucket, so :sum just surfaces its count.
+                      {:id :manager    :body {:widget :pivot-table :rows {:val :by-station}
+                                              :row :mangel-station :col :status
+                                              :value :maengel :agg :sum}}]}}
+
+   ;; A BOARD page — the loop/events/overlay mechanisms in one place. The :loop
+   ;; renders its :body as a TEMPLATE, once per defect ({:item …} fills the card);
+   ;; a per-card :button fires a declarative EVENT (a vector: set the selection,
+   ;; THEN open the drawer); the :overlay shows the selected defect and clears the
+   ;; selection on close. (Three loops over three filtered sets = a Kanban board.)
+   {:id :board :label "Board"
+    :body {:kind :rows
+           :vars {:sel-no {:default nil}
+                  :sel    {:from :mangel :where [[:mangel-nr := {:val :sel-no}]]}}
+           :items
+           [{:kind :loop :items {:val :maengel} :arrange :grid
+             :max-columns 3 :min-card-width 240
+             ;; [NEW FORM] group the cards by :status — each group subheaded
+             :group-by :status :group-label :text
+             :empty {:widget :markdown :text "_no defects_"}
+             :body {:kind :section :bg :2
+                    :body {:kind :rows
+                           :items [{:widget :markdown :text {:item :mangel-nr}}
+                                   {:widget :badge :tone :info :text {:item :status}}
+                                   {:widget :button :label "Details" :intent :none
+                                    :on-click [{:do :set :var {:var :sel-no} :to {:item :mangel-nr}}
+                                               {:do :open :overlay :mdetail}]}]}}}
+            {:kind :overlay :overlay :mdetail :as :drawer :side :right :title "Defect"
+             :on-close {:do :set :var {:var :sel-no} :to nil}
+             :body {:widget :object-table :rows {:val :sel}
+                    :cols [{:label "No."   :prop :mangel-nr}
+                           {:label "Ground h" :align :right :prop :liegezeit :fmt :menge}]}}]}}]}}
+
+;; ── An SCI-authored app instead of a data layout — the LEGACY road ──────────
+;; An app whose view is hand-written ClojureScript carries NO :layout; it names a
+;; sibling `:source-file` (client-inlined to :source on install, exactly as a
+;; python transform's :code-file → :code). The rest of the wrapper is identical:
+;;   {:name :capacity-planner
+;;    :description "…" :icon "📊" :project :aviation
+;;    :object-types [:station]
+;;    :source-file "apps/capacity_planner.cljs"}
+;;
+;; Do not start here. The FE routes a data `:layout` AHEAD of `:source`
+;; (`apphost/registry.cljs`), so an app that has both renders from the
+;; layout and the `.cljs` is dead weight that still ships to every viewer.
+;;
+;; ── HOW TO RETIRE ONE — deleting the `.cljs` now HOLDS ──────────────────────
+;; It did not always. `:source` is omit-preserved like every other field, so a
+;; push that merely dropped `:source-file` left the stored view standing, and the
+;; exporter wrote `apps/<name>.cljs` back into the tree on the very next schema
+;; write. With `SUTRA_APP_SOURCE_OMIT_CLEARS` on (prod, since 2026-08-15), an app
+;; declaration that carries a `:layout` and NO `:source` RETRACTS the stored view:
+;;   1. author the `:layout` (this file is the vocabulary) and push it — verify
+;;      the app renders from data alone;
+;;   2. in ONE commit, drop `:source-file` from the `.enta` and `git rm` the
+;;      `apps/<name>.cljs`;
+;;   3. the install clears `:source`, the exporter stops emitting the sibling, and
+;;      `normalized by install` removes it from the tree.
+;; Both halves matter: a `.enta` that still names a `:source-file` whose blob is
+;; gone is NOT a retraction. And the reset is narrow on purpose — a metadata-only
+;; update (no `:layout`, e.g. `repository place`) still preserves the view, so a
+;; partial push cannot blank an app by accident.
+
+;; ════════════════════════════════════════════════════════════════════════════
+;; THREE APP CAPABILITIES — authorable from a DATA `.enta` (Upload · Export ·
+;; Scenario forks). `:upload`/`:export` are FILE-LEVEL keys that `enta->schema`
+;; folds INTO `:layout` (where the server reads `[:layout :upload]`/`[:layout
+;; :export]`), the exact pattern as `:object-types`; `emit-app-file` lifts them
+;; back out, so the round-trip is byte-stable. The scenario surface is a widget +
+;; a layout-root rider. (Grammar: `DataAppFile`/`UploadSpec`/`ExportSpec` +
+;; `:scenario-picker`/`::container :scenario` in `parser/ent.clj`.)
+;;
+;; Sie läuft NACH dem Build: ihre Edits landen auf den Objekten, die der Build
+;; gerade materialisiert hat, und bleiben als `object_edits`-Overlay über jeden
+;; späteren Rebuild bestehen („user edits win"). Vor dem Build gestartet schriebe
+;; sie auf Zeilen, die es noch nicht gibt. Schlägt sie fehl, ist der Upload
+;; trotzdem gelandet — das Ergebnis reitet neben ihm in der Antwort unter
+;; `:action`, so wie das des Builds unter `:build`.
+;;
+;; ── (2) :export — the READ-side generator (ODS / ad-hoc python) ─────────────
+;; POST /api/my-application/:rid/export → fill a spreadsheet template from the
+;; app's bound objects for a chosen period, hand back the `.ods` (base64) to
+;; download. `server.clj my-application-export`: sums `:value-field` per
+;; `:key-field` over objects matching the period, runs `:code` in the NETLESS
+;; python jail. `:cumulative-field` (e.g. :monat) matches as `≤` → year-to-date.
+;; Author the template + generator as sibling FILES; the CLI inlines
+;; `:template-file`→`:template-b64` and `:code-file`→`:code` on install, and the
+;; exporter externalises them back to `exports/<app>.<ext>` (round-trip verified).
+;; Used by kostenverlauf.
+;;   :export {:object-type      :kostenzeile
+;;            :key-field        :konto :value-field :betrag
+;;            :period-fields    [:jahr :monat]     ; whitelisted request params
+;;            :cumulative-field :monat             ; matched ≤ (YTD); omit = equality
+;;            :template-file    "exports/kostenverlauf.ods"  ; CLI → :template-b64
+;;            :code-file        "exports/kostenverlauf.py"   ; CLI → :code
+;;            :python-deps      ["odfpy"] :filename "kostenverlauf" :profile :default}
+;;
+;;   THE SCENARIO HANDLE MAY BE IN THE URL — and should be, so the selected fork
+;;   survives a reload, moves with Back/Forward and travels in a shared link. It
+;;   needs an `:external-id` to say so: that id is the query parameter's key, and
+;;   `:in-url` says whether the app writes it back. That
+;;   was BROKEN until 2026-08-20: the SDK `add-watch`es the active-scenario handle
+;;   to re-read the payload on a switch, an addressed var is a `ViewCursor`, and the
+;;   cursor implemented only IDeref/IReset/ISwap — so `add-watch` threw
+;;   "No protocol method IWatchable.-add-watch" from inside a component
+;;   constructor and the WHOLE app painted as the error box. The cursor is
+;;   watchable now (`view-state`), delegating to the URL store and filtered to its
+;;   own param.
+;;
+;;      (a) the ARRAY comes from a multi picker:
+;;            :vars {:szen {:type :array :default []
+;;                          :external-id :szen :in-url :always}}
+;;            {:widget :scenario-picker :sel {:var :szen} :multi? true}
+;;          `:multi? true` writes a VECTOR of segs (a checkbox strip); without it
+;;          the picker writes one seg, which is what a `:scenario` rider wants.
+;;
+;;      (b) a `:compare` VAR reads one object set on the base AND each fork:
+;;            :koepfe {:source :mitarbeiter :where [[:aktiv := 1]]}
+;;            :vergl  {:compare {:of :koepfe :scenarios {:var :szen}
+;;                               :key :mitarbeiter-nr}}
+;;          `:of` must name a DERIVED var (`:source`/`:from`): the spec is
+;;          RE-RESOLVED against each branch's payload, and that is the whole trick
+;;          — a comparison needs no second layout and no server-side diff. An
+;;          `:aggregate`/`:function` var is refused (its handle already belongs to
+;;          one branch, and comparing a branch with itself is worse than an error).
+;;          `:key` is the BUSINESS key rows are matched on, not the object id: a
+;;          fork can carry an object the base never had, and an id-join would show
+;;          it as a row from nowhere. Each fork costs one payload read, cached.
+;;

@@ -1,0 +1,5 @@
+{:schema
+ {:objects
+  {:intern {:project    :stamm
+            :title      :name
+            :attributes [[:intern-id :string] [:name :string]]}}}}

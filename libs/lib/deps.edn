@@ -1,0 +1,15 @@
+{:paths ["src" "resources"]
+ :deps  {org.clojure/clojure {:mvn/version "1.12.0"}
+         sutra/dialect       {:local/root "../dialect"}
+         sutra/store         {:local/root "../store"}}
+ :aliases
+ {:test {:extra-paths ["test"]
+         :extra-deps  {org.clojure/test.check {:mvn/version "1.1.1"}}
+         :main-opts   ["-m" "sutra.lib.run-tests"]}
+  :pg   {:extra-deps {sutra/store-pg {:local/root "../store-pg"}
+                      io.zonky.test/embedded-postgres {:mvn/version "2.1.0"
+                                                       :exclusions
+                                                         [io.zonky.test.postgres/embedded-postgres-binaries-bom]}
+                      io.zonky.test.postgres/embedded-postgres-binaries-linux-amd64
+                        {:mvn/version "16.4.0"}}
+         :jvm-opts   ["-Dsutra.lib.store=pg"]}}}

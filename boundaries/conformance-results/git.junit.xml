@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="git" tests="11" failures="0" skipped="1">
+  <testcase classname="git" name="git.enabled"></testcase>
+  <testcase classname="git" name="git.anonymous-401"></testcase>
+  <testcase classname="git" name="git.wrong-token-401"></testcase>
+  <testcase classname="git" name="git.receive-pack-guarded"></testcase>
+  <testcase classname="git" name="git.advertisement"></testcase>
+  <testcase classname="git" name="git.no-cache"></testcase>
+  <testcase classname="git" name="git.capabilities"></testcase>
+  <testcase classname="git" name="git.protocol-v2"><skipped message="answers v0 — allowed, v2 not offered"/></testcase>
+  <testcase classname="git" name="git.unknown-repo"></testcase>
+  <testcase classname="git" name="git.clone"></testcase>
+  <testcase classname="git" name="git.push"></testcase>
+</testsuite>

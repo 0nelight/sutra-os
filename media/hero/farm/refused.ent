@@ -1,0 +1,5 @@
+;; Saturday: forty bales for the neighbour, with twenty-five in the barn. The server
+;; must refuse this; bin/readme-media fails if it does not.
+{:steps
+ [[:action {:name :sell-hay :args {:lot "North Meadow, 1st cut 2025" :sale-nr "S-2026-009" :buyer "Neighbour"
+                                   :bales 40 :price-per-bale 5 :sold-on "2026-02-14"}}]]}

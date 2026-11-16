@@ -1,0 +1,105 @@
+;; ════════════════════════════════════════════════════════════════════════════
+;; template-ablauf.enta — Vorlage für eine App, die einen ARBEITSABLAUF trägt
+;; ════════════════════════════════════════════════════════════════════════════
+;; template.enta zeigt die Objekte: Liste, daneben die Ansicht. Das reicht zum
+;; Nachschlagen. Wer mit der App ARBEITET, fragt nicht „welche Arbeitsaufträge gibt es",
+;; sondern „was muss ich jetzt tun". Diese Vorlage beantwortet genau das.
+;; Die Regeln dahinter: DESIGN.md (neben AGENTS.md).
+;;
+;; Vor dem ersten Widget drei Sätze aufschreiben:
+;;   1. Der Job      — „Ein Arbeitsauftrag soll bezahlt werden."
+;;   2. Die Schritte — beginnen → fertig melden → verrechnen → Zahlung nachfassen.
+;;                     Das sind die Übergänge im `:lifecycle` des Objekts.
+;;   3. Der Korb     — je Schritt EINE Liste der Objekte, die auf ihn warten.
+;;                     Reihenfolge: der Schritt, der am nächsten am Geld liegt, oben.
+;;
+;; Was daraus folgt:
+;;   · Ein Bildschirm, kein Reiter je Datentyp. Links der Korb, rechts das gewählte
+;;     Objekt in SEINER Ansicht — dort stehen seine Handlungen, und der Lebenslauf
+;;     zeigt nur die, die im aktuellen Stand gehen. Keine Knopfwand im Korb.
+;;   · Ein leerer Schritt verschwindet (`:when`). Ist alles leer, sagt die App das
+;;     („Alles erledigt"), statt vier leere Tabellen zu zeigen.
+;;   · Jede Überschrift trägt ihre Anzahl als Pille (`:tag`) — man sieht den
+;;     Stapel, bevor man liest.
+;;   · EIN blauer Knopf je Gruppe: die Handlungen stehen in der Objektansicht,
+;;     der Lebenslauf zeigt nur die erlaubten; „Neuer Arbeitsauftrag“ ist selten und
+;;     bleibt grau (`:button` ohne `:intent` = :none).
+;;   · Anlegen ist selten: ein Knopf oben, das Formular als Dialog.
+;;   · Nachschlagen (alle Arbeitsaufträge, Betreiber) ist kein Schritt. Dafür gibt es die
+;;     Objektansichten und den Workspace — nicht einen fünften Reiter hier.
+;; ════════════════════════════════════════════════════════════════════════════
+{:name         :arbeitsauftraege-ablauf
+ :display-name "Arbeitsaufträge — zu erledigen"
+ :description  "Was heute zu tun ist: verrechnen, nachfassen, fertig melden, beginnen."
+ :icon         "📥"
+ :project      :werft
+
+ :object-types [:arbeitsauftrag :betreiber :rechnung :zeitbuchung]
+ :actions      [{:action :arbeitsauftrag-anlegen}]
+
+ :layout
+ {:kind  :rows
+  :title "Arbeitsaufträge — zu erledigen"
+  :vars
+  {:gewaehlt      {:default nil}
+
+   ;; je Schritt ein Korb — die Stände aus dem :lifecycle des Arbeitsauftrags
+   :zu-verrechnen {:from :arbeitsauftrag  :where [[:stand := "fertig"]]}
+   :nachfassen    {:from :rechnung :where [[:offen :> 0]]}
+   :in-arbeit     {:from :arbeitsauftrag  :where [[:stand := "in-arbeit"]]}
+   :zu-beginnen   {:from :arbeitsauftrag  :where [[:stand := "angelegt"]]}
+
+   :n-verrechnen  {:agg [:count :id] :of :zu-verrechnen}
+   :n-nachfassen  {:agg [:count :id] :of :nachfassen}
+   :n-in-arbeit   {:agg [:count :id] :of :in-arbeit}
+   :n-beginnen    {:agg [:count :id] :of :zu-beginnen}
+
+   :hat-verrechnen {:expr [:> {:val :n-verrechnen} 0]}
+   :hat-nachfassen {:expr [:> {:val :n-nachfassen} 0]}
+   :hat-in-arbeit  {:expr [:> {:val :n-in-arbeit} 0]}
+   :hat-beginnen   {:expr [:> {:val :n-beginnen} 0]}
+   :alles-erledigt {:expr [:not [:or {:val :hat-verrechnen} {:val :hat-nachfassen}
+                                     {:val :hat-in-arbeit} {:val :hat-beginnen}]]}}
+
+  :items
+  [{:kind  :toolbar
+    :items [{:widget :button :label "＋ Neuer Arbeitsauftrag" :on-click {:do :open :overlay :anlegen}}]}
+
+   {:kind   :columns
+    :detail {:var :gewaehlt}
+    :items
+    [{:kind :rows
+      :box  {:w 520}
+      :items
+      [{:widget :empty-state :icon "✓" :title "Alles erledigt"
+        :hint "Nichts zu verrechnen, keine offene Rechnung, kein Arbeitsauftrag wartet."
+        :when {:val :alles-erledigt}}
+
+       {:kind :section :title "Verrechnen" :when {:val :hat-verrechnen}
+        :tag  {:widget :kpi :display :tag :label "warten" :value {:val :n-verrechnen}}
+        :body {:widget :object-table :rows {:val :zu-verrechnen} :active {:var :gewaehlt}
+               :sort [[:freigabetermin :asc]]}}
+
+       {:kind :section :title "Zahlung nachfassen" :when {:val :hat-nachfassen}
+        :tag  {:widget :kpi :display :tag :label "warten" :value {:val :n-nachfassen}}
+        :body {:widget :object-table :rows {:val :nachfassen} :active {:var :gewaehlt}
+               :sort [[:faellig-am :asc]]}}
+
+       {:kind :section :title "Fertig melden" :when {:val :hat-in-arbeit}
+        :tag  {:widget :kpi :display :tag :label "warten" :value {:val :n-in-arbeit}}
+        :body {:widget :object-table :rows {:val :in-arbeit} :active {:var :gewaehlt}
+               :sort [[:freigabetermin :asc]]}}
+
+       {:kind :section :title "Beginnen" :when {:val :hat-beginnen}
+        :tag  {:widget :kpi :display :tag :label "warten" :value {:val :n-beginnen}}
+        :body {:widget :object-table :rows {:val :zu-beginnen} :active {:var :gewaehlt}
+               :sort [[:freigabetermin :asc]]}}]}
+
+     {:widget :object-view :object {:val :gewaehlt}}]}
+
+   {:kind    :overlay
+    :overlay :anlegen
+    :as      :modal
+    :title   "Neuer Arbeitsauftrag"
+    :body    {:widget :action-form :action :arbeitsauftrag-anlegen :label "Anlegen"
+              :on-done [{:do :close :overlay :anlegen}]}}]}}

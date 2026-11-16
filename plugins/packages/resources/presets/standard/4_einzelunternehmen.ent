@@ -1,0 +1,5 @@
+;; standard / Haushalt und Betrieb in einer Ontologie -- Einzelunternehmen,
+;; Freiberufler, Landwirtschaft. Dieselbe Bankbuchung kann privat eingeordnet
+;; oder einer Ausgangsrechnung zugeordnet werden; es gibt nur EIN Bankkonto-Modell.
+{:require ["3_privat.ent" "3_betrieb.ent"]
+ :schema  {}}

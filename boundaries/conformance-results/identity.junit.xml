@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="identity" tests="10" failures="0" skipped="1">
+  <testcase classname="identity" name="discovery"></testcase>
+  <testcase classname="identity" name="issuer-https"><skipped message="http issuer allowed by --allow-http"/></testcase>
+  <testcase classname="identity" name="pkce-s256"></testcase>
+  <testcase classname="identity" name="jwks"></testcase>
+  <testcase classname="identity" name="token-error"></testcase>
+  <testcase classname="identity" name="userinfo-bearer"></testcase>
+  <testcase classname="identity" name="introspection-auth"></testcase>
+  <testcase classname="identity" name="introspection-inactive"></testcase>
+  <testcase classname="identity" name="revocation-unknown"></testcase>
+  <testcase classname="identity" name="id-token"></testcase>
+</testsuite>

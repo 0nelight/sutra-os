@@ -1,0 +1,307 @@
+{
+ :definitions
+ [{:kind :object          :at [:schema :objects :*]          :name :key :owner [:project] :unique true}
+  {:kind :link            :at [:schema :links :*]            :name [0]  :owner [4 :project] :unique true}
+  {:kind :action          :at [:schema :actions :*]          :name :key :owner [:project] :unique true
+   :derive {:in [:rules] :ops #{:create :update} :kind :object}}
+  {:kind :interface       :at [:schema :interfaces :*]       :name :key :owner [:project] :unique true}
+  {:kind :shared-property :at [:schema :shared-properties :*] :name :key :owner [:project] :unique true}
+  {:kind :value-type      :at [:schema :value-types :*]      :name :key :unique true}
+  {:kind :project         :at [:schema :projects :*]         :name :key}
+  {:kind :repository      :at [:schema :repositories :*]     :name :key :owner [:project]}
+  {:kind :dataset         :at [:schema :datasets :*]         :name :key :owner [:project] :unique true}
+  {:kind :source          :at [:schema :sources :*]          :name :key :owner [:project] :unique true
+   :defining #{:type}}
+  {:kind :writeback       :at [:schema :sources :* :writeback :*] :name :key :unique true
+   :derive {:kind :object}}
+  {:kind :transform       :at [:schema :transforms :*]       :name :key :owner [:project] :unique true}
+  {:kind :function        :at [:schema :functions :*]        :name :key :owner [:project] :unique true}
+  {:kind :pipeline        :at [:schema :pipelines :*]        :name :key :owner [:project] :unique true}
+  {:kind :object-set      :at [:schema :object-sets :*]      :name :key :owner [:project] :unique true}
+  {:kind :collection      :at [:schema :collections :*]      :name :key}
+  {:kind :workspace       :at [:schema :workspaces :*]       :name :key}
+  {:kind :custom-application :at [:schema :custom-applications :*] :name :key :owner [:project] :unique true}
+  {:kind :application     :at [:schema :applications :*]     :name :key :owner [:project] :unique true}
+  {:kind :object-view     :at []  :unit :view :name [:object-type] :owner [:project]}
+  {:kind :application     :at []  :unit :app :name [:name]        :owner [:project] :unique true}
+  {:kind :pipeline        :at []  :unit :pipeline :name [:name]        :owner [:project] :unique true}]
+
+ :references
+ [{:at [:schema :links :* 1] :kind :object}
+  {:at [:schema :links :* 2] :kind :object}
+  {:at [:schema :actions :* :rules :** :object-type] :kind :object :soft-when "-log"}
+  {:at [:schema :actions :* :params :* :type] :kind #{:object :interface} :soft true}
+  {:at [:schema :objects :* :attributes :*] :kind :shared-property}
+  {:at [:schema :objects :* :attributes :* 1] :kind :value-type :soft true}
+  {:at [:schema :custom-applications :* :scope :actions :*] :kind :action}
+  {:at [:schema :custom-applications :* :scope :object-types :*] :kind :object}
+  {:at [:schema :workspaces :* :apps :*] :kind :application :soft true}
+  {:at [:schema :workspaces :* :anchored :*] :kind :application :soft true}
+  {:at [:schema :workspaces :* :landing] :kind :application :soft true}
+  {:at [:object-types :*] :kind :object :unit :app}
+  {:at [:collection] :kind :collection :soft true}
+  {:at [:schema :projects :* :imports :*] :kind :project}
+  {:at [:schema :interfaces :* :extends :*] :kind :interface}
+  {:at [:schema :interfaces :* :link-constraints :* :to-object-type] :kind :object}
+  {:at [:schema :interfaces :* :link-constraints :* :to-interface] :kind :interface}
+  {:at [:schema :interfaces :* :links :* :to-object-type] :kind :object}
+  {:at [:schema :interfaces :* :links :* :to-interface] :kind :interface}
+  {:at [:schema :projects :* :exports :*] :kind :any :soft true}
+  {:at [:schema :pipelines :* :imports :*] :kind #{:dataset :object} :soft true}
+  {:key :object-type    :kind :object}
+  {:key :to-object-type :kind :object}
+  {:key :target-type    :kind :object}
+  {:key :link-type      :kind :link}
+  {:key :implements     :kind :interface :many true}
+  {:key :datasource     :kind :source}
+  {:key :dataset        :kind :dataset :soft true}
+  {:key :project        :kind :project}
+  {:key :repository     :kind :repository}
+  {:key :external-systems :kind :source :many true :soft true}]
+
+ :properties
+ {:of          :object
+  :attributes  :attributes
+  :primary-key [:backing :primary-key]}
+
+ :property-references
+ [{:at [:schema :objects :* :title]             :object {:up 1 :key true}}
+  {:at [:schema :objects :* :backing :primary-key]    :object {:up 2 :key true}}
+  {:at [:schema :objects :* :backing :primary-key :*] :object {:up 3 :key true}}
+  {:at [:schema :actions :* :rules :** :set :*] :object {:up 2 :from [:object-type]}}
+  {:at [:schema :links :* 4 :fk :attribute]     :object {:up 3 :link-fk true}}]
+
+ :actions
+ {:writes {:at [:schema :actions :* :rules :**] :op :op
+           :ops #{:create :update :create-or-update :delete-object}
+           :object :object-type :set :set}
+  :function-ops #{:apply-edit-function}
+  :rule-ops [:create :update :create-or-update :delete-object :create-link :delete-link
+             :apply-marking :remove-marking :create-of-interface :update-of-interface
+             :delete-of-interface :invoke-webhook :invoke-function :apply-edit-function
+             :python-edit :clojure-edit :writeback-create :writeback-update :writeback-delete]
+  :forbidden-types #{:byte :short :float :decimal}
+  :sprawl {:max 10 :name-pattern "^(set|update|setze|aendere|ändere)-"}}
+
+ :status
+ {:vocab     {:object             #{:active :experimental :deprecated :example :endorsed}
+              :application        #{:draft :published}
+              :custom-application #{:draft :published}
+              :object-view        #{:draft :published}
+              :default            #{:active :experimental :deprecated :example}}
+  :default   :experimental
+  :protected #{:active :endorsed :published}
+  :follows-ends #{:experimental :example :deprecated}}
+
+ :identifiers
+ {:kinds   #{:object :link :action :interface :shared-property :property}
+  :pattern "^[a-z][a-z0-9-]*$"
+  :silo-words   #{"sap" "erp" "crm" "dms" "legacy"}
+  :time-pattern "-(alt|neu|old|new|v[0-9]+|historie|history|archiv|kopie)$"}
+
+ :ownership
+ {
+  :tags {:object :object-type :link :link-type :action :action :interface :interface
+          :shared-property :shared-property :repository :repository :dataset :dataset :source :source
+          :transform :transform :function :function :pipeline :pipeline :object-set :object-set
+          :collection :collection :workspace :workspace :custom-application :custom-application
+          :application :application :object-view :application :project :project :value-type :value-type}
+  :global-projects  #{:platform}
+  :transitive-imports false}
+
+ :layout
+ {:legacy ["ontology.ent" "transform.ent"]
+  :paths
+  [{:kind :value-type      :path "shared.ent"}
+   {:kind :project         :path "{project}/project.ent" :alt ["{project}/{project}.ent"]}
+   {:kind :source          :path "{project}/{name}.ent"}
+   {:kind :object          :path "{project}/{name}/object.ent"}
+   {:kind :interface       :path "{project}/{name}/interface.ent" :alt ["{project}/{name}/object.ent"]}
+   {:kind :shared-property :path "{project}/shared.ent"}
+   {:kind :action          :path "{project}/{object-type}/actions.ent" :alt ["{project}/actions.ent"]}
+   {:kind :link            :path "{project}/{from}/object.ent" :alt ["{project}/links.ent"]}
+   {:kind :object-view     :path "{project}/{name}/view.entv" :alt ["object-views/{name}.entv"]}
+   {:kind :dataset         :path "{project}/anbindung/{source}/{table}.ent" :when :synced
+    :alt ["{project}/{project}.ent"]}
+   {:kind :writeback       :path "{project}/anbindung/{source}/{table}.ent"}
+   {:kind :transform       :path "{repository}/{repository}.ent"}
+   {:kind :function        :path "{repository}/{repository}.ent"}
+   {:kind :repository      :path "{name}/{name}.ent" :alt ["{project}/project.ent"]}
+   {:kind :application     :path "{project}/apps/{name}.enta" :alt ["{repository}/apps/{name}.enta"]}]}
+
+ :rules
+ {:unbekannt
+  {:severity :error
+   :datalog "befund(R) :- verweist(R, N, K), not definiert(N, K)."
+   :message "{kind} {name} ist nirgends definiert"}
+  :import-fehlt
+  {:severity :hint
+   :sutra "Kopplung wird gemessen, nicht erlaubt — eine Referenz über eine Projektgrenze braucht kein Import"
+   :datalog "befund(R) :- verweist(R, T), liegt-in(R, P), besitzt(Q, T), P != Q, not importiert(P, Q)."
+   :message "{name} liegt in {owner}; {site} nutzt es — gemessene Kopplung, kein Import nötig (ein :imports macht die Absicht nur sichtbar)"}
+  :export-fehlt
+  {:severity :warning
+   :sutra ":project/not-exported"
+   :datalog "befund(R) :- verweist(R, T), besitzt(Q, T), exportiert-etwas(Q), not exportiert(Q, T)."
+   :message "{name} gehört {owner} und ist dort nicht exportiert — ändern kann das nur {owner} (Proposal an den Besitzer)"}
+  :verwaister-link
+  {:severity :warning
+   :datalog "befund(L) :- link(L, A, B), liegt-in(L, P), not besitzt(P, A), not besitzt(P, B)."
+   :message "Link {name} gehört {site}, aber keines seiner Enden ({from} → {to}) — er gehört zu {owners}"}
+  :projekttext-gibt-es-schon
+  {:severity :error
+   :datalog "befund(D) :- definiert(D, N, K), projekttext(D, P), definiert(D2, N, K), not projekttext(D2, _), besitzt(Q, D2)."
+   :message "{kind} {name} gibt es schon in {owner} ({others}) — {site} verwendet ihn, statt ihn neu zu deklarieren (kein Import nötig)"}
+  :projekttext-aehnlich
+  {:severity :information
+   :message "{name} ähnelt {matches} — derselbe Typ? Dann verwenden und als Synonym führen statt neu deklarieren"}
+  :projekttext-autorenort
+  {:severity :information
+   :datalog "befund(D) :- definiert(D, N, object), projekttext(D, P), not definiert(D2, N, object), D2 != D."
+   :message "{kind} {name} gibt es sonst nirgends — {site} ist sein Autorenort"}
+  :projekttext-attribut-doppelt
+  {:severity :error
+   :message "{object} hat {name} schon ({others}) — eine Erweiterung fügt nur neue Attribute hinzu"}
+  :doppelte-definition
+  {:severity :error
+   :datalog "befund(D) :- definiert(D, N, K), definiert(D2, N, K), D != D2, besitzt(P, D), besitzt(Q, D2), P != Q."
+   :message "{kind} {name} ist mehrfach definiert ({others}) — genau ein Besitzer"}
+  :nicht-deklariert
+  {:severity :error
+   :sutra "repo_checks scope-check: no text kind of the projection reads"
+   :datalog "befund(D) :- datei(D), wurzel(D), not liest(_, D)."
+   :message "Keine Textart der Projektion liest {file} — sie unter :filename der Projektion deklarieren (language, envelope, name, owner) oder die Datei nach einem deklarierten Muster benennen"}
+  :format-unpassend
+  {:severity :error
+   :sutra "authoring ::no-format"
+   :datalog "befund(D) :- liest(F, D), not nimmt(F, D)."
+   :message "{message}"}
+  :feld-widerspruch
+  {:severity :error
+   :sutra "ent-graph ::conflict"
+   :datalog "befund(D) :- teil(D, K, F, W), teil(D2, K, F, W2), D != D2, W != W2."
+   :message "{kind} {name}: {fields} steht in {others} anders — jeder Teil einer Ressource hat genau einen Ort"}
+  :ohne-besitzer
+  {:severity :warning
+   :sutra ":project/missing"
+   :datalog "befund(D) :- definiert(D), regiert(D), not besitzt(_, D)."
+   :message "{kind} {name} hat kein :project — der Ordner ist kein Besitzer{suggest}"}
+  :besitzer-abgeleitet
+  {:severity :hint
+   :datalog "besitzt(P, D) :- not deklariert(D), erzeugt-oder-aendert(D, T), besitzt(P, T)."
+   :message "{kind} {name} gehört {owner} — abgeleitet über {via}"}
+  :falscher-ort
+  {:severity :information
+   :sutra ":layout/misplaced"
+   :datalog "befund(D) :- liegt-in-datei(D, F), pfad(D, G), F != G."
+   :message "{kind} {name} gehört nach {expected}"}
+  :unbekannte-eigenschaft
+  {:severity :error
+   :sutra ":action/unknown-property"
+   :datalog "befund(R) :- verweist-eigenschaft(R, O, N), definiert(O, object), not eigenschaft(O, N)."
+   :message "{object} hat keine Eigenschaft {name}"}
+  :doppelte-eigenschaft
+  {:severity :error
+   :datalog "befund(E) :- eigenschaft(O, N, E), eigenschaft(O, N, E2), E != E2."
+   :message "Eigenschaft {name} ist auf {object} mehrfach definiert"}
+  :pk-fehlt
+  {:severity :warning
+   :sutra ":action/create-without-key"
+   :datalog "befund(R) :- erzeugt(A, R, O), primaerschluessel(O, K), not setzt(R, K)."
+   :message "Action {name} legt {object} an, setzt aber den Primärschlüssel {pk} nicht"}
+  :sync-beim-verbraucher
+  {:severity :information
+   :datalog "befund(D) :- synchronisiert(D, S), besitzt(P, D), besitzt(Q, S), P != Q."
+   :message "Dataset {name} synchronisiert {source} selbst — Rohdaten gehören in die Ingest-Facette von {source-owner}, dem die Quelle gehört, und werden von dort importiert"}
+  :action-sprawl
+  {:severity :hint
+   :datalog "befund(O) :- #{A | aendert(A, O)} > max."
+   :message "{name} hat {count} Action-Types — Actions um Geschäftsvorgänge bündeln statt pro Eigenschaft"}
+  :action-pro-eigenschaft
+  {:severity :hint
+   :message "Action {name} liest sich wie „Set/Update [Eigenschaft]“ — Actions um Geschäftsvorgänge bündeln"}
+  :entfernt
+  {:severity :warning
+   :message "{kind} {name} gibt es gegenüber {base} nicht mehr — Anwendungen, die ihn nutzen, brechen"}
+  :pk-geaendert
+  {:severity :error
+   :message "Primärschlüssel von {name} geändert ({old} → {new}) — Edits hängen am Primärschlüssel und gehen alle verloren"}
+  :typ-geaendert
+  {:severity :warning
+   :message "Eigenschaft {name} von {object}: Typ {old} → {new} — jeder vorhandene Wert muss sich umwandeln lassen"}
+  :link-seite-doppelt
+  {:severity :error
+   :message "{object} hat zwei Link-Seiten namens {side} ({links}) — Seitennamen sind pro Object-Type eindeutig"}
+  :selbst-link-seiten
+  {:severity :warning
+   :message "Selbst-Link {name} braucht zwei verschiedene Seitennamen (:forward-api-name, :reverse-api-name)"}
+  :link-anbindung
+  {:severity :error
+   :message "Link {name}: {problem}"}
+  :fk-typ
+  {:severity :warning
+   :message "Fremdschlüssel {fk} ({fk-type}) zeigt auf den Primärschlüssel {pk} von {object} ({pk-type}) — die Typen müssen gleich sein"}
+  :datenquelle-mehrfach
+  {:severity :error
+   :message "Dataset {name} speist mehrere Object-Types ({objects}) — eine Datenquelle speist genau einen"}
+  :status-unbekannt
+  {:severity :error
+   :message "{kind} {name}: Status {status} gibt es nicht — erlaubt sind {allowed}"}
+  :veraltet
+  {:severity :warning
+   :message "{name} ist deprecated{replacement}"}
+  :deprecation-fehlt
+  {:severity :information
+   :message "{kind} {name} ist deprecated ohne :deprecation (Grund, Frist, Ersatz)"}
+  :link-status
+  {:severity :error
+   :message "Link {name} ist {status}, aber {end} ist {end-status} — ein Link ist höchstens so weit wie seine Enden"}
+  :interface-eigenschaft-fehlt
+  {:severity :error
+   :message "{object} implementiert {interface}, hat aber {missing} nicht"}
+  :interface-typ
+  {:severity :error
+   :message "{object}: Eigenschaft {name} hat Typ {type}, {interface} verlangt {wanted}"}
+  :interface-link-fehlt
+  {:severity :error
+   :message "{object} implementiert {interface}, hat aber keinen Link {link} ({cardinality}) zu {target}"}
+  :extends-zyklus
+  {:severity :error
+   :message "Interface {name} erweitert sich selbst (über {via})"}
+  :interface-zu-viele
+  {:severity :warning
+   :message "Interface {name} hat {count} Implementierungen — {limit} sind höchstens erlaubt ({kind})"}
+  :function-rule-allein
+  {:severity :error
+   :message "Action {name}: eine Function-Rule ist die einzige Regel ihrer Action"}
+  :action-typ
+  {:severity :warning
+   :message "Action {name}: {what} hat Typ {type} — in Actions nicht verwendbar"}
+  :fremd-schreiben
+  {:severity :warning
+   :message "Action {name} ({owner}) schreibt {object}, das {object-owner} gehört — dafür braucht sie Edit-Rechte auf {object-owner}"}
+  :id-syntax
+  {:severity :warning
+   :message "{kind} {name}: IDs bestehen aus Kleinbuchstaben, Ziffern und Bindestrichen und beginnen mit einem Buchstaben"}
+  :beschreibung-fehlt
+  {:severity :hint
+   :message "{kind} {name} ist {why}, hat aber keine :description"}
+  :system-silo
+  {:severity :hint
+   :message "{name} trägt das Quellsystem {word} im Namen — die Realität modellieren, nicht das System"}
+  :time-machine
+  {:severity :hint
+   :message "{name} klingt nach einer Version — ein Objekt pro Entität, Historie über Links"}
+  :entfernt-geschuetzt
+  {:severity :error
+   :sutra ":protected"
+   :message "{kind} {name} war {status} gegenüber {base} — aktive Ressourcen werden nicht gelöscht, erst deprecated"}
+  :grammatik
+  {:severity :error
+   :message "{message}"}
+  :referenz
+  {:severity :error
+   :message "{message}"}
+  :lesefehler
+  {:severity :error
+   :message "{message}"}}}

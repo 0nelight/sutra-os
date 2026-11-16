@@ -1,0 +1,5 @@
+{:schema
+ {:projects
+  {:stamm {:description "Stammdaten"
+           :imports     [:quellen]
+           :exports     [:partner :partner-anlegen :notiz]}}}}

@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sutra.local/interfaces/app-host/widget-messages.schema.json",
+  "title": "Sutra app and widget host messages (B-11, version 1.0.0)",
+  "description": "Every message that crosses window.postMessage or a BroadcastChannel between a Sutra app (the host) and code it frames or pairs with. Three channels: the custom widget frame, the Iframe widget bridge, and App Pairing. Sources of truth: libs/core/src/sutra/capps/custom_widget.cljc, libs/core/src/sutra/capps/iframe_bridge.cljc, libs/core/src/sutra/capps/pairing.cljc and the frame runtime clients/frontend/src/sutra_ui/widget_frame/core.cljs.",
+  "$defs": {
+    "customWidget": {
+      "description": "Custom widget frame. Each message is a string holding one EDN vector [op & args] (pr-str / cljs.reader). The frame is a srcdoc iframe sandboxed to an opaque origin; the host accepts only messages whose source is that frame's window and whose origin is \"null\", and only while the srcdoc has loaded once. The frame accepts only messages from window.parent with the host origin it reads off its runtime script tag. JSON Schema below describes the decoded vector.",
+      "x-encoding": "edn-string",
+      "x-sandbox": "allow-scripts allow-downloads allow-modals",
+      "frameToHost": {
+        "ready": {
+          "description": "The runtime is listening; the host answers with init.",
+          "type": "array", "prefixItems": [{"const": "ready"}], "items": false
+        },
+        "emit": {
+          "description": "A declared event fired; updates are written to the parameters the event declares. An undeclared event or key is refused.",
+          "type": "array",
+          "prefixItems": [{"const": "emit"}, {"$ref": "#/$defs/keyword"}, {"type": "object"}],
+          "items": false
+        },
+        "rpc": {
+          "description": "A request the host runs under the app's scope; answered by reply with the same id.",
+          "type": "array",
+          "prefixItems": [{"const": "rpc"}, {"type": "integer"},
+                          {"$ref": "#/$defs/customWidget/rpcOps"}, {"type": "object"}],
+          "items": false
+        },
+        "store": {
+          "description": "Keep a value in this browser across reloads of the widget.",
+          "type": "array", "prefixItems": [{"const": "store"}, {"$ref": "#/$defs/keyword"}, {}],
+          "items": false
+        },
+        "height": {
+          "description": "The frame's content height in px.",
+          "type": "array", "prefixItems": [{"const": "height"}, {"type": "number"}],
+          "items": false
+        },
+        "error": {
+          "description": "The widget failed; the message is logged by the host.",
+          "type": "array", "prefixItems": [{"const": "error"}, {"type": "string"}],
+          "items": false
+        }
+      },
+      "hostToFrame": {
+        "init": {
+          "description": "The release's files, the widget's manifest entry, parameter values (object sets capped at 10000 rows), stored values, and the frame's size class, colour scheme and design tokens.",
+          "type": "array",
+          "prefixItems": [{"const": "init"},
+                          {"type": "object", "required": ["files", "widget", "values", "stored"],
+                           "properties": {"files": {"type": "object"},
+                                          "widget": {"$ref": "#/$defs/manifest/$defs/widget"},
+                                          "values": {"type": "object"},
+                                          "stored": {"type": "object"},
+                                          "groesse": {"$ref": "#/$defs/customWidget/$defs/groesse"},
+                                          "thema": {"enum": ["dark", "light"]},
+                                          "tokens": {"type": "object"}}}],
+          "items": false
+        },
+        "values": {
+          "description": "Parameter values changed.",
+          "type": "array", "prefixItems": [{"const": "values"}, {"type": "object"}],
+          "items": false
+        },
+        "reply": {
+          "description": "The answer to rpc id: ok? true with the value, or false with an error text.",
+          "type": "array",
+          "prefixItems": [{"const": "reply"}, {"type": "integer"}, {"type": "boolean"}, {}],
+          "items": false
+        },
+        "groesse": {
+          "description": "The frame's width crossed into another size class (sutra.kit.size).",
+          "type": "array",
+          "prefixItems": [{"const": "groesse"}, {"$ref": "#/$defs/customWidget/$defs/groesse"}],
+          "items": false
+        }
+      },
+      "$defs": {
+        "groesse": {"description": "Size class of a width: up to 700, 1199, 1799 px, or wider.",
+                    "enum": ["kompakt", "mittel", "breit", "weit"]}
+      },
+      "rpcOps": {"enum": ["objects", "search", "aggregate", "function", "submit"]}
+    },
+    "iframeBridge": {
+      "description": "Iframe widget. Messages are structured-clone objects with a type field (App Studio message names). A frame of a foreign origin keeps its origin and is the only accepted sender and receiver; a page of this host is sandboxed to an opaque origin and must post from origin \"null\". A frame reaches only the parameter and event keys the builder named. Arrays are capped at 10000 entries.",
+      "x-encoding": "structured-clone",
+      "frameToHost": {
+        "APPHOST//SET_OUTPUT_VALUE": {
+          "type": "object", "required": ["type", "outputParameterKey"],
+          "properties": {"type": {"const": "APPHOST//SET_OUTPUT_VALUE"},
+                         "outputParameterKey": {"type": "string"},
+                         "value": {}, "undefined?": {"type": "boolean"}}
+        },
+        "APPHOST//TRIGGER_APPHOST_EVENT": {
+          "type": "object", "required": ["type", "eventKey"],
+          "properties": {"type": {"const": "APPHOST//TRIGGER_APPHOST_EVENT"},
+                         "eventKey": {"type": "string"}}
+        },
+        "APPHOST//RESIZE": {
+          "type": "object", "required": ["type", "height"],
+          "properties": {"type": {"const": "APPHOST//RESIZE"},
+                         "height": {"type": "number", "exclusiveMinimum": 0}}
+        }
+      },
+      "hostToFrame": {
+        "APPHOST//VARIABLE_VALUES": {
+          "description": "Bidirectional mode: every variable with its loading state.",
+          "type": "object", "required": ["type", "values"],
+          "properties": {"type": {"const": "APPHOST//VARIABLE_VALUES"},
+                         "values": {"type": "object",
+                                    "additionalProperties": {
+                                      "type": "object",
+                                      "properties": {"value": {}, "loading": {"type": "boolean"}}}}}
+        },
+        "inputParameters": {
+          "description": "Input mode: a plain map of input parameter key to value, as getMessage reads it.",
+          "type": "object"
+        }
+      }
+    },
+    "pairing": {
+      "description": "App Pairing between two open apps of one origin, over the BroadcastChannel sutra-app-pairing:<scope>. Each message is an EDN map as a string. A message with to is for that app only; :open-data variables are received only.",
+      "x-encoding": "edn-string",
+      "type": "object", "required": ["type", "from"],
+      "properties": {
+        "type": {"enum": ["hello", "here", "bye", "pair", "paired", "unpair", "state"]},
+        "from": {"type": "string"},
+        "to": {"type": "string"},
+        "name": {"type": "string"},
+        "vars": {"type": "object"}
+      }
+    },
+    "manifest": {
+      "description": "widgets.edn at the root of a widget set release (EDN). Checked by sutra.capps.custom-widget/manifest-problems on release.",
+      "type": "object", "required": ["widgets"],
+      "properties": {
+        "widgets": {"type": "object", "minProperties": 1,
+                    "additionalProperties": {"$ref": "#/$defs/manifest/$defs/widget"}},
+        "csp": {
+          "type": "object",
+          "propertyNames": {"enum": ["connect-src", "img-src", "media-src", "font-src",
+                                     "frame-src"]},
+          "additionalProperties": {"type": "array",
+                                   "items": {"type": "string", "pattern": "^[\\w:/.*'-]+$"}}
+        }
+      },
+      "$defs": {
+        "widget": {
+          "type": "object", "required": ["main"],
+          "properties": {
+            "main": {"type": "string", "description": "namespace/var of the view"},
+            "css": {"type": "string", "description": "a file of the release"},
+            "parameters": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object", "required": ["type"],
+                "properties": {"type": {"$ref": "#/$defs/manifest/$defs/valueType"}}}
+            },
+            "events": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {"updates": {"type": "array", "items": {"type": "string"}}}}
+            }
+          }
+        },
+        "valueType": {
+          "oneOf": [
+            {"enum": ["boolean", "date", "number", "string", "timestamp", "object-set", "any"]},
+            {"type": "array",
+             "prefixItems": [{"const": "array"},
+                             {"enum": ["boolean", "date", "number", "string", "timestamp"]}],
+             "items": false}
+          ]
+        }
+      }
+    },
+    "keyword": {"type": "string", "description": "an EDN keyword, shown without its colon"}
+  }
+}

@@ -1,0 +1,43 @@
+{:documents
+ {:purpose
+    "Was jemand aufschreibt und ausdruckt — eine Notiz, ein Bericht, ein Plan für die Schranktür."
+  :regime      :own-history
+  :doors       ["document-create" "document-generate" "document-export"]
+  :folder-sync nil
+  :counterpart     "Notebook: ein Dokument ist eine Resource im Project, keine Datei in einem Code-repository. Export und Einfrieren gehören dazu."}
+
+ :kompass-placements
+ {:purpose     "In welchem Ordner eine Resource liegt, damit Leute sie finden."
+  :regime      :setting
+  :doors       ["place" "folder" "graph-move"]
+  :folder-sync nil
+  :counterpart     "Atlas: Projects und Ordner halten Resources. Verschieben ändert nicht, WAS eine Sache ist, also wird es nicht geprüft."}
+
+ :projection-placements
+ {:purpose
+    "Welcher Text welchen Knoten hält, damit zwei Autoren nicht im selben Text kollidieren."
+  :regime      :setting
+  :doors       ["projection pull --rehome" "projection push"]
+  :folder-sync "projection"
+  :counterpart     "Kein Gegenstück — die Ontologie als Texte zu schreiben ist Sutras eigene Autorenschaft, und darum ist die Platzierung hier eine Einstellung und keine Schemaaussage."}
+
+ :dataset-rows
+ {:purpose     "Die eigentlichen Zeilen — was eine Quelle geliefert und ein Transform geformt hat."
+  :regime      :transactional
+  :doors       ["upload" "build"]
+  :folder-sync nil
+  :counterpart     "Dataset-Transaktionen und Views: SNAPSHOT/APPEND-Kette, Rollback je Transaktion, Retention je View."}
+
+ :blobs
+ {:purpose     "Beilagen, die keine Tabelle sind — Scans, PDFs, Bilder, eine Tabellendatei."
+  :regime      :content-addressed
+  :doors       ["upload" "blob" "media-gc"]
+  :folder-sync nil
+  :counterpart     "Media sets und Attachments: der Inhalt wird nicht überschrieben, und was niemand referenziert, wird aufgeräumt."}
+
+ :object-rows
+ {:purpose     "Die Objekte, die Leute anfassen — ein Prüfdatum, ein korrigierter Wert."
+  :regime      :log-only
+  :doors       ["action submit"]
+  :folder-sync nil
+  :counterpart     "Der Objektindex ist ephemer, es gibt kein „der Objekttyp von gestern“. Historie ist das Action-/Edit-Protokoll und die Materialisierung."}}

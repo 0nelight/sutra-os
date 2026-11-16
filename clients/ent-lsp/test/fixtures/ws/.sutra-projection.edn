@@ -1,0 +1,3 @@
+{:projection "fixture"
+ :filename   {:texte     {:language :edn :envelope [:schema] :name ["**.ent"] :home-for [:*]}
+              :ansichten {:language :edn :name ["**.entv"] :kind :view}}}

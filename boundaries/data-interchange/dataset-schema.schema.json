@@ -1,0 +1,204 @@
+{
+  "$id": "https:\/\/sutra.dev\/boundaries\/data-interchange\/dataset-schema.schema.json",
+  "$schema": "http:\/\/json-schema.org\/draft-07\/schema#",
+  "definitions": {
+    "dataset-schema": {
+      "description": "The columns of a dataset, in order, and the columns that key a row.",
+      "properties": {
+        "columns": {
+          "items": {
+            "description": "One column: its name and value type. A keyword travels as a string; a parameterised type as an array: [\"decimal\", precision, scale], [\"array\", type], [\"struct\", {name: type}].",
+            "properties": {
+              "attribute-name": {
+                "type": "string"
+              },
+              "attribute-type": {
+                "$ref": "#\/definitions\/sutra.parser.spec~1vt"
+              },
+              "opts": {
+                "oneOf": [
+                  {
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "attribute-name",
+              "attribute-type"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "dataset": {
+          "description": "The dataset's name or rid."
+        },
+        "kind": {
+          "description": "transform-output, standalone, materialization, …",
+          "type": "string"
+        },
+        "primary-key": {
+          "oneOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "columns"
+      ],
+      "title": "dataset schema",
+      "type": "object"
+    },
+    "rows-write": {
+      "description": "POST \/api\/datasets\/:name\/rows — rows written to a dataset.",
+      "properties": {
+        "key": {
+          "description": "The column a row is keyed by.",
+          "type": "string"
+        },
+        "mode": {
+          "description": "append (default) or snapshot",
+          "enum": [
+            "append",
+            "snapshot"
+          ],
+          "type": "string"
+        },
+        "rows": {
+          "items": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "rows"
+      ],
+      "title": "rows write",
+      "type": "object"
+    },
+    "sutra.parser.spec\/vt": {
+      "anyOf": [
+        {
+          "enum": [
+            "attachment",
+            "boolean",
+            "byte",
+            "date",
+            "decimal",
+            "double",
+            "float",
+            "geohash",
+            "geopoint",
+            "geoshape",
+            "instant",
+            "integer",
+            "keyword",
+            "long",
+            "media-reference",
+            "number",
+            "short",
+            "string",
+            "text",
+            "timeseries",
+            "timestamp",
+            "uuid"
+          ],
+          "type": "string"
+        },
+        {
+          "additionalItems": false,
+          "items": [
+            {
+              "const": "decimal"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "type": "array"
+        },
+        {
+          "additionalItems": false,
+          "items": [
+            {
+              "const": "vector"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "type": "array"
+        },
+        {
+          "additionalItems": false,
+          "items": [
+            {
+              "const": "array"
+            },
+            {
+              "$ref": "#\/definitions\/sutra.parser.spec~1vt"
+            }
+          ],
+          "type": "array"
+        },
+        {
+          "additionalItems": false,
+          "items": [
+            {
+              "const": "struct"
+            },
+            {
+              "additionalProperties": {
+                "$ref": "#\/definitions\/sutra.parser.spec~1vt"
+              },
+              "type": "object"
+            }
+          ],
+          "type": "array"
+        }
+      ]
+    }
+  },
+  "description": "The schema a dataset carries across the platform boundary (B-13). Version 1.0.",
+  "oneOf": [
+    {
+      "$ref": "#\/definitions\/dataset-schema"
+    },
+    {
+      "$ref": "#\/definitions\/rows-write"
+    }
+  ],
+  "title": "Sutra dataset schema",
+  "version": "1.0",
+  "x-sutra-file-formats": {
+    "arrow": {
+      "extension": "arrow",
+      "media-type": "application\/vnd.apache.arrow.file"
+    },
+    "csv": {
+      "extension": "csv",
+      "media-type": "text\/csv; charset=utf-8"
+    },
+    "parquet": {
+      "extension": "parquet",
+      "media-type": "application\/vnd.apache.parquet"
+    }
+  }
+}

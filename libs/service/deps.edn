@@ -1,0 +1,14 @@
+{:paths ["src"]
+ :deps  {org.clojure/clojure {:mvn/version "1.12.0"}
+         sutra/world          {:local/root "../world"}
+         sutra/dialect       {:local/root "../dialect"}}
+ :aliases
+ {:test {:extra-paths ["test"]
+         :extra-deps  {org.clojure/test.check {:mvn/version "1.1.1"}
+                       sutra/world-gen         {:local/root "../world/gen"}
+                       sutra/core             {:local/root "../core"}}
+         :main-opts   ["-m" "sutra.service.run-tests"]}
+  :repl {:extra-paths ["test"]
+         :extra-deps  {org.clojure/test.check {:mvn/version "1.1.1"}
+                       sutra/world-gen         {:local/root "../world/gen"}
+                       sutra/core             {:local/root "../core"}}}}}

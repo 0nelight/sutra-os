@@ -1,0 +1,74 @@
+{:paths ["src" "src/data-plane" "resources"]
+ :deps  {org.clojure/clojure                {:mvn/version "1.12.0"}
+         sutra/core                         {:local/root "libs/core"}
+         sutra/kernel                       {:local/root "libs/kernel"}
+         sutra/world                         {:local/root "libs/world"}
+         sutra/commits                     {:local/root "libs/commits"}
+         sutra/service                       {:local/root "libs/service"}
+         sutra/calx                         {:local/root "libs/calx"}
+         sutra/store                        {:local/root "libs/store"}
+         sutra/store-pg                     {:local/root "libs/store-pg"}
+         sutra/sso                          {:local/root "plugins/sso"}
+         sutra/llm                          {:local/root "plugins/llm"}
+         sutra/dot                          {:local/root "plugins/dot"}
+         sutra/smb                          {:local/root "plugins/smb"}
+         sutra/packages                     {:local/root "plugins/packages"}
+         com.github.seancorfield/next.jdbc  {:mvn/version "1.3.939"}
+         org.postgresql/postgresql          {:mvn/version "42.7.14"}
+         org.xerial/sqlite-jdbc             {:mvn/version "3.46.1.3"}
+         com.mysql/mysql-connector-j        {:mvn/version "9.7.0"}
+         com.microsoft.sqlserver/mssql-jdbc {:mvn/version "12.10.2.jre11"}
+         com.zaxxer/HikariCP                {:mvn/version "6.0.0"}
+         org.slf4j/slf4j-nop                {:mvn/version "2.0.16"}
+         org.clojure/data.json              {:mvn/version "2.5.0"}
+         org.clojure/data.csv               {:mvn/version "1.1.0"}
+         com.hierynomus/sshj                {:mvn/version "0.41.2"}
+         org.bouncycastle/bcprov-jdk18on    {:mvn/version "1.86"}
+         org.bouncycastle/bcpkix-jdk18on    {:mvn/version "1.86"}
+         org.bouncycastle/bcutil-jdk18on    {:mvn/version "1.86"}
+         org.babashka/sci                   {:mvn/version "0.9.44"}
+         org.apache.pdfbox/pdfbox           {:mvn/version "3.0.8"}
+         org.commonmark/commonmark          {:mvn/version "0.24.0"}
+         org.commonmark/commonmark-ext-gfm-tables {:mvn/version "0.24.0"}
+         org.jsoup/jsoup                    {:mvn/version "1.24.1"}
+         org.eclipse.jgit/org.eclipse.jgit {:mvn/version "7.8.1.202611041320-r"}
+         metosin/malli                      {:mvn/version "0.16.4"}
+         http-kit/http-kit                  {:mvn/version "2.8.1"}
+         metosin/reitit-ring                {:mvn/version "0.7.2"}
+         metosin/reitit-middleware          {:mvn/version "0.7.2"}
+         metosin/muuntaja                   {:mvn/version "0.6.10"}
+         com.cognitect/transit-clj          {:mvn/version "1.0.333"}
+         ring/ring-core                     {:mvn/version "1.15.6"}
+         rewrite-clj/rewrite-clj            {:mvn/version "1.1.48"}
+         com.fasterxml.jackson.core/jackson-core        {:mvn/version "2.18.12"}
+         com.fasterxml.jackson.core/jackson-databind    {:mvn/version "2.18.12"}
+         com.fasterxml.jackson.core/jackson-annotations {:mvn/version "2.18.12"}
+         com.fasterxml.jackson.datatype/jackson-datatype-jsr310 {:mvn/version "2.18.12"}}
+ :aliases
+ {
+  :test {:extra-paths ["tests" "libs/store/test" "libs/world/gen/src" "clients/sutra-cli/src"
+                       "clients/frontend/src"
+                       "clients/sutra-cli/resources" "boundaries/conformance/src"]
+         :extra-deps {lambdaisland/kaocha   {:mvn/version "1.91.1392"}
+                      org.clojure/test.check {:mvn/version "1.1.1"}}}
+  :conformance {:replace-paths ["boundaries/conformance/src"]
+                :replace-deps  {org.clojure/clojure   {:mvn/version "1.12.0"}
+                                org.clojure/data.json {:mvn/version "2.5.0"}}
+                :main-opts     ["-m" "conformance.main"]}
+  :prod {:jvm-opts ["-Duser.timezone=UTC"]}
+  :dev  {:extra-deps {nrepl/nrepl               {:mvn/version "1.3.0"}
+                      cider/cider-nrepl         {:mvn/version "0.47.1"}}
+         :jvm-opts ["-Duser.timezone=UTC"]}
+  :run  {:main-opts ["-m" "sutra.serve.server"]}
+  :aot  {:extra-paths ["classes"]}
+  :solo {:extra-paths ["distributions/sutra-solo/src"]
+         :extra-deps  {io.zonky.test/embedded-postgres
+                       {:mvn/version "2.1.0"
+                        :exclusions  [io.zonky.test.postgres/embedded-postgres-binaries-bom]}
+                       io.zonky.test.postgres/embedded-postgres-binaries-linux-amd64
+                       {:mvn/version "16.4.0"}
+                       org.apache.commons/commons-lang3 {:mvn/version "3.20.0"}}
+         :main-opts   ["-m" "sutra.solo.main"]}
+  :spec-dump {:extra-paths ["clients/sutra-cli/src" "clients/sutra-cli/resources"]
+              :extra-deps  {com.cognitect/transit-clj {:mvn/version "1.0.333"}}
+              :main-opts   ["-m" "sutra.cli.spec-dump"]}}}

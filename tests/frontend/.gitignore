@@ -1,0 +1,6 @@
+/node_modules/
+/out/
+/shots/
+/.shadow-cljs/
+/package-lock.json
+/*.log

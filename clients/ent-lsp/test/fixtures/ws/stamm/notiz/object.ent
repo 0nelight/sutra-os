@@ -1,0 +1,5 @@
+{:schema
+ {:objects
+  {:notiz {:project    :stamm
+           :title      :text
+           :attributes [[:notiz-id :string] [:text :string]]}}}}

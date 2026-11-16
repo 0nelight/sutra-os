@@ -1,0 +1,6 @@
+{:schema
+ {:sources
+  {:erp {:type    :mssql
+         :host    "erp.local"
+         :port    1433
+         :project :quellen}}}}

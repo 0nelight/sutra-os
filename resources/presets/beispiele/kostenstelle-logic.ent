@@ -1,0 +1,69 @@
+;;   automation proposals kostenstelle-vorschlagen
+;;   automation accept kostenstelle-vorschlagen <vorschlag-id>
+;;
+;; Voraussetzung: eine Sprachmodell-Quelle `:lms` (`:external-transform true`)
+;; mit hinterlegtem Schlüssel und das Modell im Register (:llm-models).
+;; ════════════════════════════════════════════════════════════════════════════
+{:schema
+ {:objects
+  {:kostenstelle
+   {:name "Kostenstelle" :plural "Kostenstellen"
+    :description "Wohin ein Aufwand gebucht wird."
+    :match-keys [:kostenstelle-id]
+    :title :bezeichnung
+    :attributes [[:kostenstelle-id :string {:visibility :hidden}]
+                 [:bezeichnung     :string {:name "Bezeichnung" :required true}]
+                 [:beschreibung    :string {:name "Wofür"}]]}
+
+   :eingangsrechnung
+   {:name "Eingangsrechnung" :plural "Eingangsrechnungen"
+    :description "Eine Rechnung eines Lieferanten, die gebucht werden muss."
+    :match-keys [:rechnung-id]
+    :title :rechnung-nr
+    :attributes [[:rechnung-id  :string {:visibility :hidden}]
+                 [:rechnung-nr  :string {:name "Rechnungsnummer" :required true}]
+                 [:text         :string {:name "Positionstext"}]
+                 [:betrag       :number {:name "Betrag"}]
+                 [:stand        :string {:name "Stand"}]
+                 [:kostenstelle :string {:name "Kostenstelle"}]]}}
+
+  :llm-models
+  {"grok-4" {:in 0.15 :out 0.60 :currency "USD"
+             :description "Entscheidet die Kostenstelle einer Rechnung."}}
+
+  :actions
+  {:kostenstelle-zuordnen
+   {:display-name "Kostenstelle zuordnen"
+    :on     :eingangsrechnung
+    :params {:rechnung     {:type :eingangsrechnung :name "Rechnung" :required true}
+             :kostenstelle {:type :string :name "Kostenstelle" :required true}}
+    :rules  [{:op :update :object-type :eingangsrechnung :target [:get :rechnung :id]
+              :values {:kostenstelle [:get :kostenstelle] :stand "kontiert"}}]}}
+
+  ;; Die Logic-Funktion: Use LLM (getypte Antwort, Werkzeuge) → Apply action.
+  :functions
+  {:kostenstelle-bestimmen
+   {:name        :kostenstelle-bestimmen
+    :language    :clojure
+    :source      "(defn kostenstelle-bestimmen [rechnung]
+                    (let [ks (OntologyClient/use-llm
+                               {:model \"grok-4\" :source :lms
+                                :system \"Du kontierst Eingangsrechnungen einer Flugzeugwerft (Ersatzteile, Triebwerksteile, Hangarbetrieb).\"
+                                :prompt \"Rechnung {{rechnung.rechnung-nr}} über {{rechnung.betrag}} EUR: {{rechnung.text}}. Welche Kostenstelle? Sieh in den Kostenstellen nach.\"
+                                :output [:enum \"hangar\" \"buero\" \"triebwerke\"]
+                                :tools [{:query-objects :kostenstelle :properties [:bezeichnung :beschreibung]}]
+                                :max-iterations 4})]
+                      (OntologyClient/apply-action :kostenstelle-zuordnen
+                                                   {:rechnung rechnung :kostenstelle ks})))"
+    :target-type :eingangsrechnung
+    :types       {:rechnung :eingangsrechnung}}}}
+
+ ;; Automation: je eingegangener Rechnung einmal, als VORSCHLAG zur Prüfung.
+ :automations
+ [{:name     "kostenstelle-vorschlagen"
+   :on       :eingangsrechnung
+   :when     {:eq {:attr :stand :value "eingegangen"}}
+   :effect   {:function :kostenstelle-bestimmen
+              :inputs   {:rechnung {:self :id}}
+              :mode     :propose}
+   :every-ms 300000}]}

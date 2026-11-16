@@ -1,0 +1,234 @@
+;; ════════════════════════════════════════════════════════════════════════════
+;; standard / 1 — BASISTYPEN
+;; ════════════════════════════════════════════════════════════════════════════
+;; Was JEDER hat, Privatperson wie Betrieb: Parteien, Geld auf Konten, Belege,
+;; Vertraege, Fristen, Besitz, Vorgaenge. Diese Stufe kennt keine Datenquelle
+;; und keinen Anwendungsfall. Sie legt nur fest, welche FRAGEN ueber alle
+;; konkreten Typen hinweg gleich gestellt werden -- als Interfaces:
+;;
+;;   :partei          wer?                         Person, Organisation
+;;   :geldkonto       wo liegt Geld?               Girokonto, Kreditkarte, Kasse
+;;   :kontobewegung   wann floss wie viel?         Bankbuchung, Kassenbuchung
+;;   :beleg           wer schuldet wem was?        Rechnung, Gutschrift, Quittung
+;;   :vertrag         was bindet mich, bis wann?   Versicherung, Miete, Abo
+;;   :befristet       was laeuft ab?               Ausweis, Garantie, Pickerl, Vertrag
+;;   :wiederkehrend   was kommt regelmaessig?      Abo, Versicherung, Gehalt, Miete
+;;   :besitz          was gehoert mir?             Fahrzeug, Geraet, Maschine
+;;   :vorgang         was ist zu erledigen?        Schadensfall, Reklamation, Antrag
+;;   :ausgehend       was soll hinaus?             Ueberweisung, Beitrag, Mail, Kuendigung
+;;
+;; Ein Interface steht hier nur, wenn eine Anwendung die Frage OHNE Kenntnis des
+;; konkreten Typs stellt (ontology/README.md §3): die Fristenliste liest
+;; :befristet, der Belegabgleich :kontobewegung x :beleg, die Vermoegensuebersicht
+;; :geldkonto. Wer nur eine Spalte teilt, bekommt eine gemeinsame Eigenschaft.
+;;
+;; Konkrete Typen dieser Stufe sind nur die Anker, die keine Quelle brauchen und
+;; ohne die kein Interface eine Link-Pflicht haben kann (Person, Organisation,
+;; Ort, Dokument) -- und :ausgleich, das Verbindungsobjekt zwischen Geldfluss und
+;; Beleg, weil ein Link keine Eigenschaften tragen kann (Teilbetrag).
+;;
+;; Stufe 2 (2_abgeleitet.ent) implementiert diese Interfaces je Datenquelle,
+;; Stufe 3 (3_privat.ent, 3_betrieb.ent) setzt die Anwendungsfaelle darauf.
+{:schema
+ {:value-types
+  {:betrag      {:type        :decimal
+                 :description "Geldbetrag in der Waehrung des Datensatzes; Vorzeichen = Richtung."
+                 :format      {:kind :currency :currency "EUR" :decimals 2 :grouping true}}
+   :iban-nr     {:type :string :description "IBAN, Pruefziffer validiert" :constraints {:format :iban}}}
+
+  ;; Jede Eigenschaft, die ein Interface verlangt, steht HIER: dieselbe Spalte
+  ;; bedeutet in jedem Implementierer dasselbe, und der Implementierer nennt sie
+  ;; nur beim Namen. Wo ein Werttyp passt, nennt die Eigenschaft ihn (:value-type)
+  ;; statt Einschraenkung und Format zu wiederholen; der Basistyp folgt daraus.
+  :shared-properties
+  {:bezeichnung    {:type :string :name "Bezeichnung" :render-hints [:searchable :identifier]}
+   :notiz          {:type :string :name "Notiz"}
+   :email          {:type :string :name "E-Mail" :constraints {:format :email}}
+   :telefon        {:type :string :name "Telefon"}
+   :iban           {:value-type :iban-nr :name "IBAN" :render-hints [:searchable]}
+   :waehrung       {:type :string :name "Waehrung"
+                    :constraints {:min-length 3 :max-length 3 :regex "[A-Z]{3}"} :format {:kind :id}}
+   :betrag         {:value-type :betrag :name "Betrag" :description "Vorzeichen = Richtung"}
+   :gueltig-bis    {:type :date :name "Gueltig bis" :render-hints [:sortable]}
+   :vorlauf-tage   {:type :integer :name "Vorlauf (Tage)" :description "So viele Tage vor Ablauf soll es auffallen."}
+   :faellig-am     {:type :date :name "Faellig am" :render-hints [:sortable]}
+
+   :buchungsdatum    {:type :date :name "Buchungsdatum" :render-hints [:sortable]}
+   :verwendungszweck {:type :string :name "Verwendungszweck" :render-hints [:searchable]}
+   :gegenpartei      {:type :string :name "Gegenpartei" :render-hints [:searchable]}
+   :gegen-iban       {:value-type :iban-nr :name "IBAN der Gegenpartei"}
+
+   :belegnummer {:type :string :name "Belegnummer" :render-hints [:searchable :identifier]}
+   :belegdatum  {:type :date :name "Belegdatum" :render-hints [:sortable]}
+
+   :takt                 {:type :string :name "Takt"
+                          :constraints {:one-of ["woechentlich" "monatlich" "quartalsweise" "halbjaehrlich" "jaehrlich"]}}
+   :naechste-faelligkeit {:type :date :name "Naechste Faelligkeit" :render-hints [:sortable]}
+
+   :vertragsnummer          {:type :string :name "Vertragsnummer" :render-hints [:searchable]}
+   :beginn                  {:type :date :name "Beginn"}
+   :kuendigungsfrist-monate {:type :integer :name "Kuendigungsfrist (Monate)"}
+   :gekuendigt-am           {:type :date :name "Gekuendigt am"}
+
+   :seriennummer      {:type :string :name "Seriennummer" :render-hints [:searchable]}
+   :angeschafft-am    {:type :date :name "Angeschafft am"}
+   :anschaffungspreis {:value-type :betrag :name "Anschaffungspreis"}
+
+   :zustand     {:type :string :name "Zustand"
+                 :constraints {:one-of ["offen" "in-arbeit" "wartet" "erledigt" "verworfen"]}}
+   :erledigt-am {:type :date :name "Erledigt am"}
+
+   :auftrag-id     {:type :string :name "Auftrags-Id"
+                    :description "Vom Client vergeben; wird als Idempotency-Key gesendet, damit eine Wiederholung nichts doppelt ausloest."}
+   :auftragsstand  {:type :string :name "Stand"
+                    :constraints {:one-of ["entwurf" "freigegeben" "gesendet" "bestaetigt" "abgelehnt"]}}
+   :freigegeben-am {:type :timestamp :name "Freigegeben am"}
+   :gesendet-am    {:type :timestamp :name "Gesendet am"}
+   :fremd-referenz {:type :string :name "Fremdreferenz"
+                    :description "Kennung, unter der das fremde System den Auftrag fuehrt."}
+   :antwort        {:type :string :name "Antwort" :description "Die letzte Antwort des fremden Systems, gekuerzt."}}
+
+  :interfaces
+  {:partei
+   {:display-name  "Partei"
+    :description   "Wer handelt, schuldet, besitzt: ein Mensch oder eine Organisation."
+    :status        :experimental
+    :searchable    true
+    :property-list [:bezeichnung :email :telefon]}
+
+   :geldkonto
+   {:display-name     "Geldkonto"
+    :description      "Wo Geld liegt: Girokonto, Sparbuch, Kreditkarte, Kassa."
+    :status           :experimental
+    :property-list    [:bezeichnung :iban :waehrung]
+    :link-constraints [{:link-name :inhaber :to-interface :partei :cardinality :many-to-one}]}
+
+   :kontobewegung
+   {:display-name     "Kontobewegung"
+    :description      "Ein Geldfluss auf einem Geldkonto, wie die Quelle ihn meldet. Nie von Hand geaendert."
+    :status           :experimental
+    :property-list    [:betrag :waehrung :buchungsdatum :verwendungszweck :gegenpartei :gegen-iban]
+    :link-constraints [{:link-name :konto :to-interface :geldkonto :cardinality :many-to-one :required true}
+                       {:link-name :ausgleiche :to-object-type :ausgleich :cardinality :one-to-many}]}
+
+   :beleg
+   {:display-name     "Beleg"
+    :description      "Wer schuldet wem wie viel bis wann: Rechnung, Gutschrift, Quittung, Vorschreibung."
+    :status           :experimental
+    :property-list    [:betrag :waehrung :faellig-am :belegnummer :belegdatum]
+    :link-constraints [{:link-name :aussteller :to-interface :partei :cardinality :many-to-one}
+                       {:link-name :ausgleiche :to-object-type :ausgleich :cardinality :one-to-many}
+                       {:link-name :original :to-object-type :dokument :cardinality :many-to-one}]}
+
+   :befristet
+   {:display-name  "Befristet"
+    :description   "Laeuft an einem Tag ab und will vorher bemerkt werden."
+    :status        :experimental
+    :property-list [:gueltig-bis :vorlauf-tage]}
+
+   :wiederkehrend
+   {:display-name  "Wiederkehrend"
+    :description   "Erzeugt Zahlungen in einem Takt -- die Grundlage fuer erwartete Buchungen und bemerkte Preisaenderungen."
+    :status        :experimental
+    :property-list [:betrag :takt :naechste-faelligkeit]}
+
+   :vertrag
+   {:display-name     "Vertrag"
+    :description      "Eine Bindung an eine Partei mit Beginn, Ende und Kuendigungsfrist."
+    :status           :experimental
+    :extends          [:befristet]
+    :property-list    [:vertragsnummer :beginn :kuendigungsfrist-monate :gekuendigt-am]
+    :link-constraints [{:link-name :vertragspartner :to-interface :partei :cardinality :many-to-one :required true}]}
+
+   :besitz
+   {:display-name     "Besitz"
+    :description      "Ein Gegenstand, der jemandem gehoert und irgendwo steht."
+    :status           :experimental
+    :property-list    [:bezeichnung :seriennummer :angeschafft-am :anschaffungspreis]
+    :link-constraints [{:link-name :eigentuemer :to-interface :partei :cardinality :many-to-one}
+                       {:link-name :standort :to-object-type :ort :cardinality :many-to-one}]}
+
+   :vorgang
+   {:display-name  "Vorgang"
+    :description   "Etwas, das erledigt werden muss und einen Zustand hat."
+    :status        :experimental
+    :property-list [:bezeichnung :faellig-am :zustand :erledigt-am]}
+
+   :ausgehend
+   {:display-name  "Ausgehend"
+    :description   "Ein Auftrag an ein fremdes System: Ueberweisung, Beitrag, Mail, Kuendigung. Entsteht als Entwurf, wird von einem Menschen freigegeben und erst dann gesendet."
+    :status        :experimental
+    :property-list [:auftrag-id :auftragsstand :freigegeben-am :gesendet-am :fremd-referenz :antwort]}}
+
+  :objects
+  {:person
+   {:symbol "👤" :name "Person" :plural "Personen" :title :bezeichnung
+    :description "Ein Mensch -- man selbst, Familie, Ansprechpartner, Mitarbeiterin."
+    :status :experimental
+    :implements [:partei]
+    :primary-key :person-id
+    :attributes [[:person-id :string] :bezeichnung :email :telefon
+                 [:vorname :string] [:nachname :string] [:geburtsdatum :date]
+                 [:organisation-id :string {:description "Schluessel der Organisation, fuer die sie arbeitet (Stufe 2 bindet ihn per Link)."}]
+                 [:anschrift-id :string {:description "Schluessel des Orts ihrer Anschrift (Stufe 2 bindet ihn per Link)."}]]}
+
+   :organisation
+   {:symbol "🏢" :name "Organisation" :plural "Organisationen" :title :bezeichnung
+    :description "Firma, Bank, Versicherung, Behoerde, Verein."
+    :status :experimental
+    :implements [:partei]
+    :primary-key :organisation-id
+    :attributes [[:organisation-id :string] :bezeichnung :email :telefon
+                 [:uid-nummer :string] [:webseite :string]
+                 [:anschrift-id :string {:description "Schluessel des Orts ihrer Anschrift (Stufe 2 bindet ihn per Link)."}]]}
+
+   :ort
+   {:symbol "📍" :name "Ort" :plural "Orte" :title :bezeichnung
+    :description "Eine Anschrift oder ein Raum darin -- Wohnung, Keller, Werkstatt, Halle."
+    :status :experimental
+    :primary-key :ort-id
+    :attributes [[:ort-id :string] :bezeichnung
+                 [:strasse :string] [:plz :string] [:ortschaft :string] [:land :string]
+                 [:teil-von-id :string {:description "Schluessel des Orts, zu dem er gehoert (Stufe 2 bindet ihn per Link)."}]]}
+
+   :dokument
+   {:symbol "📄" :name "Dokument" :plural "Dokumente" :title :bezeichnung
+    :description "Eine Datei, wie sie einging: PDF, Foto, Scan. Das Original eines Belegs."
+    :status :experimental
+    :primary-key :dokument-id
+    :attributes [[:dokument-id :string] :bezeichnung
+                 [:datei :media-reference] [:eingegangen-am :timestamp] [:herkunft :string]]}
+
+   :ausgleich
+   {:symbol "🔗" :name "Ausgleich" :plural "Ausgleiche" :title :ausgleich-id
+    :description "Diese Bewegung begleicht (einen Teil von) diesem Beleg. Der Abgleich zwischen Geld und Papier -- im Haushalt wie in der Buchhaltung dieselbe Arbeit."
+    :rationale "Ein Objekt, kein Link: ein Link traegt keinen Teilbetrag, und eine Zahlung kann mehrere Belege, ein Beleg mehrere Zahlungen haben."
+    :status :experimental
+    :primary-key :ausgleich-id
+    :attributes [[:ausgleich-id :string] :betrag
+                 [:bewegung-id :string {:description "Schluessel der Kontobewegung (Stufe 2 bindet ihn per Link)."}]
+                 [:beleg-id :string {:description "Schluessel des Belegs (Stufe 2 bindet ihn per Link)."}]
+                 [:quelle :string {:description "wie der Ausgleich entstand"
+                                   :constraints {:one-of ["hand" "regel" "vorschlag"]}}]]}}
+
+  :actions
+  {
+   :person-anlegen
+   {:display-name "Person anlegen" :status :experimental
+    :params {:bezeichnung {:type :string :name "Name" :required true}
+             :email       {:type :string :name "E-Mail" :constraints {:format :email}}
+             :telefon     {:type :string :name "Telefon"}
+             :person-id   {:type :string :exposure :hidden :prefill :uuid}}
+    :rules [{:op :create :object-type :person
+             :values {:person-id [:get :person-id] :bezeichnung [:get :bezeichnung]
+                      :email [:get :email] :telefon [:get :telefon]}}]}
+
+   :organisation-anlegen
+   {:display-name "Organisation anlegen" :status :experimental
+    :params {:bezeichnung     {:type :string :name "Name" :required true}
+             :uid-nummer      {:type :string :name "UID"}
+             :email           {:type :string :name "E-Mail" :constraints {:format :email}}
+             :organisation-id {:type :string :exposure :hidden :prefill :uuid}}
+    :rules [{:op :create :object-type :organisation
+             :values {:organisation-id [:get :organisation-id] :bezeichnung [:get :bezeichnung]
+                      :uid-nummer [:get :uid-nummer] :email [:get :email]}}]}}}}

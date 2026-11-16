@@ -1,0 +1,22 @@
+{:paths ["src" "resources" "../sutra-change/src"]
+ :deps  {sutra/core {:local/root "../../libs/core"}}
+ :tasks {lsp  {:doc  "Language Server über stdio"
+               :requires ([ent-lsp.server])
+               :task (apply ent-lsp.server/-main *command-line-args*)}
+         lint {:doc  "Befunde für einen Arbeitsbereich: bb lint [wurzel] [--alle]"
+               :requires ([ent-lsp.lint])
+               :task (apply ent-lsp.lint/-main *command-line-args*)}
+         suggest
+           {:doc  "Was meint dieser Name? Fragt die Sutra-Instanz des Checkouts: bb suggest <name> [object|action|link] [wurzel]"
+            :requires ([ent-lsp.sutra])
+            :task (let [[nm kind root] *command-line-args*
+                        f (ent-lsp.sutra/suggester (or root "."))
+                        cs (f (keyword nm) (some-> kind keyword))]
+                    (if (nil? cs)
+                      (do (binding [*out* *err*] (println "keine Sutra-Instanz erreichbar"))
+                        (System/exit 2))
+                      (doseq [c cs] (println (ent-lsp.sutra/describe c)))))}
+         test {:doc         "Tests"
+               :extra-paths ["test"]
+               :requires    ([ent-lsp.test-runner])
+               :task        (apply ent-lsp.test-runner/-main *command-line-args*)}}}

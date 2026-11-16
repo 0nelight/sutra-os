@@ -1,0 +1,2 @@
+{"libs/kernel/src/sutra/ref/install.clj"
+ {:n 2 :why "the kernel sits below core and cannot reach sutra.types.plan; its ⊥(:plan-problems) and ⊥(:sql-gate) are worded through the pipeline by sutra.catalog.kernel/worded-refusal"}}

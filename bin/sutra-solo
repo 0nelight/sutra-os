@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+out=.run/solo-public
+neu() { find "$@" -newer "$out/index.html" -print -quit; }
+if [ -d clients/frontend ] && { [ ! -f "$out/index.html" ] \
+   || [ -n "$(neu clients/frontend/src clients/frontend/index.html clients/frontend/shadow-cljs.edn clients/frontend/package.json)" ] \
+   || [ -n "$(neu libs/core/src libs/core/resources libs/dialect/src \( -name '*.cljs' -o -name '*.cljc' -o -name '*.edn' \))" ]; }; then
+  echo "Baue das Frontend-Release nach $out ..."
+  (cd clients/frontend && npx shadow-cljs release app --config-merge "{:output-dir \"../../$out/js\"}" \
+    && npx shadow-cljs release widget-frame --config-merge "{:output-dir \"../../$out/js/widget\"}")
+fi
+exec clojure -M:dev:solo "$@"

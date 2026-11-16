@@ -1,0 +1,204 @@
+;; ════════════════════════════════════════════════════════════════════════════
+;; grammar.entv — THE authoritative `.entv` grammar, in one annotated file.
+;;
+;; ── Where it lives ──────────────────────────────────────────────────────────
+;; One file per object-type: `object-views/<object-type>.entv`, beside the type
+;; layer's `ontology.ent`. THAT PREFIX, and not `views/`: it is what
+;; `parser.project-export/resource-planes` registers, and a `.entv` anywhere else
+;; is file-plane — carried as content, read by nobody, publishing nothing while
+;; every check passes. The `scope` check now refuses one rather than carrying it.
+;; The importer reads EVERY entity-plane `.ent`/`.entv` from the
+;; git tree and deep-merges them STRICTLY (a same-key collision between two files
+;; throws — no silent winner). The FE Object-View editor authors these as
+;; `:application` catalog entities; the projection splits them back into `.entv`.
+;;
+;; ── ONE dialect: the node tree ──────────────────────────────────────────────
+;; A form-factor body (`:full`/`:panel`) is a node tree, validated against the
+;; runtime that renders it, so a typo is a load error — not a silently-blank card.
+;; The old card list `{:cards [{:widget … :config {…} :title :hidden?}]}` is still
+;; READ (the door lowers it to `{:kind :rows :items […]}`, a card's `:config`
+;; inlined and `:hidden?` kept as a rider) and the projection writes the tree back.
+;; Do not write it any more.
+;;
+;;     OBJECT — the viewed object's own widgets; none names the object, they read
+;;     it from the view they stand in:
+;;       :attributes    its properties (the Property List over this object)
+;;       :relations     its links, in and out
+;;       :documents     the documents filed on it
+;;       :matrix        :owner-type :children-conn :other-type  ; adjacency grid over a link
+;;       :floorplan     placement canvas (only on floor-plan types; link-convention driven)
+;;
+;;   THE NODE TREE (apphost). A leaf is
+;;     `{:widget <kw> …config}` (config INLINE, not under `:config`); a sibling
+;;     `:vars` graph drives reactive cross-filtering. Any value may be a reactive
+;;     ref: `{:from <type>}` (payload set) · `{:var <name>}` (state handle, an
+;;     interactive `:sel`) · `{:val <name>}` (a variable value). This is the SAME
+;;     kit a STANDALONE app uses — see `grammar.enta` (an `.enta` over object
+;;     SETS); an object view is just this kit BOUND to one object-type — the
+;;     SAME vocabulary, not a subset, and a test holds this list against the
+;;     widget registry so it cannot fall behind it again. Complete config keys
+;;     per widget (closed maps — a typo is a load error); a `*` marks required:
+;;
+;;     CONTAINERS  (a node with :kind; children in :items unless noted)
+;;       :rows :flow        vertical stack        (:rows also :scroll?)
+;;       :columns :toolbar  side-by-side
+;;       :section           a titled box          (:body one child)
+;;       :tabs :pages       selectable strip bound to :select; panes [{:id :label :body}];
+;;                          :pages also :header {:title :items}; both also :view-as
+;;       :loop              repeat :body over :items; :key :arrange :empty
+;;       :profiles          show ONLY the :variants variant whose :id = @:select
+;;                          (the viewer's profile); :default; NO visible strip
+;;       :overlay           a named modal/drawer over the view; :body one child.
+;;                          :overlay <key> (the name events open it by) :visible
+;;                          :as :modal|:drawer :side :left|:right :size :s|:m|:l
+;;                          :title. Inside its :body, {:arg <prop>} is the payload
+;;                          it was opened with — this is where an Action's
+;;                          :action-form goes when the page itself must stay short,
+;;                          which on a phone-width screen it usually must.
+;;     RIDERS  (on any node)
+;;       :title :hidden? :when · containers also :bg (:1..:5) :collapse :class
+;;       :box {:icon :help :w :min-w :max-w :grow?}     ; per-widget icon/help/sizing
+;;       :vars {…}  on any INNER container → a subtree-scoped filter SANDBOX
+;;       :scenario {:var …}  on the ROOT → the whole surface reads that fork; on an
+;;                  INNER container → that subtree alone reads it (its own payload,
+;;                  aggregates and functions), so two forks stand side by side.
+;;                  A subtree naming none inherits the one above. See grammar.enta §(3).
+;;
+;; ── What a view READS, standalone and embedded ──────────────────────────────
+;; A view's payload is its OBJECT's, in both places: the object itself plus its
+;; 1-hop neighbourhood, keyed by type name. So `{:from :line}` inside a `.entv` is
+;; THIS object's lines — on the standalone page (`/object/<type>/<id>`) and inside
+;; a module's `:object-view` widget alike, and for a type that module never bound.
+;; Nothing of the host module is in scope by default.
+;;
+;; This file is a reference, not an installable view. Config VALUES are illustrative;
+;; the KEY set per widget above IS complete and is what the grammar enforces.
+;; `bin/sutra` reads live wiring — do not treat this as prod state.
+;; ════════════════════════════════════════════════════════════════════════════
+{;; :object-type — REQUIRED. The type whose single object this view details.
+ ;; THIS key is the identity; renaming the file does not rebind the view.
+ :object-type :order
+
+ ;; :project — OPTIONAL. Ownership (the Pillar-4 grant cascade), shared by a
+ ;; type's views. A view opens at its published version: the first install cuts
+ ;; version 1; :auto-publish true cuts one on every save.
+ :project :procurement
+
+ ;; ── :full — Dialect B: the rich, standalone page (/object/<type>/<id>) ──────
+ ;; Without any `.entv` a type still HAS this page: the standard Object View is
+ ;; generated from the type — :title/:subtitle as header, the prominent
+ ;; properties, every relationship as a table of the neighbours' `:row`s, and
+ ;; every Action declared `:on` this type. Author a `.entv` only to say more.
+ ;;
+ ;; Three OOUX rules the example below follows (Sophia Prater):
+ ;;   · NESTED OBJECTS come through relationships: `{:from :invoice}` in a view
+ ;;     IS this order's invoices (the payload is the object's 1-hop
+ ;;     neighbourhood), shown as the invoice looks everywhere else.
+ ;;   · CALLS TO ACTION live ON the object, next to the data they change — an
+ ;;     `:action-form` in the page, never a separate "Actions" tab.
+ ;;   · ONE VARIABLE, ONE JOB: the page strip, a filter and the profile switch
+ ;;     each get their own handle. Binding one var to all three makes a click on
+ ;;     a filter pill flip the page and the profile with it.
+ :full
+ {;; :vars — the reactive graph (read at the ROOT). A STATE handle an interactive
+  ;; widget writes; a DERIVED object set recomputed from other vars + payload.
+  :vars {:page       {:type :keyword :default :overview :url? true}             ; the page strip
+         :status-sel {:type :keyword :default :all}                             ; the filter pills
+         :profile    {:type :keyword :default :all}                             ; the profile switch
+         :open-lines {:from :line :where [[:status := {:var :status-sel}]]}
+         ;; Der KPI unten liest `{:val :sum}` — eine Variable MUSS es dazu geben.
+         ;; Sie fehlte hier, und was die Vorlage vorfuehrt, schreibt jeder ab: das
+         ;; Feld haette ueberall leer gestanden, ohne dass irgendwo etwas schiefging.
+         :sum        {:agg [:sum :netto] :of :open-lines}}
+
+  ;; Root container: a page strip, bound to ITS OWN handle.
+  ;; :view-as — the "Viewing Object As:" selector: the profiles a user may switch
+  ;; between to preview profile-gated tabs. Defaults to the viewer's role.
+  :kind    :pages
+  :select  {:var :page}
+  :view-as [{:id :consumer :label "Sachbearbeiter"}
+            {:id :controlling :label "Controlling"}]
+  :pages
+  [{:id :overview :label "Overview"
+    :body {:kind :columns                                       ; side-by-side
+           :items
+           [{:kind :rows
+             :items [{:widget :property-list :object {:from :order} :only-prominent? true}
+                     {:widget :kpi :title "Total" :value {:val :sum} :fmt :eur}
+                     ;; the related objects, nested via the relationship. Rows
+                     ;; default to the invoice type's `:row`; `:cols` is given
+                     ;; because the grammar still requires it — it becomes optional.
+                     {:widget :object-table :title "Invoices" :rows {:from :invoice}
+                      :cols [{:prop :doc-number} {:prop :doc-date} {:prop :netto}]}]}
+            {:kind :rows
+             ;; the CTA, next to the data it changes. `:mark-paid` is declared
+             ;; `:on :order`, so its :order param IS this object — no binding here.
+             ;; (On a hand-wired `:action-button` you bind it yourself:
+             ;;  `:params {:order {:item :id}}` — a bare button cannot tell which
+             ;;  object it sits on.)
+             :items [{:kind :section :title "Mark paid"
+                      :body {:widget :action-form :action :mark-paid :label "Mark paid"}}
+                     {:widget :edit-history :object {:item :id} :limit 20}
+                     {:widget :timeline :items {:val :open-lines}}]}]}}
+
+   {:id :lines :label "Lines"
+    :body {:kind :rows
+           :items [{:widget :filter-pills :sel {:var :status-sel}
+                    :items [{:value :open :label "Open"} {:value :done :label "Done"}]}
+                   {:widget :object-table :rows {:val :open-lines}
+                    :cols [{:label "SKU" :prop :sku} {:label "Qty" :prop :qty :fmt :menge}]}
+                   {:widget :pivot-table :row :sku :col :month :value :qty :agg :sum}]}}
+
+   {:id :controlling :label "Controlling"
+    ;; :visibility — this tab appears only for the :ontology-owner role AND under
+    ;; the :controlling profile; PRESENTATION only (see the SECURITY note above).
+    :visibility {:roles [:ontology-owner] :profiles [:controlling]}
+    ;; :when — DYNAMIC visibility (a handle/ref), vs the static :hidden?.
+    :body {:kind :section :title "Margins" :when {:val :sum}
+           :items [{:widget :pivot-table :rows {:from :invoice} :row :doc-date :value :netto :agg :sum}]}}
+
+   {:id :insights :label "Insights"
+    ;; :link — LINK-VISIBILITY, enforced SERVER-side: the tab is stripped from the
+    ;; payload entirely unless the viewer may see the :site object-type it joins.
+    :visibility {:link :site}
+    :body {:kind :rows
+           :items
+           [;; a general chart (Plotly), built from a payload object set. :box adds
+            ;; a per-widget help tooltip + lets it grow to fill its column.
+            {:widget :chart :chart-kind :time-series
+             :rows {:from :line} :x :month :y :qty :group :sku
+             :box {:help "Monthly volume per SKU" :grow? true}}
+            ;; rich text (a SAFE markdown subset → hiccup)
+            {:widget :markdown :text "## Notes\nApproved lines feed **billing**."}
+            {:kind :section :title "Explore" :vars {:q {:default ""}
+                                                    :hits {:from :line :where [[:sku :contains {:var :q}]]}}
+             :items [{:widget :filter-sidebar
+                      :fields [{:label "SKU" :kind :search :sel {:var :q}}]}
+                     {:widget :object-table :rows {:val :hits}
+                      :cols [{:label "SKU" :prop :sku}]}]}
+            ;; a token-free map (Plotly/MapLibre): each row carries its OWN :lat/:lon
+            ;; (produced by the pipeline — geocoding is a transform's job, not the
+            ;; view's). :color/:size are per-row props or constants; :map-kind :heat
+            ;; switches to a density layer weighted by :z. No Mapbox/Google key.
+            {:widget :map :rows {:from :site} :lat :lat :lon :lng
+             :label :name :color :load :style :carto-positron :height 340
+             :box {:help "Sites by load"}}
+            ;; media preview (by mime) + an external embed
+            {:widget :media  :src "spec.pdf" :mime "application/pdf"}
+            {:widget :iframe :src "https://status.example.com" :height 300}]}}
+
+   ;; :profiles — the viewer's profile (@:select) picks ONE variant, no strip.
+   ;; Its OWN handle (:profile) — not the page strip's, not the filter's.
+   {:id :by-role :label "By role"
+    :body {:kind :profiles :select {:var :profile} :default :all
+           :variants [{:id :all         :body {:widget :kpi :title "All"  :value {:val :sum} :fmt :eur}}
+                      {:id :controlling :body {:widget :kpi :title "Open" :value {:val :sum} :fmt :eur}}]}}]}
+
+ ;; ── :panel — Dialect A: the embeddable condensed form (Object Workspace) ─────
+ ;; The four native widgets, flat, config under :config. Usually just the
+ ;; prominent properties; a card may be :hidden? to keep it out of render.
+ ;; the object widgets are ordinary leaves; `:hidden?` keeps one out of render
+ :panel {:kind  :rows
+         :items [{:widget :attributes}
+                 {:widget :documents :hidden? true}
+                 {:widget :relations :hidden? true}]}}

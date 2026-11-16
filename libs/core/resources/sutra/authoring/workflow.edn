@@ -1,0 +1,21 @@
+{:steps
+ {:branch          {:verb "branch"
+                    :line "bin/sutra branch {branch}"}
+  :projection-push {:verb "projection push"
+                    :line "bin/sutra --branch {branch} projection push <ABSOLUTE text>"}
+  :commit          {:verb "commit"
+                    :line "bin/sutra --branch {branch} commit --yes"}
+  :propose         {:verb "propose"
+                    :line "bin/sutra --branch {branch} propose --source {branch} --target {trunk} --yes"}
+  :git-rebase      {:line "git pull --rebase origin {branch}"}
+  :git-push        {:line "timeout 30 git push origin {branch}"}
+  :proposal        {:verb "proposal"
+                    :line "bin/sutra proposal <id>"}
+  :merge-proposal  {:verb "merge-proposal"
+                    :line "bin/sutra merge-proposal <id>"}}
+ :ways
+ {
+  :python-and-ent [:projection-push :commit :propose :git-rebase :git-push
+                   :proposal :merge-proposal]
+  :open-proposal  [:commit :propose :git-rebase :git-push]
+  :land-protected [:branch :propose :git-push :proposal :merge-proposal]}}

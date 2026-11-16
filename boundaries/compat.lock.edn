@@ -1,0 +1,56 @@
+#:boundary{:app-host
+           {:version "1.2.0",
+            :surface
+            "09511a542d991f46db8b483d873301160aa2ef750bf87578bdfc32ecf67bebde"},
+           :authoring-language
+           {:version "2.1.0",
+            :surface
+            "4d67ab5f2cddb95643e1ea600cc283efa6da78a1efff764f548d9bb9884a111b"},
+           :connectors
+           {:version "1.1.0",
+            :surface
+            "b8f333acea03e9ffbefa1720f58d5039397eccfb3988916acd8612037bb7e4c5"},
+           :data-interchange
+           {:version "1.1.0",
+            :surface
+            "01f160b63e61daa8e10a8af1678bfcf6128648ef511b95ddf4ad07f44e01f308"},
+           :events
+           {:version "1.1.0",
+            :surface
+            "ba7b65a6894d56104ba9590da2b43aadfc37df77d6165a8df182b71d874c0410"},
+           :git
+           {:version "1.1.0",
+            :surface
+            "aebef4ba8ecb053c0c03a438ad1d1fc07b1d934ebaf331baac675bdac951b44e"},
+           :http-api
+           {:version "2.0.0",
+            :surface
+            "b800c46a8ebabbc0f64f0041f157423eb5386a571b4148fe7baaa9a75cd8b919"},
+           :identity
+           {:version "1.1.0",
+            :surface
+            "bfd4794fe856ed4caa3d3035236342b20d1b5be6d6f347b9cbe74458ffde2ab4"},
+           :llm
+           {:version "1.1.0",
+            :surface
+            "50465f7b476694abe8fec3c62a78ef2a0bb58fc16a54d031e6f6d25bdb9909b6"},
+           :operations
+           {:version "1.2.0",
+            :surface
+            "adc125f4c945eb0cef407d91f291ba00e2c5d3f686cc942d3cbb4756709af0e2"},
+           :platform-sdk
+           {:version "1.2.0",
+            :surface
+            "682d316f6415fef8923ee975cabd4704a2486ca793004977511dd01aa5ec2d0d"},
+           :projection
+           {:version "1.1.0",
+            :surface
+            "eec224402b09c54ebb8a70ec275ed4196169c9a900eedd11f4495d1a89e7eb26"},
+           :storage
+           {:version "1.0.0",
+            :surface
+            "6ac7fff826793aab2ac91305bbd7cbc8ebe25ee1586cd34332a88ed9d4f0c8cc"},
+           :transform-runtime
+           {:version "1.1.0",
+            :surface
+            "d55bbc09db45c1d58af37935c66b68c8f471e39d76c42eb1548dc91b18f99fd3"}}

@@ -1,0 +1,20 @@
+{:cursor-swap #{"clients/frontend/src/sutra_ui/apphost/widgets/filter.cljs"}
+ :hex-css #{}
+ :roh-table #{"clients/frontend/src/sutra_ui/apps/assistant/core.cljs"
+   "clients/frontend/src/sutra_ui/apps/explorer/object_set.cljs"
+   "clients/frontend/src/sutra_ui/apphost/widgets/inline_action.cljs"
+   "clients/frontend/src/sutra_ui/apphost/procurement_tracking.cljs"}
+ :style-px #{"clients/frontend/src/sutra_ui/apps/assistant/providers.cljs"
+   "clients/frontend/src/sutra_ui/apphost/widgets/embed.cljs"
+   "clients/frontend/src/sutra_ui/apphost/widgets/history.cljs"
+   "clients/frontend/src/sutra_ui/apphost/widgets/media_viewer.cljs"
+   "clients/frontend/src/sutra_ui/builder/bottom_panel/health.cljs"
+   "clients/frontend/src/sutra_ui/builder/bottom_panel/column_stats.cljs"
+   "clients/frontend/src/sutra_ui/forms/object.cljs"
+   "clients/frontend/src/sutra_ui/graph_editor.cljs"
+   "clients/frontend/src/sutra_ui/graph_editor/edges.cljs"
+   "clients/frontend/src/sutra_ui/graph_editor/seed.cljs"
+   "clients/frontend/src/sutra_ui/health/watch.cljs"
+   "clients/frontend/src/sutra_ui/shell/notifications/settings.cljs"
+   "clients/frontend/src/sutra_ui/shell/sessions.cljs"
+   "clients/frontend/src/sutra_ui/shell/consumer.cljs"}}

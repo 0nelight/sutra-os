@@ -1,0 +1,393 @@
+;; ════════════════════════════════════════════════════════════════════════════
+;; template.ent — Vorlage für ein Ontologie-Modell, am Beispiel einer Werft (Flugzeugwartung)
+;; ════════════════════════════════════════════════════════════════════════════
+;; Kopieren, umbenennen, eigene Welt einsetzen. Jede Zeile Kommentar sagt, welche
+;; ENTSCHEIDUNG du mit dem Schlüssel triffst. Was es sonst noch gibt, steht in
+;; `grammar.ent` daneben (jeder Schlüssel der Grammatik, mit Erklärung).
+;;
+;; Die Reihenfolge folgt ORCA (Sophia Prater, Object-Oriented UX): zuerst die
+;; DINGE, über die im Betrieb gesprochen wird, dann wie sie zusammenhängen, dann
+;; was man mit ihnen tut, zuletzt ihre Details. Woher die Daten kommen, ist eine
+;; eigene, spätere Frage — ganz unten.
+;;
+;;   1. Objekte        :objects   Name, Titel, Listenzeile; die Attribute stehen
+;;                                am Ende jedes Objekts, nach Wichtigkeit geordnet
+;;   2. Beziehungen    :links     beide Richtungen benannt, wie man sie sagt
+;;   3. Handlungen     :actions   am Objekt angeboten (:on); der Lebenslauf des
+;;                                Arbeitsauftrags (:lifecycle) verbindet Stand und Handlung
+;;   4. Formate        :value-types  ein Begriff, ein Format, überall gleich
+;;   5. Herkunft       :sources :datasets  + :backing am Objekt
+;;   6. Projekt        :projects  der Ort, an dem alles steht
+;;
+;; Hier steht alles in EINER Datei, damit man es am Stück liest. Im Projekt
+;; verteilt es sich auf die Texte, die `projection pull` holt — und dort entfällt
+;; `:project` an jeder Ressource, denn der Dateiname sagt das Projekt:
+;;   werft.objects.ent  :objects :links :actions     ontology.ent  :value-types
+;;   werft.ingest.ent   :sources :datasets           (werft.apps.ent: Workspaces)
+;; Das Projekt selbst legt `sutra project create werft` an.
+;;
+;; Die Welt: Betreiber → Angebot → Arbeitsauftrag → Rechnung → Zahlung, und Mechaniker,
+;; die Zeit auf Arbeitsaufträge buchen. API-Namen (Schlüsselwörter) nur ASCII —
+;; `:arbeitsauftraege`, nicht `:arbeitsaufträge`; Anzeigenamen dürfen Umlaute tragen.
+;; ════════════════════════════════════════════════════════════════════════════
+{:schema
+ {;; ══ 1. OBJEKTE ═════════════════════════════════════════════════════════════
+  ;; Ein Objekt ist ein Ding, das Leute beim Namen nennen und wiederfinden wollen.
+  ;; Kein Objekt: ein Bericht, eine Ansicht, eine Tabelle aus einem Fremdsystem.
+  :objects
+  {:betreiber
+   {:name        "Betreiber"                  ; so heißt es im Betrieb, Einzahl
+    :project     :werft                       ; WO es steht — in werft.objects.ent entfällt das
+    :plural      "Betreiber"                  ; … und Mehrzahl (Listen, Menüs)
+    :symbol      "🤝"                          ; woran man es auf einen Blick erkennt
+    ;; WAS es ist, in einem Satz — und WARUM es so geschnitten ist
+    :description "Ein Geschäftspartner in der Rolle Betreiber: wer seine Luftfahrzeuge bei uns warten lässt."
+    :rationale   "Eine Rolle, kein zweiter Stammsatz — wird der Betreiber auch Lieferant, bleibt es ein Partner."
+    :aliases     ["Airline" "Halter"]       ; weitere Wörter, unter denen die Suche es findet
+    :match-keys  [:betreiber-id]              ; was EIN Objekt eindeutig macht — stabil, nie neu vergeben
+    :primary-key :betreiber-id                ; der Primärschlüssel — Pflicht für jeden Typ, auch für einen, den nur Actions füllen
+    :title       :name                        ; was ein einzelnes Objekt BENENNT — lesbar, keine Nummer
+    :subtitle    :betreibernummer             ; was darunter steht, meist die Nummer
+    :row         [:name :ort :arbeitsauftraege-offen] ; wie es als Zeile einer Liste aussieht
+    :attributes
+    [[:betreiber-id           :string  {:visibility :hidden}]   ; der Schlüssel — für Maschinen, nicht für Menschen
+     [:name                   :string  {:name "Name" :visibility :prominent :required true}]
+     [:betreibernummer        :nummer  {:name "Betreibernummer" :visibility :prominent}]
+     [:ort                    :string  {:name "Ort"}]
+     [:email                  :string  {:name "E-Mail" :constraints {:format :email}}]
+     ;; abgeleitet: zur Lesezeit über die Beziehung gezählt, nie gespeichert
+     [:arbeitsauftraege-offen :integer {:name "Offene Arbeitsaufträge"
+                                        :derived {:rollup {:over :arbeitsauftraege :agg :count
+                                                           :where [:and [:not= :stand "verrechnet"]
+                                                                        [:not= :stand "storniert"]]}}}]]}
+
+   :angebot
+   {:name "Angebot" :plural "Angebote" :symbol "📝"
+    :project     :werft
+    :description "Was wir einem Betreiber zu welchem Preis anbieten."
+    :match-keys  [:angebot-id]
+    :primary-key :angebot-id
+    :title       :bezeichnung
+    :subtitle    :angebot-nr
+    :row         [:angebot-nr :bezeichnung :betrag :gueltig-bis :stand]
+    :attributes
+    [[:angebot-id   :string {:visibility :hidden}]
+     [:bezeichnung  :string {:name "Bezeichnung" :visibility :prominent :required true}]
+     [:angebot-nr   :nummer {:name "Angebotsnummer" :visibility :prominent}]
+     [:betrag       :betrag {:name "Betrag" :visibility :prominent}]
+     [:gueltig-bis  :date   {:name "Gültig bis"}]
+     [:stand        :string {:name "Stand" :constraints {:one-of ["offen" "angenommen" "abgelehnt"]}}]
+     [:betreiber-id :string {:visibility :hidden}]]}  ; der Verweis auf den Betreiber (→ 2.)
+
+   :arbeitsauftrag
+   {:name "Arbeitsauftrag" :plural "Arbeitsaufträge" :symbol "🛠"
+    :project     :werft
+    :description "Ein angenommener Auftrag: was wir an welchem Luftfahrzeug für wen bis wann erledigen."
+    :aliases     ["Work Order" "Werftauftrag"]
+    :visibility  :prominent                   ; das Hauptobjekt des Betriebs — zuerst in Suche und Menüs
+    :match-keys  [:arbeitsauftrag-id]
+    :primary-key :arbeitsauftrag-id
+    :title       :bezeichnung                 ; „C-Check D-AINA", nicht „A-2026-014"
+    :subtitle    :auftrag-nr
+    :row         [:auftrag-nr :bezeichnung :betreiber-name :freigabetermin :stand]
+    :attributes
+    [[:arbeitsauftrag-id :string {:visibility :hidden}]
+     ;; prominent — was man immer sehen will
+     [:bezeichnung    :string {:name "Bezeichnung" :visibility :prominent :required true}]
+     [:auftrag-nr     :nummer {:name "Auftragsnummer" :visibility :prominent}]
+     [:stand          :string {:name "Stand" :visibility :prominent
+                               :conditional-format [{:when [:= [:get :stand] "storniert"] :color "#999"}]}]
+     [:freigabetermin :date   {:name "Freigabetermin" :visibility :prominent}]
+     ;; normal — Details, die man beim Hinsehen braucht
+     [:betrag         :betrag {:name "Auftragswert"}]
+     [:begonnen-am    :timestamp {:name "Begonnen am"}]
+     [:fertig-am      :timestamp {:name "Fertig am"}]
+     [:storno-grund   :string {:name "Storno-Grund"}]
+     ;; abgeleitet — aus Beziehungen gelesen, nicht abgetippt
+     [:betreiber-name :string {:name "Betreiber"
+                               :derived {:rollup {:over :betreiber :agg :one :pick :name}}}]
+     [:stunden        :stunden {:name "Stunden"
+                                :derived {:rollup {:over :zeitbuchungen :agg :sum :of :stunden}}}]
+     [:verrechnet     :betrag {:name "Verrechnet"
+                               :derived {:rollup {:over :rechnungen :agg :sum :of :betrag}}}]
+     ;; hidden — Verweise; die Beziehungen (→ 2.) zeigen das Objekt dahinter
+     [:betreiber-id   :string {:visibility :hidden}]
+     [:angebot-id     :string {:visibility :hidden}]]
+    ;; Der Lebenslauf: welche Stände es gibt und welche Handlung (→ 3.) von wo nach
+    ;; wo führt. Eine Handlung ist nur in ihren :from-Ständen möglich und setzt den
+    ;; Stand danach selbst auf :to — außer ihre Regeln schreiben :stand selbst.
+    :lifecycle
+    {:property    :stand
+     :states      [:angelegt :in-arbeit :fertig :verrechnet :storniert]
+     :transitions [{:action :arbeitsauftrag-beginnen     :from [:angelegt]            :to :in-arbeit}
+                   {:action :arbeitsauftrag-fertigmelden :from [:in-arbeit]           :to :fertig}
+                   {:action :rechnung-stellen            :from [:fertig]              :to :verrechnet}
+                   {:action :arbeitsauftrag-stornieren   :from [:angelegt :in-arbeit] :to :storniert}]}}
+
+   :rechnung
+   {:name "Rechnung" :plural "Rechnungen" :symbol "🧾"
+    :project     :werft
+    :description "Was wir für einen Arbeitsauftrag verrechnen, und was davon noch offen ist."
+    :match-keys  [:rechnung-id]
+    :primary-key :rechnung-id
+    :title       :bezeichnung
+    :subtitle    :rechnung-nr
+    :row         [:rechnung-nr :bezeichnung :faellig-am :betrag :offen]
+    :attributes
+    [[:rechnung-id    :string {:visibility :hidden}]
+     [:bezeichnung    :string {:name "Bezeichnung" :visibility :prominent}]
+     [:rechnung-nr    :nummer {:name "Rechnungsnummer" :visibility :prominent}]
+     [:betrag         :betrag {:name "Betrag" :visibility :prominent}]
+     [:rechnungsdatum :date   {:name "Rechnungsdatum"}]
+     [:faellig-am     :date   {:name "Fällig am"}]
+     [:bezahlt        :betrag {:name "Bezahlt"
+                               :derived {:rollup {:over :zahlungen :agg :sum :of :betrag}}}]
+     ;; `offen` ist eine Rechnung über zwei Attribute — derselbe Wert in jeder App
+     [:offen          :betrag {:name "Offen" :visibility :prominent
+                               :derived {:language :clojure
+                                         :expression [:- [:get :betrag] [:get :bezahlt]]
+                                         :inputs [:betrag :bezahlt]}}]
+     [:arbeitsauftrag-id :string {:visibility :hidden}]]}
+
+   :zahlung
+   {:name "Zahlung" :plural "Zahlungen" :symbol "💶"
+    :project     :werft
+    :description "Ein Zahlungseingang, der eine Rechnung (teilweise) begleicht."
+    :match-keys  [:zahlung-id]
+    :primary-key :zahlung-id
+    :title       :verwendungszweck
+    :subtitle    :eingang-am
+    :row         [:eingang-am :betrag :verwendungszweck]
+    :attributes
+    [[:zahlung-id       :string {:visibility :hidden}]
+     [:betrag           :betrag {:name "Betrag" :visibility :prominent :required true}]
+     [:eingang-am       :date   {:name "Eingang am" :visibility :prominent}]
+     [:verwendungszweck :string {:name "Verwendungszweck"}]
+     [:rechnung-id      :string {:visibility :hidden}]]}
+
+   :mechaniker
+   {:name "Mechaniker" :plural "Mechaniker" :symbol "🧑‍🔧"
+    :project     :werft
+    :description "Wer im Hangar oder auf dem Vorfeld an den Luftfahrzeugen arbeitet."
+    :match-keys  [:mechaniker-id]
+    :title       :name
+    :subtitle    :kuerzel
+    :row         [:kuerzel :name]
+    :attributes
+    [[:mechaniker-id :string {:visibility :hidden}]
+     [:name          :string {:name "Name" :visibility :prominent}]
+     [:kuerzel       :string {:name "Kürzel"}]
+     [:stundensatz   :betrag {:name "Stundensatz" :visibility :hidden}]]  ; intern: nur auf Nachfrage
+    ;; direkt auf dem Sync-Dataset nur, weil die Quelle schon sauber ist und
+    ;; :column-map bloß umbenennt — sonst ein formender Transform dazwischen (→ 5.)
+    :backing {:dataset :mechaniker_zeiterfassung
+              :primary-key :mechaniker-id
+              :column-map {:mechaniker-id :personal_nr :name :anzeigename}}}
+
+   :zeitbuchung
+   {:name "Zeitbuchung" :plural "Zeitbuchungen" :symbol "⏱"
+    :project     :werft
+    :description "Wer wann wie lange an welchem Arbeitsauftrag gearbeitet hat."
+    :match-keys  [:zeitbuchung-id]
+    :title       :taetigkeit
+    :subtitle    :datum
+    :row         [:datum :taetigkeit :stunden]
+    :attributes
+    [[:zeitbuchung-id    :string  {:visibility :hidden}]
+     [:datum             :date    {:name "Datum" :visibility :prominent}]
+     [:taetigkeit        :string  {:name "Tätigkeit" :visibility :prominent}]
+     [:stunden           :stunden {:name "Stunden" :visibility :prominent}]
+     [:mechaniker-id     :string  {:visibility :hidden}]
+     [:arbeitsauftrag-id :string  {:visibility :hidden}]]
+    :backing {:dataset :zeitbuchungen_zeiterfassung                       ; → 5.
+              :primary-key :zeitbuchung-id
+              :column-map {:zeitbuchung-id :buchung_id :arbeitsauftrag-id :auftrag_ref}}}}
+
+  ;; ══ 2. BEZIEHUNGEN ═════════════════════════════════════════════════════════
+  ;; [<name> <von> <zu> <kardinalität> {…}]. Jede Beziehung hat ZWEI Seiten, und
+  ;; jede Seite heißt so, wie man vom einen Objekt aus das andere nennt: vom
+  ;; Arbeitsauftrag aus „der Betreiber", vom Betreiber aus „die Arbeitsaufträge".
+  ;; Mit diesen Namen liest eine Summe (`:over :arbeitsauftraege`) und zeigt eine
+  ;; Ansicht die Nachbarn.
+  ;; `:fk` sagt, welches Attribut der „viele"-Seite auf die andere zeigt.
+  :links
+  [[:angebot-betreiber :angebot :betreiber :many-to-one
+    {:forward-api-name :betreiber :forward-name "Betreiber"   ; vom Angebot aus
+     :reverse-api-name :angebote  :reverse-name "Angebote"    ; vom Betreiber aus
+     :fk :betreiber-id}]
+   [:arbeitsauftrag-betreiber :arbeitsauftrag :betreiber :many-to-one
+    {:forward-api-name :betreiber :forward-name "Betreiber" :reverse-api-name :arbeitsauftraege :reverse-name "Arbeitsaufträge" :fk :betreiber-id}]
+   [:arbeitsauftrag-angebot :arbeitsauftrag :angebot :many-to-one
+    {:forward-api-name :angebot :forward-name "Angebot" :reverse-api-name :arbeitsauftraege :reverse-name "Arbeitsaufträge"
+     :fk {:attribute :angebot-id :on-null :skip}}]   ; nicht jeder Arbeitsauftrag hatte ein Angebot
+   [:rechnung-arbeitsauftrag :rechnung :arbeitsauftrag :many-to-one
+    {:forward-api-name :arbeitsauftrag :forward-name "Arbeitsauftrag" :reverse-api-name :rechnungen :reverse-name "Rechnungen" :fk :arbeitsauftrag-id}]
+   [:zahlung-rechnung :zahlung :rechnung :many-to-one
+    {:forward-api-name :rechnung :forward-name "Rechnung" :reverse-api-name :zahlungen :reverse-name "Zahlungen" :fk :rechnung-id}]
+   [:zeitbuchung-arbeitsauftrag :zeitbuchung :arbeitsauftrag :many-to-one
+    {:forward-api-name :arbeitsauftrag :forward-name "Arbeitsauftrag" :reverse-api-name :zeitbuchungen :reverse-name "Zeitbuchungen" :fk :arbeitsauftrag-id}]
+   [:zeitbuchung-mechaniker :zeitbuchung :mechaniker :many-to-one
+    {:forward-api-name :mechaniker :forward-name "Mechaniker" :reverse-api-name :zeitbuchungen :reverse-name "Zeitbuchungen" :fk :mechaniker-id}]]
+
+  ;; ══ 3. HANDLUNGEN ══════════════════════════════════════════════════════════
+  ;; Eine Action ist ein Verb am Objekt. `:on <typ>` stellt sie auf dessen
+  ;; Ansicht; ihr EINER Parameter dieses Typs ist dann das angesehene Objekt und
+  ;; wird nicht abgefragt. Anlegen hat kein :on — das Objekt gibt es noch nicht.
+  ;; `:prefill :uuid` vergibt den Schlüssel, `:exposure :hidden` versteckt ihn,
+  ;; und `:id` am :create macht ihn zur Id des neuen Objekts.
+  :actions
+  {:betreiber-anlegen
+   {:display-name "Betreiber anlegen"             ; so steht es auf dem Knopf
+    :params {:name            {:type :string :name "Name" :required true}
+             :betreibernummer {:type :string :name "Betreibernummer"}
+             :ort             {:type :string :name "Ort"}
+             :betreiber-id    {:type :string :exposure :hidden :prefill :uuid}}
+    :rules  [{:op :create :object-type :betreiber :id [:get :betreiber-id]
+              :values {:betreiber-id [:get :betreiber-id] :name [:get :name]
+                       :betreibernummer [:get :betreibernummer] :ort [:get :ort]}}]}
+
+   :angebot-erstellen
+   {:display-name "Angebot erstellen"
+    :on     :betreiber                            ; angeboten auf dem Betreiber
+    :params {:betreiber   {:type :betreiber :name "Betreiber" :required true}
+             :bezeichnung {:type :string :name "Bezeichnung" :required true}
+             :angebot-nr  {:type :string :name "Angebotsnummer" :required true}
+             :betrag      {:type :number :name "Betrag" :constraints {:min 0}}
+             :gueltig-bis {:type :date :name "Gültig bis"}
+             :angebot-id  {:type :string :exposure :hidden :prefill :uuid}}
+    :rules  [{:op :create :object-type :angebot :id [:get :angebot-id]
+              :values {:angebot-id [:get :angebot-id] :betreiber-id [:get :betreiber :betreiber-id]
+                       :bezeichnung [:get :bezeichnung] :angebot-nr [:get :angebot-nr]
+                       :betrag [:get :betrag] :gueltig-bis [:get :gueltig-bis] :stand "offen"}}]}
+
+   :angebot-annehmen
+   {:display-name "Angebot annehmen"
+    :description  "Der Betreiber sagt ja: aus dem Angebot wird ein Arbeitsauftrag."
+    :on     :angebot
+    :params {:angebot    {:type :angebot :name "Angebot" :required true}
+             :auftrag-nr {:type :string :name "Auftragsnummer" :required true}
+             :arbeitsauftrag-id {:type :string :exposure :hidden :prefill :uuid}}
+    ;; wann die Handlung NICHT geht — und was man dann liest
+    :submission-criteria [{:test {:s [:get :angebot :stand]} :pred [:= :s "offen"]
+                           :message "Nur ein offenes Angebot kann angenommen werden."}]
+    :rules  [{:op :update :object-type :angebot :target [:get :angebot :id]
+              :values {:stand "angenommen"}}
+             {:op :create :object-type :arbeitsauftrag :id [:get :arbeitsauftrag-id]
+              :values {:arbeitsauftrag-id [:get :arbeitsauftrag-id] :auftrag-nr [:get :auftrag-nr]
+                       :bezeichnung [:get :angebot :bezeichnung] :betrag [:get :angebot :betrag]
+                       :betreiber-id [:get :angebot :betreiber-id] :angebot-id [:get :angebot :angebot-id]
+                       :stand "angelegt"}}]}
+
+   :arbeitsauftrag-anlegen
+   {:display-name "Arbeitsauftrag anlegen"
+    :description  "Ein Arbeitsauftrag ohne Angebot, z. B. ein AOG-Einsatz auf Zuruf."
+    :params {:betreiber         {:type :betreiber :name "Betreiber" :required true}
+             :bezeichnung       {:type :string :name "Bezeichnung" :required true}
+             :auftrag-nr        {:type :string :name "Auftragsnummer" :required true}
+             :freigabetermin    {:type :date :name "Freigabetermin"}
+             :betrag            {:type :number :name "Auftragswert" :constraints {:min 0}}
+             :arbeitsauftrag-id {:type :string :exposure :hidden :prefill :uuid}}
+    :rules  [{:op :create :object-type :arbeitsauftrag :id [:get :arbeitsauftrag-id]
+              :values {:arbeitsauftrag-id [:get :arbeitsauftrag-id] :betreiber-id [:get :betreiber :betreiber-id]
+                       :bezeichnung [:get :bezeichnung] :auftrag-nr [:get :auftrag-nr]
+                       :freigabetermin [:get :freigabetermin] :betrag [:get :betrag]
+                       :stand "angelegt"}}]}
+
+   ;; Die vier Übergänge aus dem :lifecycle des Arbeitsauftrags. Keine schreibt :stand —
+   ;; das tut der Lebenslauf; sie halten nur fest, was sonst noch passiert.
+   :arbeitsauftrag-beginnen
+   {:display-name "Beginnen"
+    :on     :arbeitsauftrag
+    :params {:arbeitsauftrag {:type :arbeitsauftrag :name "Arbeitsauftrag" :required true}}
+    :rules  [{:op :update :object-type :arbeitsauftrag :target [:get :arbeitsauftrag :id]
+              :values {:begonnen-am [:now]}}]}
+
+   :arbeitsauftrag-fertigmelden
+   {:display-name "Fertig melden"
+    :on     :arbeitsauftrag
+    :params {:arbeitsauftrag {:type :arbeitsauftrag :name "Arbeitsauftrag" :required true}}
+    :rules  [{:op :update :object-type :arbeitsauftrag :target [:get :arbeitsauftrag :id]
+              :values {:fertig-am [:now]}}]}
+
+   :rechnung-stellen
+   {:display-name "Rechnung stellen"
+    :visibility   :prominent                      ; die wichtigste Handlung — zuerst anbieten
+    :on     :arbeitsauftrag
+    :params {:arbeitsauftrag {:type :arbeitsauftrag :name "Arbeitsauftrag" :required true}
+             :rechnung-nr    {:type :string :name "Rechnungsnummer" :required true}
+             ;; vorbelegt aus dem Arbeitsauftrag, änderbar
+             :betrag         {:type :number :name "Betrag" :required true
+                              :default {:from :arbeitsauftrag :property :betrag}}
+             :faellig-am     {:type :date :name "Fällig am"}
+             :rechnung-id    {:type :string :exposure :hidden :prefill :uuid}}
+    :rules  [{:op :create :object-type :rechnung :id [:get :rechnung-id]
+              :values {:rechnung-id [:get :rechnung-id] :arbeitsauftrag-id [:get :arbeitsauftrag :arbeitsauftrag-id]
+                       :rechnung-nr [:get :rechnung-nr] :bezeichnung [:get :arbeitsauftrag :bezeichnung]
+                       :betrag [:get :betrag] :rechnungsdatum [:now] :faellig-am [:get :faellig-am]}}]}
+
+   :arbeitsauftrag-stornieren
+   {:display-name "Stornieren"
+    :on     :arbeitsauftrag
+    :params {:arbeitsauftrag {:type :arbeitsauftrag :name "Arbeitsauftrag" :required true}
+             :grund          {:type :string :name "Grund" :required true}}
+    :rules  [{:op :update :object-type :arbeitsauftrag :target [:get :arbeitsauftrag :id]
+              :values {:storno-grund [:get :grund]}}]}
+
+   :zahlung-erfassen
+   {:display-name "Zahlung erfassen"
+    :on     :rechnung
+    :params {:rechnung   {:type :rechnung :name "Rechnung" :required true}
+             :betrag     {:type :number :name "Betrag" :required true :constraints {:min 0}
+                          :default {:from :rechnung :property :offen}}
+             :eingang-am {:type :date :name "Eingang am" :required true :prefill :now}
+             :zahlung-id {:type :string :exposure :hidden :prefill :uuid}}
+    :rules  [{:op :create :object-type :zahlung :id [:get :zahlung-id]
+              :values {:zahlung-id [:get :zahlung-id] :rechnung-id [:get :rechnung :rechnung-id]
+                       :betrag [:get :betrag] :eingang-am [:get :eingang-am]}}]}}
+
+  ;; ══ 4. FORMATE ═════════════════════════════════════════════════════════════
+  ;; Ein Werttyp gibt einem Begriff EIN Aussehen: jeder Betrag in Euro mit zwei
+  ;; Stellen, jede Nummer als Kennung, jede Stunde mit „h" — in jeder Liste, jeder
+  ;; Ansicht, jedem Formular gleich. Oben nennt ein Attribut ihn statt eines Typs.
+  :value-types
+  {:betrag  {:type :decimal
+             :format {:kind :currency :currency "EUR" :decimals 2 :grouping true}}
+   :stunden {:type :decimal
+             :constraints {:min 0 :max 24}
+             :format {:kind :unit :unit "h" :decimals 2}}
+   :nummer  {:type :string
+             :format {:kind :id}}}
+
+  ;; ══ 5. WOHER DIE DATEN KOMMEN ══════════════════════════════════════════════
+  ;; Betreiber, Angebote, Arbeitsaufträge, Rechnungen und Zahlungen entstehen durch die
+  ;; Handlungen oben — sie brauchen keine Quelle. Mechaniker und Zeitbuchungen
+  ;; kommen aus der Zeiterfassung: Quelle → Dataset → Objekt (`:backing` oben).
+  ;; Aufbereiten (umrechnen, zusammenführen, Schlüssel bilden) ist ein Transform
+  ;; im Code-Repo, nicht hier: `transforms/<name>.py` plus seine Deklaration im
+  ;; `.ent` des Repos (README des Code-Repos), ohne Code als template.entp.
+  :sources
+  {:zeiterfassung
+   {:type        :postgres
+    :project     :werft
+    :description "Die Datenbank des Zeiterfassungs-Terminals im Hangar."
+    :jdbc-url    "jdbc:postgresql://zeiterfassung.invalid:5432/zeit"  ; eigene Adresse eintragen
+    :egress      ["zeiterfassung.invalid:5432"]
+    :access      :read-only}}                     ; Passwort NIE hier: `sutra source secret zeiterfassung`
+
+  :datasets
+  {:mechaniker_zeiterfassung
+   {:title "Mechaniker (Zeiterfassung)" :kind :standalone
+    :project     :werft
+    :external-source {:datasource :zeiterfassung :table "personal" :primary-key :personal_nr}}
+   :zeitbuchungen_zeiterfassung
+   {:title "Zeitbuchungen (Zeiterfassung)" :kind :standalone
+    :project     :werft
+    ;; der Schlüssel muss eine Zeile der Quelle GANZ bestimmen — sonst fehlen Zeilen
+    :external-source {:datasource :zeiterfassung :table "buchungen" :primary-key :buchung_id}}}
+
+  ;; ══ 6. PROJEKT ═════════════════════════════════════════════════════════════
+  ;; Ein Projekt ist der Ort einer Ressource; seine :grants sagen, wer dort ändern
+  ;; und öffnen darf. Projekte gelten für die ganze Instanz: `sutra project create`
+  ;; landet sofort, nicht auf einem Zweig.
+  :projects
+  {:werft {:description "Arbeitsaufträge, Rechnungen und Zeiten des Betriebs."}}}}

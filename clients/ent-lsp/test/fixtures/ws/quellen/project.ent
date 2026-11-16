@@ -1,0 +1,5 @@
+{:schema
+ {:projects
+  {:quellen {:description "Verbindungen zu Fremdsystemen"
+             :imports     [:bericht]
+             :exports     [:erp]}}}}

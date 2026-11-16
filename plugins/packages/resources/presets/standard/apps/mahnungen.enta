@@ -1,0 +1,116 @@
+;; Mahnungen — "Ich mahne, was offen ist, gebe die Mahnung frei und versende sie."
+;;
+{:name         :mahnungen
+ :display-name "Mahnungen"
+ :description  "Ausgangsrechnungen erfassen, Offenes mahnen, Mahnungen freigeben und versenden."
+ :icon         "⏰"
+ :promoted     true
+ :collection   :alltag
+ :project      :anwendungen
+ :repository   :startanwendungen
+ :object-types [:ausgangsrechnung :mahnung :kundenbeziehung :organisation]
+ :actions      [{:action :ausgangsrechnung-erfassen}
+                {:action :kunde-anlegen}
+                {:action :organisation-anlegen}
+                {:action :mahnung-entwerfen}
+                {:action :mahnung-freigeben}
+                {:action :mahnung-senden}]
+ :layout
+ {:kind  :rows
+  :title "Mahnungen"
+  :vars  {:offene      {:from :ausgangsrechnung :where [[:offen :> 0]]}
+          :summe-offen {:agg [:sum :offen] :of :offene}
+          :rechnung    {:default nil}
+          :rechnung-id {:object-property :id :of :rechnung :type :string}
+          :belegnr     {:object-property :belegnummer :of :rechnung :type :string}
+          :kunde       {:object-property :kunde-name :of :rechnung :type :string}
+          :ansicht     {:type :keyword :default :entwurf}
+          :entwuerfe   {:from :mahnung :where [[:auftragsstand := "entwurf"]]}
+          :freigegeben {:from :mahnung :where [[:auftragsstand := "freigegeben"]]}
+          :gesendet    {:from :mahnung :where [[:auftragsstand :not= "entwurf"]
+                                               [:auftragsstand :not= "freigegeben"]]}
+          :n-entwuerfe {:agg [:count :auftrag-id] :of :entwuerfe}
+          ;; Nicht `:mahnung` nennen: `:from :mahnung` laese sonst diese
+          ;; Auswahl statt des Objekttyps.
+          :gewaehlt    {:default nil}
+          :mahnung-id  {:object-property :id :of :gewaehlt :type :string}
+          :an          {:object-property :empfaenger :of :gewaehlt :type :string}
+          :mahnbetrag  {:object-property :mahnbetrag :of :gewaehlt :type :number}}
+  :items
+  [{:widget :kpi-row
+    :items  [{:label "Offen" :value {:val :summe-offen} :fmt :eur}
+             {:label "Zur Freigabe" :value {:val :n-entwuerfe} :fmt :int}]}
+   {:kind   :columns
+    :detail {:var :rechnung}
+    :items
+    [{:kind  :section
+      :title "Offene Rechnungen"
+      :body  {:widget :object-table
+              :rows   {:val :offene}
+              :cols   [{:prop :belegnummer} {:prop :faellig-am} {:prop :offen}]
+              :sort   [[:faellig-am :asc]]
+              :active {:var :rechnung}}}
+     {:kind :rows
+      :items
+      [{:widget :kpi-row
+        :items  [{:label "Rechnung" :value {:val :belegnr}}
+                 {:label "Kunde" :value {:val :kunde}}]}
+       {:kind  :section
+        :title "Mahnen"
+        :body  {:widget   :action-form
+                :action   :mahnung-entwerfen
+                :label    "Mahnung entwerfen"
+                :defaults {:rechnung {:val :rechnung-id}}}}]}]}
+   {:kind   :columns
+    :detail {:var :gewaehlt}
+    :items
+    [{:kind   :tabs
+      :select {:var :ansicht}
+      :tabs   [{:id    :entwurf
+                :label "Zur Freigabe"
+                :body  {:widget :object-table
+                        :rows   {:val :entwuerfe}
+                        :cols   [{:prop :belegnummer} {:prop :empfaenger}
+                                 {:prop :mahnbetrag :fmt :eur}]
+                        :active {:var :gewaehlt}}}
+               {:id    :freigegeben
+                :label "Freigegeben"
+                :body  {:widget :object-table
+                        :rows   {:val :freigegeben}
+                        :cols   [{:prop :belegnummer} {:prop :freigegeben-am}
+                                 {:prop :mahnbetrag :fmt :eur}]
+                        :active {:var :gewaehlt}}}
+               {:id    :gesendet
+                :label "Gesendet"
+                :body  {:widget :object-table
+                        :rows   {:val :gesendet}
+                        :cols   [{:prop :belegnummer} {:prop :gesendet-am}
+                                 {:prop :auftragsstand}]
+                        :sort   [[:gesendet-am :desc]]
+                        :active {:var :gewaehlt}}}]}
+     {:kind :rows
+      :items
+      [{:widget :kpi-row
+        :items  [{:label "An" :value {:val :an}}
+                 {:label "Betrag" :value {:val :mahnbetrag} :fmt :eur}]}
+       {:kind  :section
+        :title "1. Freigeben"
+        :body  {:widget   :action-form
+                :action   :mahnung-freigeben
+                :label    "Freigeben"
+                :defaults {:mahnung {:val :mahnung-id}}}}
+       {:kind  :section
+        :title "2. Versenden"
+        :body  {:widget   :action-form
+                :action   :mahnung-senden
+                :label    "Versenden"
+                :defaults {:mahnung {:val :mahnung-id}}}}]}]}
+   {:kind  :section
+    :title "Rechnung erfassen"
+    :body  {:widget :action-form :action :ausgangsrechnung-erfassen :label "Erfassen"}}
+   {:kind  :section
+    :title "Kunde fehlt in der Liste?"
+    :body  {:widget :action-form :action :kunde-anlegen :label "Anlegen"}}
+   {:kind  :section
+    :title "Organisation fehlt?"
+    :body  {:widget :action-form :action :organisation-anlegen :label "Anlegen"}}]}}

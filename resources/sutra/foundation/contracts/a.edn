@@ -1,0 +1,2209 @@
+{:a/access-explain.get.res
+   [:maybe
+    [:map
+     [:username {:optional true} [:maybe :string]]
+     [:user-id {:optional true} [:maybe :string]]
+     [:op {:optional true} [:maybe :keyword]]
+     [:project {:optional true} [:maybe :string]]
+     [:allow? {:optional true} [:maybe :boolean]]
+     [:because
+      {:optional true}
+      [:maybe
+       [:map
+        [:fact {:optional true} [:maybe [:sequential :any]]]
+        [:rule {:optional true} [:maybe :any]]
+        [:from {:optional true} [:maybe [:sequential :any]]]]]]]]
+
+   :a/access-request-approve.post.req
+   [:maybe [:map [:note {:optional true} [:maybe [:or :string :keyword]]]]]
+
+   :a/access-request-approve.post.res
+   [:maybe
+    [:map
+     [:role {:optional true} [:maybe :string]]
+     [:resolved-at {:optional true} [:maybe :string]]
+     [:group {:optional true} [:maybe :string]]
+     [:applied
+      {:optional true}
+      [:maybe
+       [:map
+        [:link {:optional true} [:maybe :any]]
+        [:group {:optional true} [:maybe :any]]
+        [:grant {:optional true} [:maybe :map]]
+        [:project {:optional true} [:maybe :any]]]]]
+     [:group-id {:optional true} [:maybe :string]]
+     [:resolved-by {:optional true} [:maybe :string]]
+     [:tasks {:optional true} [:maybe [:sequential :map]]]
+     [:author {:optional true} [:maybe :string]]
+     [:justification {:optional true} [:maybe :string]]
+     [:project {:optional true} [:maybe :string]]
+     [:status {:optional true} [:maybe :string]]
+     [:id {:optional true} [:maybe :string]]
+     [:kind {:optional true} [:maybe :keyword]]
+     [:reviews {:optional true} [:maybe [:sequential :map]]]
+     [:project-rid {:optional true} [:maybe :string]]
+     [:group-project {:optional true} [:maybe :string]]
+     [:principal {:optional true} [:maybe :string]]
+     [:created-at {:optional true} [:maybe :string]]]]
+
+   :a/access-request-reject.post.req
+   [:maybe [:map [:note {:optional true} [:maybe [:or :string :keyword]]]]]
+
+   :a/access-request-reject.post.res
+   [:maybe
+    [:map
+     [:role {:optional true} [:maybe :string]]
+     [:resolved-at {:optional true} [:maybe :string]]
+     [:applied {:optional true} [:maybe :any]]
+     [:resolved-by {:optional true} [:maybe :string]]
+     [:tasks {:optional true} [:maybe [:sequential :map]]]
+     [:author {:optional true} [:maybe :string]]
+     [:justification {:optional true} [:maybe :any]]
+     [:project {:optional true} [:maybe :string]]
+     [:status {:optional true} [:maybe :string]]
+     [:id {:optional true} [:maybe :string]]
+     [:kind {:optional true} [:maybe :keyword]]
+     [:reviews {:optional true} [:maybe [:sequential :map]]]
+     [:project-rid {:optional true} [:maybe :string]]
+     [:principal {:optional true} [:maybe :string]]
+     [:created-at {:optional true} [:maybe :string]]]]
+
+   :a/access-request.delete.res
+   [:maybe
+    [:map
+     [:role {:optional true} [:maybe :string]]
+     [:resolved-at {:optional true} [:maybe :string]]
+     [:applied {:optional true} [:maybe :any]]
+     [:resolved-by {:optional true} [:maybe :string]]
+     [:tasks {:optional true} [:maybe [:sequential :map]]]
+     [:author {:optional true} [:maybe :string]]
+     [:justification {:optional true} [:maybe :any]]
+     [:project {:optional true} [:maybe :string]]
+     [:status {:optional true} [:maybe :string]]
+     [:id {:optional true} [:maybe :string]]
+     [:kind {:optional true} [:maybe :keyword]]
+     [:reviews {:optional true} [:maybe [:sequential :any]]]
+     [:project-rid {:optional true} [:maybe :string]]
+     [:principal {:optional true} [:maybe :string]]
+     [:created-at {:optional true} [:maybe :string]]]]
+
+   :a/access-request.get.res
+   [:maybe
+    [:map
+     [:resolved-at {:optional true} [:maybe :string]]
+     [:group {:optional true} [:maybe :string]]
+     [:applied
+      {:optional true}
+      [:maybe
+       [:map [:link {:optional true} [:maybe :any]] [:group {:optional true} [:maybe :any]]]]]
+     [:group-id {:optional true} [:maybe :string]]
+     [:resolved-by {:optional true} [:maybe :string]]
+     [:tasks {:optional true} [:maybe [:sequential :map]]]
+     [:author {:optional true} [:maybe :string]]
+     [:justification {:optional true} [:maybe :any]]
+     [:status {:optional true} [:maybe :string]]
+     [:id {:optional true} [:maybe :string]]
+     [:kind {:optional true} [:maybe :keyword]]
+     [:reviews {:optional true} [:maybe [:sequential :map]]]
+     [:group-project {:optional true} [:maybe :string]]
+     [:principal {:optional true} [:maybe :string]]
+     [:created-at {:optional true} [:maybe :string]]]]
+
+   :a/access-requests.get.res
+   [:maybe [:map [:requests {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/access-requests.post.req
+   [:maybe
+    [:map
+     [:kind {:optional true} [:maybe [:or :string :keyword]]]
+     [:project {:optional true} [:maybe [:or :string :keyword]]]
+     [:role {:optional true} [:maybe [:or :string :keyword]]]
+     [:group {:optional true} [:maybe [:or :string :keyword]]]
+     [:justification {:optional true} [:maybe [:or :string :keyword]]]]]
+
+   :a/access-requests.post.res
+   [:maybe
+    [:map
+     [:role {:optional true} [:maybe :string]]
+     [:resolved-at {:optional true} [:maybe :any]]
+     [:group {:optional true} [:maybe :string]]
+     [:applied {:optional true} [:maybe :any]]
+     [:group-id {:optional true} [:maybe :string]]
+     [:resolved-by {:optional true} [:maybe :any]]
+     [:tasks {:optional true} [:maybe [:sequential :map]]]
+     [:author {:optional true} [:maybe :string]]
+     [:justification {:optional true} [:maybe :string]]
+     [:project {:optional true} [:maybe :string]]
+     [:status {:optional true} [:maybe :string]]
+     [:id {:optional true} [:maybe :string]]
+     [:kind {:optional true} [:maybe :keyword]]
+     [:reviews {:optional true} [:maybe [:sequential :any]]]
+     [:project-rid {:optional true} [:maybe :string]]
+     [:group-project {:optional true} [:maybe :string]]
+     [:principal {:optional true} [:maybe :string]]
+     [:created-at {:optional true} [:maybe :string]]]]
+
+   :a/access-role.get.res
+   [:maybe
+    [:map
+     [:username {:optional true} [:maybe :string]]
+     [:user-id {:optional true} [:maybe :string]]
+     [:role {:optional true} [:maybe :string]]]]
+
+   :a/access-role.post.req
+   [:maybe [:map [:role {:optional true} [:maybe [:or :string :keyword]]]]]
+
+   :a/access-role.post.res
+   [:maybe
+    [:map
+     [:username {:optional true} [:maybe :string]]
+     [:user-id {:optional true} [:maybe :string]]
+     [:before {:optional true} [:maybe :string]]
+     [:role {:optional true} [:maybe :string]]
+     [:changed {:optional true} [:maybe :boolean]]
+     [:effective {:optional true} [:maybe :string]]]]
+
+   :a/access.get.res
+   [:maybe
+    [:map
+     [:principals {:optional true} [:maybe [:sequential :map]]]
+     [:roles {:optional true} [:maybe [:sequential :map]]]
+     [:projects {:optional true} [:maybe [:sequential :map]]]
+     [:markings {:optional true} [:maybe [:sequential :map]]]
+     [:matrix {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/action-params.post.req
+   [:maybe
+    [:map
+     [:action {:optional true} [:maybe [:or :keyword :string]]]
+     [:args {:optional true} [:maybe :map]]]]
+
+   :a/action-params.post.res
+   [:maybe
+    [:map
+     [:violated {:optional true} [:maybe [:sequential :any]]]
+     [:unencodable {:optional true} [:maybe [:sequential :any]]]
+     [:blocked? {:optional true} [:maybe :boolean]]
+     [:objects
+      {:optional true}
+      [:maybe
+       [:map
+        [:maengel {:optional true} [:maybe [:sequential :any]]]
+        [:vorgang {:optional true} [:maybe [:sequential :any]]]]]]
+     [:params
+      {:optional true}
+      [:maybe
+       [:map
+        [:mangel {:optional true} [:maybe :map]]
+        [:irgendein {:optional true} [:maybe :map]]
+        [:maengel {:optional true} [:maybe :map]]
+        [:liste {:optional true} [:maybe :map]]
+        [:liste2 {:optional true} [:maybe :map]]
+        [:wert {:optional true} [:maybe :map]]
+        [:zahlen {:optional true} [:maybe :map]]
+        [:zahl {:optional true} [:maybe :map]]
+        [:vorgang {:optional true} [:maybe :map]]
+        [:titel {:optional true} [:maybe :map]]]]]
+     [:invalid {:optional true} [:maybe [:sequential :any]]]
+     [:reason {:optional true} [:maybe :string]]
+     [:values
+      {:optional true}
+      [:maybe
+       [:map
+        [:maengel {:optional true} [:maybe [:sequential :any]]]
+        [:liste2 {:optional true} [:maybe [:sequential :any]]]
+        [:zahl {:optional true} [:maybe :any]]
+        [:liste {:optional true} [:maybe [:sequential :any]]]
+        [:wert {:optional true} [:maybe :any]]
+        [:zahlen {:optional true} [:maybe [:sequential :any]]]
+        [:vorgang {:optional true} [:maybe :any]]]]]
+     [:action {:optional true} [:maybe :keyword]]
+     [:options
+      {:optional true}
+      [:maybe
+       [:or
+        [:map
+         [:mangel {:optional true} [:maybe :map]]
+         [:irgendein {:optional true} [:maybe :map]]
+         [:maengel {:optional true} [:maybe :map]]]
+        [:map [:vorgang {:optional true} [:maybe :map]]]]]]
+     [:missing {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/action-type-by.delete.res
+   [:maybe
+    [:map
+     [:schema
+      {:optional true}
+      [:maybe
+       [:map
+        [:interfaces {:optional true} [:maybe :map]]
+        [:projects {:optional true} [:maybe :map]]
+        [:datasets {:optional true} [:maybe :map]]
+        [:applications {:optional true} [:maybe :map]]
+        [:custom-applications {:optional true} [:maybe :map]]
+        [:transforms {:optional true} [:maybe :map]]
+        [:value-types {:optional true} [:maybe :map]]
+        [:actions {:optional true} [:maybe :map]]
+        [:link-types {:optional true} [:maybe :map]]
+        [:shared-properties {:optional true} [:maybe :map]]
+        [:pipelines {:optional true} [:maybe :map]]
+        [:object-types {:optional true} [:maybe :map]]
+        [:projections {:optional true} [:maybe :map]]
+        [:object-type-groups {:optional true} [:maybe :map]]]]]]]
+
+   :a/actions-batch.post.req
+   [:maybe
+    [:map
+     [:action {:optional true} [:maybe [:or :keyword :string]]]
+     [:requests {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/actions-batch.post.res
+   [:maybe
+    [:map
+     [:action {:optional true} [:maybe :keyword]]
+     [:result
+      {:optional true}
+      [:maybe
+       [:map
+        [:action-id {:optional true} [:maybe :any]]
+        [:commit {:optional true} [:maybe :map]]
+        [:side-effects {:optional true} [:maybe [:sequential :any]]]]]]
+     [:action-id {:optional true} [:maybe :uuid]]
+     [:edits
+      {:optional true}
+      [:maybe
+       [:map
+        [:type {:optional true} [:maybe :any]]
+        [:edits {:optional true} [:maybe [:sequential :any]]]
+        [:added-objects-count {:optional true} [:maybe :any]]
+        [:modified-objects-count {:optional true} [:maybe :any]]
+        [:deleted-objects-count {:optional true} [:maybe :any]]
+        [:added-links-count {:optional true} [:maybe :any]]
+        [:deleted-links-count {:optional true} [:maybe :any]]]]]]]
+
+   :a/actions.post.req
+   [:maybe
+    [:map
+     [:action {:optional true} [:maybe [:or :keyword :string]]]
+     [:args {:optional true} [:maybe :map]]]]
+
+   :a/actions.post.res
+   [:maybe
+    [:map
+     [:staged {:optional true} [:maybe :boolean]]
+     [:seq {:optional true} [:maybe [:or :int :double]]]
+     [:action {:optional true} [:maybe :keyword]]
+     [:id {:optional true} [:maybe :uuid]]
+     [:action-id {:optional true} [:maybe :uuid]]
+     [:result
+      {:optional true}
+      [:maybe
+       [:map
+        [:action-id {:optional true} [:maybe :any]]
+        [:commit {:optional true} [:maybe :map]]
+        [:side-effects {:optional true} [:maybe [:sequential :any]]]
+        [:decisions {:optional true} [:maybe [:sequential :any]]]]]]
+     [:edits
+      {:optional true}
+      [:maybe
+       [:map
+        [:type {:optional true} [:maybe :any]]
+        [:edits {:optional true} [:maybe [:sequential :any]]]
+        [:added-objects-count {:optional true} [:maybe :any]]
+        [:modified-objects-count {:optional true} [:maybe :any]]
+        [:deleted-objects-count {:optional true} [:maybe :any]]
+        [:added-links-count {:optional true} [:maybe :any]]
+        [:deleted-links-count {:optional true} [:maybe :any]]]]]
+     [:dry-run {:optional true} [:maybe :boolean]]
+     [:plan {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/agent-invoke.post.req
+   [:maybe [:map [:input {:optional true} [:maybe [:or :string :keyword]]]]]
+
+   :a/agent-invoke.post.res
+   [:maybe
+    [:map
+     [:turns {:optional true} [:maybe [:or :int :double]]]
+     [:sources {:optional true} [:maybe [:sequential :map]]]
+     [:trace {:optional true} [:maybe [:sequential :map]]]
+     [:proposals {:optional true} [:maybe [:sequential :map]]]
+     [:seen {:optional true} [:maybe [:sequential :map]]]
+     [:thread {:optional true} [:maybe :string]]
+     [:answer {:optional true} [:maybe :string]]
+     [:run-id {:optional true} [:maybe :string]]
+     [:unverified {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/thread-proposal-accept.req
+   [:maybe [:map]]
+
+   :a/thread-proposal-accept.res
+   [:maybe
+    [:map
+     [:id {:optional true} [:maybe :string]]
+     [:status {:optional true} [:maybe :string]]
+     [:action {:optional true} [:maybe :keyword]]
+     [:edited {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/agent-thread.delete.res
+   [:maybe [:map [:deleted {:optional true} [:maybe :string]]]]
+
+   :a/agent-thread.get.res
+   [:maybe
+    [:map
+     [:thread
+      {:optional true}
+      [:maybe
+       [:map
+        [:created-at {:optional true} [:maybe :any]]
+        [:updated-at {:optional true} [:maybe :any]]
+        [:id {:optional true} [:maybe :any]]
+        [:owner {:optional true} [:maybe :any]]
+        [:agent {:optional true} [:maybe :any]]
+        [:branch {:optional true} [:maybe :any]]
+        [:title {:optional true} [:maybe :any]]]]]
+     [:messages {:optional true} [:maybe [:sequential :map]]]
+     [:proposals {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/agent-threads.get.res
+   [:maybe
+    [:map
+     [:agents {:optional true} [:maybe [:sequential :map]]]
+     [:models {:optional true} [:maybe [:sequential :map]]]
+     [:threads {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/agent-threads.post.req
+   [:maybe
+    [:map
+     [:agent {:optional true} [:maybe [:or :string :keyword]]]
+     [:input {:optional true} [:maybe [:or :string :keyword]]]]]
+
+   :a/agent-threads.post.res
+   [:maybe
+    [:map
+     [:question
+      {:optional true}
+      [:maybe
+       [:map
+        [:status {:optional true} [:maybe :any]]
+        [:created-at {:optional true} [:maybe :any]]
+        [:updated-at {:optional true} [:maybe :any]]
+        [:thread-id {:optional true} [:maybe :any]]
+        [:seq {:optional true} [:maybe :any]]
+        [:role {:optional true} [:maybe :any]]
+        [:content {:optional true} [:maybe :any]]]]]
+     [:answer
+      {:optional true}
+      [:maybe
+       [:map
+        [:role {:optional true} [:maybe :any]]
+        [:updated-at {:optional true} [:maybe :any]]
+        [:content {:optional true} [:maybe :any]]
+        [:status {:optional true} [:maybe :any]]
+        [:seq {:optional true} [:maybe :any]]
+        [:thread-id {:optional true} [:maybe :any]]
+        [:created-at {:optional true} [:maybe :any]]
+        [:run-id {:optional true} [:maybe :any]]
+        [:detail {:optional true} [:maybe :map]]]]]
+     [:thread
+      {:optional true}
+      [:maybe
+       [:map
+        [:created-at {:optional true} [:maybe :any]]
+        [:updated-at {:optional true} [:maybe :any]]
+        [:id {:optional true} [:maybe :any]]
+        [:owner {:optional true} [:maybe :any]]
+        [:agent {:optional true} [:maybe :any]]
+        [:branch {:optional true} [:maybe :any]]
+        [:title {:optional true} [:maybe :any]]]]]]]
+
+   :a/agents.get.res
+   [:maybe
+    [:map
+     [:agents
+      {:optional true}
+      [:maybe
+       [:map
+        [:clerk {:optional true} [:maybe :map]]
+        [:reviewer {:optional true} [:maybe :map]]]]]]]
+
+   :a/application-preview.post.req
+   [:maybe [:map [:file {:optional true} [:maybe :map]]]]
+
+   :a/application-preview.post.res
+   [:maybe
+    [:map
+     [:id {:optional true} [:maybe :string]]
+     [:expires-in-ms {:optional true} [:maybe [:or :int :double]]]]]
+
+   :a/applications.get.res
+   [:maybe
+    [:map
+     [:applications
+      {:optional true}
+      [:maybe
+       [:map
+        [:mangel-view-full {:optional true} [:maybe :map]]
+        [:schichtbrett {:optional true} [:maybe :map]]
+        [:betriebsportal {:optional true} [:maybe :map]]
+        [:flugzeugmodul {:optional true} [:maybe :map]]
+        [:werftplan {:optional true} [:maybe :map]]
+        [:entwurf {:optional true} [:maybe :map]]
+        [:flottenmodul {:optional true} [:maybe :map]]
+        [:luftfahrzeug-view-full {:optional true} [:maybe :map]]
+        [:kostenblatt {:optional true} [:maybe :map]]
+        [:maengelportal {:optional true} [:maybe :map]]
+        [:teileliste {:optional true} [:maybe :map]]
+        [:leise {:optional true} [:maybe :map]]]]]]]
+
+   :a/automation-events.get.res
+   [:maybe
+    [:map
+     [:events {:optional true} [:maybe [:sequential :map]]]
+     [:counts {:optional true} [:maybe [:map]]]]]
+
+   :a/automation-preview.post.req
+   [:maybe
+    [:map
+     [:object-id {:optional true} [:maybe [:or :string :keyword]]]
+     [:with-model? {:optional true} [:maybe :boolean]]]]
+
+   :a/automation-preview.post.res
+   [:maybe
+    [:map
+     [:matched {:optional true} [:maybe [:or :int :double]]]
+     [:applied {:optional true} [:maybe [:or :int :double]]]
+     [:affected-ids {:optional true} [:maybe [:sequential :any]]]
+     [:errors {:optional true} [:maybe [:sequential :any]]]
+     [:proposed {:optional true} [:maybe [:or :int :double]]]
+     [:decisions {:optional true} [:maybe [:sequential :map]]]
+     [:skipped {:optional true} [:maybe [:or :int :double]]]
+     [:previews {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/automation-proposal-accept.post.req
+   [:maybe [:map [:args {:optional true} [:maybe :map]]]]
+
+   :a/automation-proposal-accept.post.res
+   [:maybe
+    [:map
+     [:id {:optional true} [:maybe :string]]
+     [:status {:optional true} [:maybe :string]]
+     [:action {:optional true} [:maybe :keyword]]
+     [:edited {:optional true} [:maybe [:sequential :map]]]
+     [:accepted-args
+      {:optional true}
+      [:maybe
+       [:map
+        [:ata {:optional true} [:maybe :any]]
+        [:begruendung {:optional true} [:maybe :any]]
+        [:mangel {:optional true} [:maybe :any]]]]]]]
+
+   :a/automation-proposal-reject.post.req
+   [:maybe [:map]]
+
+   :a/automation-proposal-reject.post.res
+   [:maybe
+    [:map [:id {:optional true} [:maybe :string]] [:status {:optional true} [:maybe :string]]]]
+
+   :a/automation-proposals.get.res
+   [:maybe
+    [:map
+     [:proposals {:optional true} [:maybe [:sequential :map]]]
+     [:counts {:optional true} [:maybe [:map]]]]]
+
+   :a/automation-run.post.res
+   [:maybe
+    [:map
+     [:errors {:optional true} [:maybe [:sequential :any]]]
+     [:matched {:optional true} [:maybe [:or :int :double]]]
+     [:decisions {:optional true} [:maybe [:sequential :map]]]
+     [:applied {:optional true} [:maybe [:or :int :double]]]
+     [:affected-ids {:optional true} [:maybe [:sequential :any]]]
+     [:ran-at {:optional true} [:maybe :any]]
+     [:proposed {:optional true} [:maybe [:or :int :double]]]
+     [:skipped {:optional true} [:maybe [:or :int :double]]]
+     [:failures {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/automation-runs.get.res
+   [:maybe [:map [:runs {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/automations.get.res
+   [:maybe [:map [:automations {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/automations.post.req
+   [:maybe
+    [:map
+     [:name {:optional true} [:maybe [:or :string :keyword]]]
+     [:on {:optional true} [:maybe [:or :keyword :string]]]
+     [:when {:optional true} [:maybe [:sequential :any]]]
+     [:effect {:optional true} [:maybe :map]]
+     [:every-ms {:optional true} [:maybe [:or :int :double]]]
+     [:paused {:optional true} [:maybe :boolean]]]]
+
+   :a/automations.post.res
+   [:maybe
+    [:map
+     [:updated-at {:optional true} [:maybe :any]]
+     [:paused {:optional true} [:maybe :boolean]]
+     [:every-ms {:optional true} [:maybe [:or :int :double]]]
+     [:muted {:optional true} [:maybe :boolean]]
+     [:name {:optional true} [:maybe :string]]
+     [:id {:optional true} [:maybe :string]]
+     [:effect-spec {:optional true} [:maybe :string]]
+     [:on {:optional true} [:maybe :string]]
+     [:live {:optional true} [:maybe :boolean]]
+     [:auto-mute {:optional true} [:maybe :boolean]]
+     [:branch {:optional true} [:maybe :string]]
+     [:created-at {:optional true} [:maybe :any]]
+     [:owner {:optional true} [:maybe :string]]
+     [:when-spec {:optional true} [:maybe :string]]]]
+
+   :a/branch-changes.get.res
+   [:maybe
+    [:map
+     [:branch {:optional true} [:maybe :string]]
+     [:target {:optional true} [:maybe :string]]
+     [:tasks {:optional true} [:maybe [:sequential :map]]]
+     [:proposal {:optional true} [:maybe :any]]]]
+
+   :a/branch-policy.get.res
+   [:maybe
+    [:map
+     [:merge-modes {:optional true} [:maybe [:sequential :any]]]
+     [:retention-days {:optional true} [:maybe [:or :int :double]]]
+     [:space {:optional true} [:maybe :any]]
+     [:purged-at {:optional true} [:maybe :any]]
+     [:inactive-days {:optional true} [:maybe [:or :int :double]]]
+     [:land-pushes {:optional true} [:maybe :boolean]]
+     [:require-checks {:optional true} [:maybe :boolean]]
+     [:inactive-at {:optional true} [:maybe :any]]
+     [:review {:optional true} [:maybe :any]]
+     [:protected {:optional true} [:maybe :boolean]]
+     [:auto-land {:optional true} [:maybe :boolean]]
+     [:closed-at {:optional true} [:maybe :any]]
+     [:branch {:optional true} [:maybe :string]]
+     [:merged-at {:optional true} [:maybe :any]]]]
+
+   :a/branch-policy.post.req
+   [:maybe
+    [:map
+     [:land-pushes {:optional true} [:maybe :boolean]]
+     [:protected {:optional true} [:maybe :boolean]]
+     [:review {:optional true} [:maybe [:sequential :any]]]
+     [:inactive-days {:optional true} [:maybe [:or :int :double]]]
+     [:auto-land {:optional true} [:maybe :boolean]]]]
+
+   :a/branch-policy.post.res
+   [:maybe
+    [:map
+     [:merge-modes {:optional true} [:maybe [:sequential :any]]]
+     [:retention-days {:optional true} [:maybe [:or :int :double]]]
+     [:space {:optional true} [:maybe :any]]
+     [:purged-at {:optional true} [:maybe :any]]
+     [:inactive-days {:optional true} [:maybe [:or :int :double]]]
+     [:land-pushes {:optional true} [:maybe :boolean]]
+     [:require-checks {:optional true} [:maybe :boolean]]
+     [:inactive-at {:optional true} [:maybe :string]]
+     [:review {:optional true} [:maybe [:sequential :map]]]
+     [:protected {:optional true} [:maybe :boolean]]
+     [:auto-land {:optional true} [:maybe :boolean]]
+     [:closed-at {:optional true} [:maybe :any]]
+     [:branch {:optional true} [:maybe :string]]
+     [:merged-at {:optional true} [:maybe :any]]]]
+
+   :a/branch-resources.post.req
+   [:maybe [:map [:remove {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/branch-resources.post.res
+   [:maybe
+    [:map
+     [:branch {:optional true} [:maybe :string]]
+     [:removed {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/branch-roles.get.res
+   [:maybe
+    [:map
+     [:branch {:optional true} [:maybe :string]]
+     [:roles {:optional true} [:maybe [:sequential :any]]]
+     [:governed {:optional true} [:maybe :boolean]]]]
+
+   :a/branch-status.post.req
+   [:maybe
+    [:map
+     [:closed {:optional true} [:maybe :boolean]]
+     [:inactive {:optional true} [:maybe :boolean]]]]
+
+   :a/branch-status.post.res
+   [:maybe
+    [:map
+     [:branch {:optional true} [:maybe :string]]
+     [:closed {:optional true} [:maybe :boolean]]]]
+
+   :a/branch-sweep.post.req
+   [:maybe [:map [:dry-run? {:optional true} [:maybe :boolean]]]]
+
+   :a/branch-sweep.post.res
+   [:maybe
+    [:map
+     [:closed {:optional true} [:maybe [:sequential :any]]]
+     [:would-close {:optional true} [:maybe [:sequential :any]]]
+     [:would-mark-inactive {:optional true} [:maybe [:sequential :any]]]
+     [:days {:optional true} [:maybe :any]]
+     [:closed-proposals {:optional true} [:maybe [:sequential :any]]]
+     [:purged {:optional true} [:maybe [:sequential :any]]]
+     [:marked-inactive {:optional true} [:maybe [:sequential :any]]]
+     [:would-purge {:optional true} [:maybe [:sequential :any]]]
+     [:reactivated {:optional true} [:maybe [:sequential :any]]]
+     [:dry-run {:optional true} [:maybe :boolean]]
+     [:would-close-proposals {:optional true} [:maybe [:sequential :any]]]
+     [:purge-failed {:optional true} [:maybe [:sequential :any]]]
+     [:would-reactivate {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/branch.delete.res
+   [:maybe
+    [:map
+     [:dropped {:optional true} [:maybe :string]]
+     [:status {:optional true} [:maybe :string]]
+     [:purged {:optional true} [:maybe :boolean]]]]
+
+   :a/branches.get.res
+   [:maybe
+    [:map
+     [:branches {:optional true} [:maybe [:sequential :map]]]
+     [:current {:optional true} [:maybe :string]]
+     [:head {:optional true} [:maybe [:or :int :double]]]]]
+
+   :a/branches.post.req
+   [:maybe
+    [:map
+     [:parent {:optional true} [:maybe [:or :string :keyword]]]
+     [:name {:optional true} [:maybe [:or :string :keyword]]]]]
+
+   :a/branches.post.res
+   [:maybe
+    [:map [:name {:optional true} [:maybe :string]] [:parent {:optional true} [:maybe :string]]]]
+
+   :a/build-estimate.get.res
+   [:maybe
+    [:map
+     [:window
+      {:optional true}
+      [:maybe
+       [:map [:days {:optional true} [:maybe :any]] [:since {:optional true} [:maybe :any]]]]]
+     [:branch {:optional true} [:maybe :string]]
+     [:transforms {:optional true} [:maybe [:sequential :map]]]
+     [:total
+      {:optional true}
+      [:maybe
+       [:map
+        [:measured {:optional true} [:maybe [:sequential :any]]]
+        [:unknown {:optional true} [:maybe [:sequential :any]]]
+        [:ceiling-cost {:optional true} [:maybe :any]]
+        [:delta-based {:optional true} [:maybe [:sequential :any]]]
+        [:calls-next-run {:optional true} [:maybe :any]]
+        [:currency {:optional true} [:maybe :any]]
+        [:in-tokens {:optional true} [:maybe :any]]
+        [:tokens {:optional true} [:maybe :any]]
+        [:calls {:optional true} [:maybe :any]]
+        [:cost {:optional true} [:maybe :any]]
+        [:ceiling-only {:optional true} [:maybe [:sequential :any]]]
+        [:runs {:optional true} [:maybe :any]]
+        [:priced {:optional true} [:maybe :any]]
+        [:out-tokens {:optional true} [:maybe :any]]
+        [:cost-next-run {:optional true} [:maybe :any]]
+        [:lower-bound? {:optional true} [:maybe :any]]]]]
+     [:budget
+      {:optional true}
+      [:maybe
+       [:map
+        [:budget {:optional true} [:maybe :any]]
+        [:spent {:optional true} [:maybe :any]]
+        [:remaining {:optional true} [:maybe :any]]
+        [:unlimited? {:optional true} [:maybe :any]]
+        [:estimate {:optional true} [:maybe :any]]
+        [:fits? {:optional true} [:maybe :any]]]]]
+     [:scope
+      {:optional true}
+      [:maybe
+       [:map
+        [:datasets {:optional true} [:maybe [:sequential :any]]]
+        [:only {:optional true} [:maybe [:sequential :any]]]
+        [:unresolved {:optional true} [:maybe [:sequential :any]]]
+        [:targets {:optional true} [:maybe [:sequential :any]]]
+        [:jobs {:optional true} [:maybe :any]]
+        [:levels {:optional true} [:maybe [:sequential :any]]]
+        [:build {:optional true} [:maybe [:sequential :any]]]
+        [:strategy {:optional true} [:maybe :any]]
+        [:object-types {:optional true} [:maybe [:sequential :any]]]]]]]]
+
+   :a/catalog-consumption.get.res
+   [:maybe [:map [:consumption {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/catalog-delta.get.res
+   [:maybe
+    [:map
+     [:delta
+      {:optional true}
+      [:maybe
+       [:map
+        [:low {:optional true} [:maybe :any]]
+        [:high {:optional true} [:maybe :any]]
+        [:bootstrap {:optional true} [:maybe :any]]]]]]]
+
+   :a/catalog-transactions.get.res
+   [:maybe
+    [:map
+     [:transactions {:optional true} [:maybe [:sequential :any]]]
+     [:via
+      {:optional true}
+      [:maybe
+       [:map
+        [:object-type {:optional true} [:maybe :any]]
+        [:producer {:optional true} [:maybe :any]]]]]]]
+
+   :a/custom-apps.get.res
+   [:maybe [:map [:custom-applications {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/data-freshness.post.req
+   [:maybe [:map [:items {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/data-freshness.post.res
+   [:maybe [:map [:updates {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/dataset-import.post.res
+   [:maybe
+    [:map
+     [:dataset {:optional true} [:maybe :string]]
+     [:format {:optional true} [:maybe :keyword]]
+     [:written {:optional true} [:maybe [:or :int :double]]]
+     [:mode {:optional true} [:maybe :keyword]]
+     [:key {:optional true} [:maybe :keyword]]
+     [:branch {:optional true} [:maybe :string]]]]
+
+   :a/dataset-preview.get.res
+   [:maybe
+    [:map
+     [:dataset {:optional true} [:maybe :string]]
+     [:kind {:optional true} [:maybe :keyword]]
+     [:columns {:optional true} [:maybe [:sequential :map]]]
+     [:as-of {:optional true} [:maybe :any]]
+     [:rows {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/dataset-write.post.req
+   [:maybe
+    [:map
+     [:rows {:optional true} [:maybe [:sequential :any]]]
+     [:message {:optional true} [:maybe [:or :string :keyword]]]
+     [:mode {:optional true} [:maybe [:or :keyword :string]]]
+     [:key {:optional true} [:maybe :any]]]]
+
+   :a/dataset-write.post.res
+   [:maybe
+    [:map
+     [:dataset {:optional true} [:maybe :string]]
+     [:written {:optional true} [:maybe [:or :int :double]]]
+     [:mode {:optional true} [:maybe :keyword]]
+     [:key {:optional true} [:maybe :any]]
+     [:branch {:optional true} [:maybe :string]]]]
+
+   :a/default-project.get.res
+   [:maybe
+    [:map
+     [:project {:optional true} [:maybe :string]]
+     [:context {:optional true} [:maybe :string]]]]
+
+   :a/default-project.post.req
+   [:maybe [:map [:project {:optional true} [:maybe [:or :string :keyword]]]]]
+
+   :a/default-project.post.res
+   [:maybe
+    [:map
+     [:project {:optional true} [:maybe :string]]
+     [:context {:optional true} [:maybe :string]]]]
+
+   :a/explorer-dashboard.get.res
+   [:maybe
+    [:map
+     [:object-type {:optional true} [:maybe :keyword]]
+     [:layout
+      {:optional true}
+      [:maybe [:map [:charts {:optional true} [:maybe [:sequential :any]]]]]]
+     [:updated-at {:optional true} [:maybe :any]]]]
+
+   :a/explorer-dashboard.put.req
+   [:maybe [:map [:layout {:optional true} [:maybe :map]]]]
+
+   :a/explorer-dashboard.put.res
+   [:maybe
+    [:map
+     [:object-type {:optional true} [:maybe :keyword]]
+     [:layout
+      {:optional true}
+      [:maybe [:map [:charts {:optional true} [:maybe [:sequential :any]]]]]]
+     [:updated-at {:optional true} [:maybe :any]]]]
+
+   :a/graph-layout.post.req
+   [:maybe
+    [:map
+     [:node-kind {:optional true} [:maybe [:or :keyword :string]]]
+     [:node-key {:optional true} [:maybe [:or :string :keyword]]]
+     [:x {:optional true} [:maybe [:or :int :double]]]
+     [:y {:optional true} [:maybe [:or :int :double]]]
+     [:entries {:optional true} [:maybe [:sequential :any]]]
+     [:commit? {:optional true} [:maybe :boolean]]]]
+
+   :a/graph-layout.post.res
+   [:maybe
+    [:map
+     [:ok {:optional true} [:maybe :boolean]]
+     [:saved {:optional true} [:maybe [:or :int :double]]]
+     [:graph-id {:optional true} [:maybe :string]]
+     [:committed {:optional true} [:maybe :boolean]]]]
+
+   :a/graph-open.get.res
+   [:maybe
+    [:map
+     [:description {:optional true} [:maybe :string]]
+     [:path {:optional true} [:maybe :string]]
+     [:visible-types
+      {:optional true}
+      [:maybe
+       [:map
+        [:object-types {:optional true} [:maybe [:set :any]]]
+        [:transforms {:optional true} [:maybe [:set :any]]]]]]
+     [:payload {:optional true} [:maybe :any]]
+     [:layout {:optional true} [:maybe [:sequential :map]]]
+     [:name {:optional true} [:maybe :keyword]]
+     [:mode {:optional true} [:maybe :keyword]]
+     [:title {:optional true} [:maybe :string]]
+     [:project {:optional true} [:maybe :any]]
+     [:id {:optional true} [:maybe :string]]
+     [:default-canvas? {:optional true} [:maybe :boolean]]
+     [:area {:optional true} [:maybe :any]]
+     [:fallback-branches {:optional true} [:maybe [:sequential :any]]]
+     [:branch {:optional true} [:maybe :string]]
+     [:color-schemes {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/graph-schemes.post.req
+   [:maybe
+    [:map
+     [:name {:optional true} [:maybe [:or :string :keyword]]]
+     [:rules {:optional true} [:maybe :map]]
+     [:is-default {:optional true} [:maybe :boolean]]]]
+
+   :a/graph-schemes.post.res
+   [:maybe
+    [:map
+     [:id {:optional true} [:maybe :string]]
+     [:graph-id {:optional true} [:maybe :string]]
+     [:name {:optional true} [:maybe :string]]
+     [:rules {:optional true} [:maybe [:map [:kind {:optional true} [:maybe :any]]]]]
+     [:created-at {:optional true} [:maybe :any]]
+     [:updated-at {:optional true} [:maybe :any]]
+     [:is-default {:optional true} [:maybe :boolean]]]]
+
+   :a/graphs.get.res
+   [:maybe [:map [:graphs {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/identity-config.post.req
+   [:maybe [:map [:enabled {:optional true} [:maybe :boolean]]]]
+
+   :a/identity-config.post.res
+   [:maybe
+    [:map
+     [:ready {:optional true} [:maybe :boolean]]
+     [:enabled {:optional true} [:maybe :boolean]]]]
+
+   :a/identity-sync.post.req
+   [:maybe
+    [:map
+     [:dry-run? {:optional true} [:maybe :boolean]]
+     [:disable-gone? {:optional true} [:maybe :boolean]]]]
+
+   :a/identity-sync.post.res
+   [:maybe
+    [:map
+     [:steps {:optional true} [:maybe [:sequential :map]]]
+     [:memberships {:optional true} [:maybe [:sequential :map]]]
+     [:gone {:optional true} [:maybe [:sequential :any]]]
+     [:skipped {:optional true} [:maybe [:or :int :double]]]
+     [:dry-run {:optional true} [:maybe :boolean]]
+     [:results {:optional true} [:maybe [:sequential :map]]]
+     [:membership-results {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/import-run.post.req
+   [:maybe
+    [:map
+     [:only {:optional true} [:maybe [:sequential :any]]]
+     [:profile {:optional true} [:maybe :boolean]]
+     [:trace {:optional true} [:maybe :boolean]]
+     [:force {:optional true} [:maybe :boolean]]
+     [:detach {:optional true} [:maybe :boolean]]]]
+
+   :a/import-run.post.res
+   [:maybe
+    [:map
+     [:run-id {:optional true} [:maybe :uuid]]
+     [:status {:optional true} [:maybe :string]]
+     [:branch {:optional true} [:maybe :string]]
+     [:started-at {:optional true} [:maybe :any]]]]
+
+   :a/import-runs.get.res
+   [:maybe
+    [:map
+     [:runs {:optional true} [:maybe [:sequential :map]]]
+     [:window
+      {:optional true}
+      [:maybe
+       [:map [:hours {:optional true} [:maybe :any]] [:limit {:optional true} [:maybe :any]]]]]]]
+
+   :a/import-status.get.res
+   [:maybe
+    [:map
+     [:per-type
+      {:optional true}
+      [:maybe
+       [:map
+        [:frisch {:optional true} [:maybe :map]]
+        [:beleg-frisch {:optional true} [:maybe :map]]]]]
+     [:total {:optional true} [:maybe [:or :int :double]]]
+     [:last-at {:optional true} [:maybe :any]]]]
+
+   :a/install.post.req
+   [:maybe
+    [:map [:schema {:optional true} [:maybe :map]] [:preview? {:optional true} [:maybe :boolean]]]]
+
+   :a/install.post.res
+   [:maybe
+    [:map
+     [:created {:optional true} [:maybe [:or :int :double]]]
+     [:updated {:optional true} [:maybe [:or :int :double]]]
+     [:skipped {:optional true} [:maybe [:or :int :double]]]
+     [:preview? {:optional true} [:maybe :boolean]]
+     [:staged {:optional true} [:maybe [:sequential :map]]]
+     [:problems {:optional true} [:maybe :any]]
+     [:advisories {:optional true} [:maybe [:sequential :map]]]
+     [:warnings {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/ledger-consumption.get.res
+   [:maybe [:map [:consumption {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/ledger-transactions.get.res
+   [:maybe [:map [:transactions {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/login.post.req
+   [:maybe
+    [:map
+     [:username {:optional true} [:maybe [:or :string :keyword]]]
+     [:password {:optional true} [:maybe [:or :string :keyword]]]]]
+
+   :a/login.post.res
+   [:maybe
+    [:map
+     [:token {:optional true} [:maybe :string]]
+     [:username {:optional true} [:maybe :string]]]]
+
+   :a/me.get.res
+   [:maybe
+    [:map
+     [:user {:optional true} [:maybe :string]]
+     [:clearances {:optional true} [:maybe [:sequential :any]]]
+     [:branch {:optional true} [:maybe :string]]
+     [:allow-anon {:optional true} [:maybe :boolean]]
+     [:username {:optional true} [:maybe :string]]
+     [:role {:optional true} [:maybe :string]]]]
+
+   :a/mfa-status.get.res
+   [:maybe
+    [:map
+     [:enrolled {:optional true} [:maybe :boolean]]
+     [:required {:optional true} [:maybe :boolean]]
+     [:limited {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/my-application-aggregate.post.req
+   [:maybe
+    [:map
+     [:find {:optional true} [:maybe [:or :keyword :string]]]
+     [:where {:optional true} [:maybe :map]]
+     [:sort-dir {:optional true} [:maybe [:or :keyword :string]]]
+     [:limit {:optional true} [:maybe [:or :int :double]]]
+     [:group-by {:optional true} [:maybe [:sequential :any]]]
+     [:object-set {:optional true} [:maybe [:or :string :keyword]]]
+     [:explain? {:optional true} [:maybe :boolean]]
+     [:aggs {:optional true} [:maybe [:sequential :any]]]
+     [:order-by {:optional true} [:maybe [:or :keyword :string]]]
+     [:around {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/my-application-aggregate.post.res
+   [:maybe
+    [:map
+     [:object-type {:optional true} [:maybe :keyword]]
+     [:keys
+      {:optional true}
+      [:maybe
+       [:map
+        [:group {:optional true} [:maybe [:sequential :any]]]
+        [:metrics {:optional true} [:maybe [:sequential :any]]]]]]
+     [:aggregations {:optional true} [:maybe [:sequential :map]]]
+     [:scenario {:optional true} [:maybe :any]]]]
+
+   :a/my-application-around.post.req
+   [:maybe
+    [:map
+     [:type {:optional true} [:maybe [:or :string :keyword]]]
+     [:id {:optional true} [:maybe [:or :string :keyword]]]
+     [:standard {:optional true} [:maybe :boolean]]]]
+
+   :a/my-application-around.post.res
+   [:maybe
+    [:map
+     [:object-type {:optional true} [:maybe :keyword]]
+     [:id {:optional true} [:maybe :string]]
+     [:objects
+      {:optional true}
+      [:maybe [:map [:mangel {:optional true} [:maybe [:sequential :any]]]]]]
+     [:scenario {:optional true} [:maybe :any]]
+     [:object
+      {:optional true}
+      [:maybe
+       [:map
+        [:id {:optional true} [:maybe :any]]
+        [:object-type-ref {:optional true} [:maybe :any]]
+        [:values {:optional true} [:maybe :map]]
+        [:_version {:optional true} [:maybe :any]]]]]
+     [:links
+      {:optional true}
+      [:maybe
+       [:map
+        [:triebwerke {:optional true} [:maybe [:sequential :any]]]
+        [:maengel {:optional true} [:maybe [:sequential :any]]]
+        [:berechtigte {:optional true} [:maybe [:sequential :any]]]]]]
+     [:answers
+      {:optional true}
+      [:maybe [:map [:alle-mechaniker {:optional true} [:maybe [:sequential :any]]]]]]
+     [:inputs {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/app-data-freshness.req
+   [:maybe [:map [:items {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/app-data-freshness.res
+   [:maybe [:map [:updates {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/my-application-scenarios.get.res
+   [:maybe [:map [:scenarios {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/my-application.get.res
+   [:maybe
+    [:map
+     [:scenario {:optional true} [:maybe :any]]
+     [:application
+      {:optional true}
+      [:maybe
+       [:map
+        [:description {:optional true} [:maybe :any]]
+        [:action-intents {:optional true} [:maybe :map]]
+        [:default-action {:optional true} [:maybe :any]]
+        [:object-titles {:optional true} [:maybe :map]]
+        [:viewer {:optional true} [:maybe :map]]
+        [:action-evaluated {:optional true} [:maybe [:sequential :any]]]
+        [:layout {:optional true} [:maybe :map]]
+        [:standard-views {:optional true} [:maybe :map]]
+        [:name {:optional true} [:maybe :any]]
+        [:object-type {:optional true} [:maybe :any]]
+        [:action-optioned {:optional true} [:maybe [:sequential :any]]]
+        [:object-names {:optional true} [:maybe :map]]
+        [:property-display {:optional true} [:maybe :map]]
+        [:object-views {:optional true} [:maybe :map]]
+        [:source {:optional true} [:maybe :any]]
+        [:icon {:optional true} [:maybe :any]]
+        [:action-forms {:optional true} [:maybe :map]]
+        [:action-params {:optional true} [:maybe :map]]
+        [:object-rows {:optional true} [:maybe :map]]
+        [:property-types {:optional true} [:maybe :map]]
+        [:id {:optional true} [:maybe :any]]
+        [:display-name {:optional true} [:maybe :any]]
+        [:object-keys {:optional true} [:maybe :map]]
+        [:live {:optional true} [:maybe :any]]
+        [:version {:optional true} [:maybe :map]]
+        [:data-inputs {:optional true} [:maybe [:set :any]]]]]]
+     [:objects {:optional true} [:maybe [:sequential :map]]]
+     [:data
+      {:optional true}
+      [:maybe
+       [:map
+        [:mangel {:optional true} [:maybe [:sequential :any]]]
+        [:mechaniker {:optional true} [:maybe [:sequential :any]]]
+        [:luftfahrzeug {:optional true} [:maybe [:sequential :any]]]
+        [:wartbares-teil {:optional true} [:maybe [:sequential :any]]]
+        [:flug {:optional true} [:maybe [:sequential :any]]]
+        [:passagier {:optional true} [:maybe [:sequential :any]]]
+        [:_refused {:optional true} [:maybe :map]]
+        [:besatzung {:optional true} [:maybe [:sequential :any]]]]]]]]
+
+   :a/my-applications.get.res
+   [:maybe
+    [:map
+     [:applications {:optional true} [:maybe [:sequential :map]]]
+     [:unlisted {:optional true} [:maybe [:sequential :map]]]
+     [:collections {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/my-home.get.res
+   [:maybe
+    [:map
+     [:url {:optional true} [:maybe :any]]
+     [:default-workspace {:optional true} [:maybe :any]]]]
+
+   :a/my-workspace-around.post.req
+   [:maybe
+    [:map
+     [:type {:optional true} [:maybe [:or :string :keyword]]]
+     [:id {:optional true} [:maybe [:or :string :keyword]]]
+     [:standard {:optional true} [:maybe :boolean]]]]
+
+   :a/my-workspace-around.post.res
+   [:maybe
+    [:map
+     [:object-type {:optional true} [:maybe :keyword]]
+     [:id {:optional true} [:maybe :string]]
+     [:objects {:optional true} [:maybe [:map]]]
+     [:scenario {:optional true} [:maybe :any]]
+     [:object
+      {:optional true}
+      [:maybe
+       [:map
+        [:id {:optional true} [:maybe :any]]
+        [:object-type-ref {:optional true} [:maybe :any]]
+        [:values {:optional true} [:maybe :map]]
+        [:_version {:optional true} [:maybe :any]]]]]
+     [:links {:optional true} [:maybe [:map]]]]]
+
+   :a/my-workspace-search.get.res
+   [:maybe [:map [:groups {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/my-workspace.get.res
+   [:maybe
+    [:map
+     [:workspace
+      {:optional true}
+      [:maybe
+       [:map
+        [:object-titles {:optional true} [:maybe :map]]
+        [:viewer {:optional true} [:maybe :map]]
+        [:standard-views {:optional true} [:maybe :map]]
+        [:name {:optional true} [:maybe :any]]
+        [:object-names {:optional true} [:maybe :map]]
+        [:property-display {:optional true} [:maybe :map]]
+        [:object-views {:optional true} [:maybe :map]]
+        [:api-root {:optional true} [:maybe :any]]
+        [:object-rows {:optional true} [:maybe :map]]
+        [:property-types {:optional true} [:maybe :map]]
+        [:id {:optional true} [:maybe :any]]
+        [:display-name {:optional true} [:maybe :any]]
+        [:object-keys {:optional true} [:maybe :map]]]]]]]
+
+   :a/my-workspaces.get.res
+   [:maybe [:map [:workspaces {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/object-type-edit-history.get.res
+   [:maybe
+    [:map
+     [:object-type {:optional true} [:maybe :string]]
+     [:history {:optional true} [:maybe [:sequential :map]]]
+     [:total {:optional true} [:maybe [:or :int :double]]]
+     [:next-page-token {:optional true} [:maybe :any]]
+     [:transactions {:optional true} [:maybe [:sequential :map]]]
+     [:provenance {:optional true} [:maybe [:sequential :map]]]
+     [:timeline
+      {:optional true}
+      [:maybe
+       [:map
+        [:edits {:optional true} [:maybe [:sequential :any]]]
+        [:runs {:optional true} [:maybe [:sequential :any]]]]]]]]
+
+   :a/object-type-usage.get.res
+   [:maybe
+    [:map
+     [:object-type {:optional true} [:maybe :string]]
+     [:window-days {:optional true} [:maybe [:or :int :double]]]
+     [:writes {:optional true} [:maybe [:or :int :double]]]
+     [:editors {:optional true} [:maybe [:sequential :map]]]
+     [:reads-counted {:optional true} [:maybe :boolean]]
+     [:applications {:optional true} [:maybe [:sequential :map]]]
+     [:object-views {:optional true} [:maybe [:sequential :map]]]
+     [:workspaces {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/object-view-standard.post.req
+   [:maybe
+    [:map
+     [:type {:optional true} [:maybe [:or :string :keyword]]]
+     [:id {:optional true} [:maybe [:or :string :keyword]]]
+     [:standard {:optional true} [:maybe :boolean]]
+     [:form {:optional true} [:maybe [:or :string :keyword]]]]]
+
+   :a/object-view-standard.post.res
+   [:maybe
+    [:map
+     [:object-titles {:optional true} [:maybe [:map]]]
+     [:viewer {:optional true} [:maybe [:map [:role {:optional true} [:maybe :any]]]]]
+     [:objects
+      {:optional true}
+      [:maybe
+       [:map
+        [:mangel {:optional true} [:maybe [:sequential :any]]]
+        [:fahrwerk {:optional true} [:maybe [:sequential :any]]]
+        [:flug {:optional true} [:maybe [:sequential :any]]]
+        [:triebwerk {:optional true} [:maybe [:sequential :any]]]]]]
+     [:standard-views {:optional true} [:maybe [:map]]]
+     [:object-type {:optional true} [:maybe :keyword]]
+     [:object-names {:optional true} [:maybe [:map]]]
+     [:property-display {:optional true} [:maybe [:map]]]
+     [:object-views {:optional true} [:maybe [:map]]]
+     [:object-page
+      {:optional true}
+      [:maybe
+       [:map [:app {:optional true} [:maybe :map]] [:view {:optional true} [:maybe :map]]]]]
+     [:object-rows {:optional true} [:maybe [:map]]]
+     [:property-types {:optional true} [:maybe [:map]]]
+     [:inputs {:optional true} [:maybe [:sequential :any]]]
+     [:id {:optional true} [:maybe :string]]
+     [:answers
+      {:optional true}
+      [:maybe [:map [:alle-mechaniker {:optional true} [:maybe [:sequential :any]]]]]]
+     [:object-keys {:optional true} [:maybe [:map]]]
+     [:object
+      {:optional true}
+      [:maybe
+       [:map
+        [:id {:optional true} [:maybe :any]]
+        [:object-type-ref {:optional true} [:maybe :any]]
+        [:values {:optional true} [:maybe :map]]
+        [:_version {:optional true} [:maybe :any]]]]]
+     [:links
+      {:optional true}
+      [:maybe
+       [:map
+        [:berechtigte {:optional true} [:maybe [:sequential :any]]]
+        [:fahrwerke {:optional true} [:maybe [:sequential :any]]]
+        [:freigeben-log-edited {:optional true} [:maybe [:sequential :any]]]
+        [:maengel {:optional true} [:maybe [:sequential :any]]]
+        [:fluege {:optional true} [:maybe [:sequential :any]]]
+        [:triebwerke {:optional true} [:maybe [:sequential :any]]]]]]
+     [:standard-view
+      {:optional true}
+      [:maybe
+       [:map
+        [:type {:optional true} [:maybe :any]]
+        [:links {:optional true} [:maybe [:sequential :any]]]
+        [:symbol {:optional true} [:maybe :any]]
+        [:display-name {:optional true} [:maybe :any]]
+        [:plural {:optional true} [:maybe :any]]
+        [:subtitle {:optional true} [:maybe :any]]
+        [:actions {:optional true} [:maybe [:sequential :any]]]]]]]]
+
+   :a/package-install.post.req
+   [:maybe
+    [:map
+     [:package {:optional true} [:maybe [:or :string :keyword]]]
+     [:land? {:optional true} [:maybe :boolean]]
+     [:preview? {:optional true} [:maybe :boolean]]]]
+
+   :a/package-install.post.res
+   [:maybe
+    [:map
+     [:package {:optional true} [:maybe :string]]
+     [:landed
+      {:optional true}
+      [:maybe
+       [:map
+        [:status {:optional true} [:maybe :any]]
+        [:committed {:optional true} [:maybe :any]]
+        [:snapshot-id {:optional true} [:maybe :any]]]]]
+     [:updated {:optional true} [:maybe [:or :int :double]]]
+     [:preview? {:optional true} [:maybe :boolean]]
+     [:created {:optional true} [:maybe [:or :int :double]]]
+     [:advisories {:optional true} [:maybe [:sequential :map]]]
+     [:warnings {:optional true} [:maybe [:sequential :any]]]
+     [:skipped {:optional true} [:maybe [:or :int :double]]]
+     [:version {:optional true} [:maybe :string]]
+     [:staged {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/package-upgrade.post.req
+   [:maybe
+    [:map
+     [:package {:optional true} [:maybe [:or :string :keyword]]]
+     [:land? {:optional true} [:maybe :boolean]]
+     [:resolve {:optional true} [:maybe [:or :keyword :string]]]]]
+
+   :a/package-upgrade.post.res
+   [:maybe
+    [:map
+     [:package {:optional true} [:maybe :string]]
+     [:landed
+      {:optional true}
+      [:maybe
+       [:map
+        [:status {:optional true} [:maybe :any]]
+        [:committed {:optional true} [:maybe :any]]
+        [:snapshot-id {:optional true} [:maybe :any]]]]]
+     [:updated {:optional true} [:maybe [:or :int :double]]]
+     [:unchanged {:optional true} [:maybe :boolean]]
+     [:created {:optional true} [:maybe [:or :int :double]]]
+     [:skipped {:optional true} [:maybe [:or :int :double]]]
+     [:from {:optional true} [:maybe :string]]
+     [:version {:optional true} [:maybe :string]]
+     [:reinstall? {:optional true} [:maybe :boolean]]]]
+
+   :a/packages.get.res
+   [:maybe [:map [:packages {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/preview-transform.get.res
+   [:maybe
+    [:map
+     [:transform {:optional true} [:maybe :keyword]]
+     [:language {:optional true} [:maybe :keyword]]
+     [:rows {:optional true} [:maybe [:or [:sequential :map] [:sequential :any]]]]
+     [:count {:optional true} [:maybe [:or :int :double]]]
+     [:error {:optional true} [:maybe :any]]
+     [:input-sample {:optional true} [:maybe :any]]
+     [:input-caps {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/principals.get.res
+   [:maybe [:map [:principals {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/project-policy.post.req
+   [:maybe
+    [:map
+     [:review {:optional true} [:maybe [:sequential :any]]]
+     [:protect-all {:optional true} [:maybe :boolean]]]]
+
+   :a/project-policy.post.res
+   [:maybe
+    [:map
+     [:container {:optional true} [:maybe :string]]
+     [:protect-all {:optional true} [:maybe :boolean]]
+     [:review {:optional true} [:maybe [:sequential :map]]]
+     [:default-project {:optional true} [:maybe :any]]]]
+
+   :a/project-rename.post.req
+   [:maybe [:map [:to {:optional true} [:maybe [:or :string :keyword]]]]]
+
+   :a/project-rename.post.res
+   [:maybe
+    [:map
+     [:schema
+      {:optional true}
+      [:maybe
+       [:map
+        [:projections {:optional true} [:maybe :map]]
+        [:transforms {:optional true} [:maybe :map]]
+        [:object-types {:optional true} [:maybe :map]]
+        [:link-types {:optional true} [:maybe :map]]
+        [:datasets {:optional true} [:maybe :map]]
+        [:actions {:optional true} [:maybe :map]]
+        [:projects {:optional true} [:maybe :map]]
+        [:interfaces {:optional true} [:maybe :map]]]]]]]
+
+   :a/projection-files.get.res
+   [:maybe
+    [:map
+     [:shape {:optional true} [:maybe :string]]
+     [:unreadable {:optional true} [:maybe [:map]]]
+     [:files {:optional true} [:maybe [:map]]]
+     [:base {:optional true} [:maybe [:map]]]
+     [:name {:optional true} [:maybe :string]]
+     [:around
+      {:optional true}
+      [:maybe
+       [:map
+        [:branch {:optional true} [:maybe [:sequential :any]]]
+        [:logic {:optional true} [:maybe :map]]
+        [:main {:optional true} [:maybe [:sequential :any]]]]]]]]
+
+   :a/projection-files.post.req
+   [:maybe
+    [:map
+     [:files {:optional true} [:maybe :map]]
+     [:base {:optional true} [:maybe :map]]
+     [:shape {:optional true} [:maybe [:or :string :keyword]]]
+     [:around {:optional true} [:maybe :map]]
+     [:preview? {:optional true} [:maybe :boolean]]
+     [:land? {:optional true} [:maybe :boolean]]]]
+
+   :a/projection-files.post.res
+   [:maybe
+    [:map
+     [:deleted {:optional true} [:maybe [:or :int :double]]]
+     [:downstream
+      {:optional true}
+      [:maybe
+       [:map
+        [:direct {:optional true} [:maybe [:sequential :any]]]
+        [:further {:optional true} [:maybe :any]]]]]
+     [:moved {:optional true} [:maybe [:sequential [:sequential :any]]]]
+     [:landed
+      {:optional true}
+      [:maybe
+       [:map
+        [:status {:optional true} [:maybe :any]]
+        [:committed {:optional true} [:maybe :any]]
+        [:snapshot-id {:optional true} [:maybe :any]]]]]
+     [:instance
+      {:optional true}
+      [:maybe
+       [:map
+        [:created {:optional true} [:maybe :any]]
+        [:updated {:optional true} [:maybe :any]]
+        [:skipped {:optional true} [:maybe :any]]
+        [:branch {:optional true} [:maybe :any]]
+        [:landed {:optional true} [:maybe :map]]]]]
+     [:updated {:optional true} [:maybe [:or :int :double]]]
+     [:preview? {:optional true} [:maybe :boolean]]
+     [:created {:optional true} [:maybe [:or :int :double]]]
+     [:skipped {:optional true} [:maybe [:or :int :double]]]
+     [:inputs-changed {:optional true} [:maybe [:sequential :map]]]
+     [:readers-unaffected {:optional true} [:maybe [:or :int :double]]]
+     [:retiring {:optional true} [:maybe [:sequential :map]]]
+     [:orphaned {:optional true} [:maybe [:sequential :any]]]
+     [:base {:optional true} [:maybe [:map]]]
+     [:strict-repository {:optional true} [:maybe :keyword]]
+     [:staged {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/projections.get.res
+   [:maybe [:map [:projections {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/proposal-approve.post.req
+   [:maybe [:map]]
+
+   :a/proposal-approve.post.res
+   [:maybe
+    [:map
+     [:description {:optional true} [:maybe :any]]
+     [:source-branch {:optional true} [:maybe :string]]
+     [:approvals {:optional true} [:maybe [:sequential :any]]]
+     [:title {:optional true} [:maybe :string]]
+     [:author {:optional true} [:maybe :string]]
+     [:justification {:optional true} [:maybe :any]]
+     [:status {:optional true} [:maybe :string]]
+     [:id {:optional true} [:maybe :string]]
+     [:approval-count {:optional true} [:maybe [:or :int :double]]]
+     [:reviews {:optional true} [:maybe [:sequential :map]]]
+     [:rejections {:optional true} [:maybe [:sequential :any]]]
+     [:created-at {:optional true} [:maybe :string]]
+     [:review-requested-at {:optional true} [:maybe :string]]
+     [:review-requested-by {:optional true} [:maybe :string]]
+     [:target-branch {:optional true} [:maybe :string]]
+     [:merge-mode {:optional true} [:maybe :any]]
+     [:reviewers {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/proposal-ask-review.post.req
+   [:maybe
+    [:map
+     [:reviewers {:optional true} [:maybe [:sequential :any]]]
+     [:justification {:optional true} [:maybe [:or :string :keyword]]]]]
+
+   :a/proposal-ask-review.post.res
+   [:maybe
+    [:map
+     [:description {:optional true} [:maybe :any]]
+     [:stage {:optional true} [:maybe :string]]
+     [:source-branch {:optional true} [:maybe :string]]
+     [:approvals {:optional true} [:maybe [:sequential :any]]]
+     [:title {:optional true} [:maybe :string]]
+     [:author {:optional true} [:maybe :string]]
+     [:justification {:optional true} [:maybe :string]]
+     [:preview
+      {:optional true}
+      [:maybe
+       [:map
+        [:status {:optional true} [:maybe :any]]
+        [:conflicts {:optional true} [:maybe [:sequential :any]]]]]]
+     [:status {:optional true} [:maybe :string]]
+     [:id {:optional true} [:maybe :string]]
+     [:approval-count {:optional true} [:maybe [:or :int :double]]]
+     [:reviews {:optional true} [:maybe [:sequential :any]]]
+     [:auto-land {:optional true} [:maybe :boolean]]
+     [:rejections {:optional true} [:maybe [:sequential :any]]]
+     [:open-tasks {:optional true} [:maybe [:sequential :any]]]
+     [:created-at {:optional true} [:maybe :string]]
+     [:review-requested-at {:optional true} [:maybe :string]]
+     [:review-requested-by {:optional true} [:maybe :string]]
+     [:target-branch {:optional true} [:maybe :string]]
+     [:merge-mode {:optional true} [:maybe :any]]
+     [:reviewers {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/proposal-comment.delete.res
+   [:maybe [:map [:deleted {:optional true} [:maybe :string]]]]
+
+   :a/proposal-comments.post.req
+   [:maybe
+    [:map
+     [:body {:optional true} [:maybe [:or :string :keyword]]]
+     [:task {:optional true} [:maybe [:or :string :keyword]]]]]
+
+   :a/proposal-comments.post.res
+   [:maybe
+    [:map
+     [:created-at {:optional true} [:maybe :string]]
+     [:id {:optional true} [:maybe :string]]
+     [:proposal-id {:optional true} [:maybe :string]]
+     [:task {:optional true} [:maybe :string]]
+     [:author {:optional true} [:maybe :string]]
+     [:body {:optional true} [:maybe :string]]]]
+
+   :a/proposal-merge.post.res
+   [:maybe
+    [:map
+     [:description {:optional true} [:maybe :any]]
+     [:resolved-at {:optional true} [:maybe :any]]
+     [:git-half
+      {:optional true}
+      [:maybe
+       [:map
+        [:state {:optional true} [:maybe :any]]
+        [:attempts {:optional true} [:maybe :any]]
+        [:error {:optional true} [:maybe :any]]
+        [:next-at {:optional true} [:maybe :any]]]]]
+     [:source-branch {:optional true} [:maybe :string]]
+     [:resolved-by {:optional true} [:maybe :string]]
+     [:approvals {:optional true} [:maybe [:sequential :any]]]
+     [:title {:optional true} [:maybe :string]]
+     [:author {:optional true} [:maybe :string]]
+     [:justification {:optional true} [:maybe :string]]
+     [:file-plane-status {:optional true} [:maybe :keyword]]
+     [:status {:optional true} [:maybe :string]]
+     [:id {:optional true} [:maybe :string]]
+     [:approval-count {:optional true} [:maybe [:or :int :double]]]
+     [:build-scope
+      {:optional true}
+      [:maybe
+       [:map
+        [:modified {:optional true} [:maybe [:sequential :any]]]
+        [:affected {:optional true} [:maybe [:sequential :any]]]]]]
+     [:reviews {:optional true} [:maybe [:sequential :map]]]
+     [:source-merged {:optional true} [:maybe :boolean]]
+     [:rejections {:optional true} [:maybe [:sequential :any]]]
+     [:merge-commit {:optional true} [:maybe :string]]
+     [:created-at {:optional true} [:maybe :string]]
+     [:review-requested-at {:optional true} [:maybe :string]]
+     [:review-requested-by {:optional true} [:maybe :string]]
+     [:target-branch {:optional true} [:maybe :string]]
+     [:merge-mode {:optional true} [:maybe :keyword]]
+     [:reviewers {:optional true} [:maybe [:sequential :any]]]
+     [:diff {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/proposal-reject.post.req
+   [:maybe [:map [:note {:optional true} [:maybe [:or :string :keyword]]]]]
+
+   :a/proposal-reject.post.res
+   [:maybe
+    [:map
+     [:description {:optional true} [:maybe :any]]
+     [:source-branch {:optional true} [:maybe :string]]
+     [:approvals {:optional true} [:maybe [:sequential :any]]]
+     [:title {:optional true} [:maybe :string]]
+     [:author {:optional true} [:maybe :string]]
+     [:justification {:optional true} [:maybe :any]]
+     [:status {:optional true} [:maybe :string]]
+     [:id {:optional true} [:maybe :string]]
+     [:approval-count {:optional true} [:maybe [:or :int :double]]]
+     [:reviews {:optional true} [:maybe [:sequential :map]]]
+     [:rejections {:optional true} [:maybe [:sequential :any]]]
+     [:created-at {:optional true} [:maybe :string]]
+     [:review-requested-at {:optional true} [:maybe :string]]
+     [:review-requested-by {:optional true} [:maybe :string]]
+     [:target-branch {:optional true} [:maybe :string]]
+     [:merge-mode {:optional true} [:maybe :any]]
+     [:reviewers {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/proposal-tasks.get.res
+   [:maybe
+    [:map
+     [:proposal {:optional true} [:maybe :string]]
+     [:tasks {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/proposal.delete.res
+   [:maybe
+    [:map
+     [:description {:optional true} [:maybe :any]]
+     [:resolved-at {:optional true} [:maybe :any]]
+     [:source-branch {:optional true} [:maybe :string]]
+     [:resolved-by {:optional true} [:maybe :string]]
+     [:approvals {:optional true} [:maybe [:sequential :any]]]
+     [:title {:optional true} [:maybe :string]]
+     [:author {:optional true} [:maybe :string]]
+     [:justification {:optional true} [:maybe :any]]
+     [:status {:optional true} [:maybe :string]]
+     [:id {:optional true} [:maybe :string]]
+     [:approval-count {:optional true} [:maybe [:or :int :double]]]
+     [:reviews {:optional true} [:maybe [:sequential :any]]]
+     [:source-merged {:optional true} [:maybe :boolean]]
+     [:rejections {:optional true} [:maybe [:sequential :any]]]
+     [:created-at {:optional true} [:maybe :string]]
+     [:review-requested-at {:optional true} [:maybe :any]]
+     [:target-branch {:optional true} [:maybe :string]]
+     [:merge-mode {:optional true} [:maybe :any]]
+     [:reviewers {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/proposal.get.res
+   [:maybe
+    [:map
+     [:description {:optional true} [:maybe :any]]
+     [:resolved-at {:optional true} [:maybe :any]]
+     [:stage {:optional true} [:maybe :string]]
+     [:git-half
+      {:optional true}
+      [:maybe
+       [:map
+        [:state {:optional true} [:maybe :any]]
+        [:attempts {:optional true} [:maybe :any]]
+        [:error {:optional true} [:maybe :any]]
+        [:next-at {:optional true} [:maybe :any]]]]]
+     [:comments {:optional true} [:maybe [:sequential :map]]]
+     [:source-branch {:optional true} [:maybe :string]]
+     [:checks
+      {:optional true}
+      [:maybe
+       [:map
+        [:commit {:optional true} [:maybe :any]]
+        [:status {:optional true} [:maybe :any]]
+        [:checks {:optional true} [:maybe [:sequential :any]]]]]]
+     [:unit-tests {:optional true} [:maybe [:sequential :map]]]
+     [:resolved-by {:optional true} [:maybe :string]]
+     [:approvals {:optional true} [:maybe [:sequential :any]]]
+     [:title {:optional true} [:maybe :string]]
+     [:tasks {:optional true} [:maybe [:sequential :map]]]
+     [:author {:optional true} [:maybe :string]]
+     [:justification {:optional true} [:maybe :any]]
+     [:preview
+      {:optional true}
+      [:maybe
+       [:map
+        [:status {:optional true} [:maybe :any]]
+        [:conflicts {:optional true} [:maybe [:sequential :any]]]]]]
+     [:status {:optional true} [:maybe :string]]
+     [:id {:optional true} [:maybe :string]]
+     [:approval-count {:optional true} [:maybe [:or :int :double]]]
+     [:reviews {:optional true} [:maybe [:sequential :map]]]
+     [:rejections {:optional true} [:maybe [:sequential :any]]]
+     [:merge-commit {:optional true} [:maybe :string]]
+     [:open-tasks {:optional true} [:maybe [:sequential :any]]]
+     [:created-at {:optional true} [:maybe :string]]
+     [:merge-history {:optional true} [:maybe [:sequential :map]]]
+     [:review-requested-at {:optional true} [:maybe :string]]
+     [:review-requested-by {:optional true} [:maybe :string]]
+     [:target-branch {:optional true} [:maybe :string]]
+     [:merge-mode {:optional true} [:maybe :any]]
+     [:reviewers {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/proposals.get.res
+   [:maybe [:map [:proposals {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/proposals.post.req
+   [:maybe
+    [:map
+     [:source {:optional true} [:maybe [:or :string :keyword]]]
+     [:target {:optional true} [:maybe [:or :string :keyword]]]
+     [:title {:optional true} [:maybe [:or :string :keyword]]]
+     [:merge-mode {:optional true} [:maybe [:or :string :keyword]]]]]
+
+   :a/proposals.post.res
+   [:maybe
+    [:map
+     [:description {:optional true} [:maybe :any]]
+     [:resolved-at {:optional true} [:maybe :any]]
+     [:git-half
+      {:optional true}
+      [:maybe
+       [:map
+        [:state {:optional true} [:maybe :any]]
+        [:attempts {:optional true} [:maybe :any]]
+        [:error {:optional true} [:maybe :any]]
+        [:next-at {:optional true} [:maybe :any]]]]]
+     [:source-branch {:optional true} [:maybe :string]]
+     [:resolved-by {:optional true} [:maybe :string]]
+     [:approvals {:optional true} [:maybe [:sequential :any]]]
+     [:title {:optional true} [:maybe :string]]
+     [:author {:optional true} [:maybe :string]]
+     [:justification {:optional true} [:maybe :any]]
+     [:file-plane-status {:optional true} [:maybe :keyword]]
+     [:preview
+      {:optional true}
+      [:maybe
+       [:map
+        [:status {:optional true} [:maybe :any]]
+        [:diff {:optional true} [:maybe [:sequential :any]]]
+        [:conflicts {:optional true} [:maybe [:sequential :any]]]]]]
+     [:status {:optional true} [:maybe :string]]
+     [:id {:optional true} [:maybe :string]]
+     [:approval-count {:optional true} [:maybe [:or :int :double]]]
+     [:build-scope
+      {:optional true}
+      [:maybe
+       [:map
+        [:modified {:optional true} [:maybe [:sequential :any]]]
+        [:affected {:optional true} [:maybe [:sequential :any]]]]]]
+     [:reviews {:optional true} [:maybe [:sequential :any]]]
+     [:source-merged {:optional true} [:maybe :boolean]]
+     [:auto-land {:optional true} [:maybe [:map [:error {:optional true} [:maybe :any]]]]]
+     [:auto-landed {:optional true} [:maybe :boolean]]
+     [:rejections {:optional true} [:maybe [:sequential :any]]]
+     [:merge-commit {:optional true} [:maybe :string]]
+     [:created-at {:optional true} [:maybe :string]]
+     [:review-requested-at {:optional true} [:maybe :any]]
+     [:review-requested-by {:optional true} [:maybe :any]]
+     [:target-branch {:optional true} [:maybe :string]]
+     [:merge-mode {:optional true} [:maybe :keyword]]
+     [:reviewers {:optional true} [:maybe [:sequential :any]]]
+     [:diff {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/protections.get.res
+   [:maybe
+    [:map
+     [:resources {:optional true} [:maybe [:sequential :any]]]
+     [:projects {:optional true} [:maybe [:sequential :any]]]
+     [:effective {:optional true} [:maybe [:sequential :any]]]
+     [:sections {:optional true} [:maybe [:sequential :any]]]
+     [:trunk-protected {:optional true} [:maybe :boolean]]]]
+
+   :a/protections.post.req
+   [:maybe
+    [:map
+     [:resources {:optional true} [:maybe [:sequential :any]]]
+     [:on {:optional true} [:maybe :boolean]]]]
+
+   :a/protections.post.res
+   [:maybe
+    [:map
+     [:resources {:optional true} [:maybe [:sequential :any]]]
+     [:projects {:optional true} [:maybe [:sequential :any]]]
+     [:effective {:optional true} [:maybe [:sequential :any]]]
+     [:sections {:optional true} [:maybe [:sequential :any]]]
+     [:trunk-protected {:optional true} [:maybe :boolean]]]]
+
+   :a/register.post.req
+   [:maybe
+    [:map
+     [:username {:optional true} [:maybe [:or :string :keyword]]]
+     [:password {:optional true} [:maybe [:or :string :keyword]]]
+     [:user-id {:optional true} [:maybe [:or :string :keyword]]]]]
+
+   :a/register.post.res
+   [:maybe
+    [:map [:ok {:optional true} [:maybe :boolean]] [:username {:optional true} [:maybe :string]]]]
+
+   :a/repo-checks.get.res
+   [:maybe
+    [:map
+     [:commit {:optional true} [:maybe :string]]
+     [:status {:optional true} [:maybe :keyword]]
+     [:checks {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/repo-clone-token.post.req
+   [:maybe [:map [:with {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/repo-clone-token.post.res
+   [:maybe
+    [:map
+     [:token {:optional true} [:maybe :string]]
+     [:expires-in {:optional true} [:maybe [:or :int :double]]]
+     [:remote {:optional true} [:maybe :string]]
+     [:note {:optional true} [:maybe :string]]]]
+
+   :a/resource-versions-publish.post.req
+   [:maybe [:map]]
+
+   :a/resource-versions-publish.post.res
+   [:maybe
+    [:map
+     [:created {:optional true} [:maybe [:or :int :double]]]
+     [:updated {:optional true} [:maybe [:or :int :double]]]
+     [:skipped {:optional true} [:maybe [:or :int :double]]]]]
+
+   :a/run-jobs.get.res
+   [:maybe [:map [:jobs {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/run.get.res
+   [:maybe
+    [:map
+     [:snapshot-id {:optional true} [:maybe [:or :int :double]]]
+     [:started-at {:optional true} [:maybe :any]]
+     [:objects-count {:optional true} [:maybe [:or :int :double]]]
+     [:working-branch {:optional true} [:maybe :any]]
+     [:parent-run-id {:optional true} [:maybe :any]]
+     [:summary
+      {:optional true}
+      [:maybe
+       [:map
+        [:steps {:optional true} [:maybe :any]]
+        [:decisions {:optional true} [:maybe :any]]
+        [:staged-count {:optional true} [:maybe :any]]
+        [:actions {:optional true} [:maybe [:sequential :any]]]]]]
+     [:inputs {:optional true} [:maybe :any]]
+     [:status {:optional true} [:maybe :string]]
+     [:id {:optional true} [:maybe :uuid]]
+     [:kind {:optional true} [:maybe :keyword]]
+     [:links-count {:optional true} [:maybe [:or :int :double]]]
+     [:branch {:optional true} [:maybe :string]]
+     [:finished-at {:optional true} [:maybe :any]]
+     [:lease-until {:optional true} [:maybe :any]]
+     [:owner {:optional true} [:maybe :string]]
+     [:actor {:optional true} [:maybe :any]]
+     [:inputs-hash {:optional true} [:maybe :string]]
+     [:error-message {:optional true} [:maybe :string]]]]
+
+   :a/runs.get.res
+   [:maybe
+    [:map
+     [:runs {:optional true} [:maybe [:or [:sequential :map] [:sequential :any]]]]
+     [:window
+      {:optional true}
+      [:maybe
+       [:map [:hours {:optional true} [:maybe :any]] [:limit {:optional true} [:maybe :any]]]]]]]
+
+   :a/schema-backing.get.res
+   [:maybe
+    [:map
+     [:object-types {:optional true} [:maybe [:map]]]
+     [:link-types {:optional true} [:maybe [:map]]]]]
+
+   :a/schema-describe.get.res
+   [:maybe
+    [:map
+     [:shape {:optional true} [:maybe :keyword]]
+     [:data
+      {:optional true}
+      [:maybe
+       [:map
+        [:sections {:optional true} [:maybe :map]]
+        [:edit-conflict {:optional true} [:maybe :any]]
+        [:symbol {:optional true} [:maybe :any]]
+        [:object-type {:optional true} [:maybe :any]]
+        [:fields {:optional true} [:maybe [:sequential :any]]]
+        [:match-keys {:optional true} [:maybe [:sequential :any]]]
+        [:title {:optional true} [:maybe :any]]
+        [:plural {:optional true} [:maybe :any]]
+        [:project {:optional true} [:maybe :any]]
+        [:status {:optional true} [:maybe :any]]
+        [:count {:optional true} [:maybe :any]]
+        [:implements {:optional true} [:maybe [:sequential :any]]]
+        [:rid {:optional true} [:maybe :any]]
+        [:primary-key {:optional true} [:maybe :any]]
+        [:links {:optional true} [:maybe [:sequential :any]]]
+        [:views {:optional true} [:maybe [:sequential :any]]]]]]]]
+
+   :a/schema-lint.get.res
+   [:maybe
+    [:map
+     [:findings {:optional true} [:maybe [:sequential :map]]]
+     [:summary
+      {:optional true}
+      [:maybe
+       [:map
+        [:total {:optional true} [:maybe :any]]
+        [:warn {:optional true} [:maybe :any]]
+        [:info {:optional true} [:maybe :any]]
+        [:error {:optional true} [:maybe :any]]]]]]]
+
+   :a/schema-name-suggest.get.res
+   [:maybe
+    [:map
+     [:name {:optional true} [:maybe :string]]
+     [:verdict {:optional true} [:maybe :keyword]]
+     [:exact {:optional true} [:maybe [:sequential :map]]]
+     [:candidates {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/schema-problems.get.res
+   [:maybe
+    [:map
+     [:valid? {:optional true} [:maybe :boolean]]
+     [:findings {:optional true} [:maybe [:sequential :any]]]
+     [:problems {:optional true} [:maybe [:map]]]]]
+
+   :a/schema-sections.get.res
+   [:maybe [:map [:object-types {:optional true} [:maybe [:map]]]]]
+
+   :a/schema-sql-check.post.req
+   [:maybe [:map [:transforms {:optional true} [:maybe :map]]]]
+
+   :a/schema-sql-check.post.res
+   [:maybe
+    [:map
+     [:checked {:optional true} [:maybe [:sequential :any]]]
+     [:compiled? {:optional true} [:maybe :boolean]]
+     [:counts
+      {:optional true}
+      [:maybe
+       [:map
+        [:checked {:optional true} [:maybe :any]]
+        [:refused {:optional true} [:maybe :any]]
+        [:unknown {:optional true} [:maybe :any]]
+        [:passed {:optional true} [:maybe :any]]]]]
+     [:findings {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/schema.get.res
+   [:maybe
+    [:map
+     [:interfaces {:optional true} [:maybe [:map]]]
+     [:projects {:optional true} [:maybe [:map]]]
+     [:datasets {:optional true} [:maybe [:map]]]
+     [:applications {:optional true} [:maybe [:map]]]
+     [:custom-applications {:optional true} [:maybe [:map]]]
+     [:sources {:optional true} [:maybe [:map]]]
+     [:transforms {:optional true} [:maybe [:map]]]
+     [:value-types {:optional true} [:maybe [:map]]]
+     [:repositories {:optional true} [:maybe [:map]]]
+     [:actions {:optional true} [:maybe [:map]]]
+     [:collections {:optional true} [:maybe [:map]]]
+     [:link-types {:optional true} [:maybe [:map]]]
+     [:spaces {:optional true} [:maybe [:map]]]
+     [:shared-properties {:optional true} [:maybe [:map]]]
+     [:pipelines {:optional true} [:maybe [:map]]]
+     [:object-types {:optional true} [:maybe [:map]]]
+     [:projections
+      {:optional true}
+      [:maybe
+       [:map
+        [:code-repository {:optional true} [:maybe :map]]
+        [:ontologie {:optional true} [:maybe :map]]]]]
+     [:object-type-groups {:optional true} [:maybe [:map]]]]]
+
+   :a/sessions.get.res
+   [:maybe [:map [:sessions {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/snapshot.get.res
+   [:maybe
+    [:map
+     [:schema
+      {:optional true}
+      [:maybe
+       [:map
+        [:projects {:optional true} [:maybe :map]]
+        [:llm-models {:optional true} [:maybe :map]]
+        [:datasets {:optional true} [:maybe :map]]
+        [:applications {:optional true} [:maybe :map]]
+        [:custom-applications {:optional true} [:maybe :map]]
+        [:transforms {:optional true} [:maybe :map]]
+        [:value-types {:optional true} [:maybe :map]]
+        [:actions {:optional true} [:maybe :map]]
+        [:link-types {:optional true} [:maybe :map]]
+        [:pipelines {:optional true} [:maybe :map]]
+        [:object-types {:optional true} [:maybe :map]]
+        [:projections {:optional true} [:maybe :map]]
+        [:object-type-groups {:optional true} [:maybe :map]]]]]
+     [:counts
+      {:optional true}
+      [:maybe
+       [:map [:objects {:optional true} [:maybe :any]] [:links {:optional true} [:maybe :any]]]]]
+     [:schema-derived
+      {:optional true}
+      [:maybe
+       [:map
+        [:implementers {:optional true} [:maybe :map]]
+        [:endpoint-types {:optional true} [:maybe :map]]
+        [:matrix {:optional true} [:maybe :map]]
+        [:app-object-types {:optional true} [:maybe :map]]]]]
+     [:sources {:optional true} [:maybe [:sequential :any]]]
+     [:max-action-seq {:optional true} [:maybe [:or :int :double]]]
+     [:schema-version {:optional true} [:maybe :string]]
+     [:import-plan
+      {:optional true}
+      [:maybe
+       [:map
+        [:objects {:optional true} [:maybe :map]]
+        [:supplements {:optional true} [:maybe :map]]
+        [:links {:optional true} [:maybe :map]]]]]
+     [:datasources {:optional true} [:maybe [:map [:xai {:optional true} [:maybe :map]]]]]
+     [:integrity {:optional true} [:maybe :any]]
+     [:branch {:optional true} [:maybe :string]]]]
+
+   :a/sources.get.res
+   [:maybe [:map [:sources {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/staged-by-seq.delete.res
+   [:maybe [:map [:deleted {:optional true} [:maybe [:or :int :double]]]]]
+
+   :a/staging-preview.get.res
+   [:maybe
+    [:map
+     [:status {:optional true} [:maybe :keyword]]
+     [:diff {:optional true} [:maybe [:sequential :any]]]
+     [:conflicts {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/staging-rebase.post.req
+   [:maybe [:map [:resolutions {:optional true} [:maybe :map]]]]
+
+   :a/staging-rebase.post.res
+   [:maybe
+    [:map
+     [:status {:optional true} [:maybe :keyword]]
+     [:rebased {:optional true} [:maybe :string]]
+     [:onto {:optional true} [:maybe :string]]
+     [:resolved {:optional true} [:maybe [:or :int :double]]]]]
+
+   :a/staging.delete.res
+   [:maybe [:map [:cleared {:optional true} [:maybe [:or :int :double]]]]]
+
+   :a/staging.get.res
+   [:maybe
+    [:map
+     [:staged {:optional true} [:maybe [:sequential :map]]]
+     [:transactions {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/staging.post.res
+   [:maybe
+    [:map
+     [:status {:optional true} [:maybe :keyword]]
+     [:committed {:optional true} [:maybe [:or :int :double]]]
+     [:results {:optional true} [:maybe [:sequential :map]]]
+     [:run-id {:optional true} [:maybe :uuid]]
+     [:snapshot-id {:optional true} [:maybe [:or :int :double]]]]]
+
+   :a/test-transform.get.res
+   [:maybe
+    [:map
+     [:transform {:optional true} [:maybe :string]]
+     [:tests {:optional true} [:maybe [:sequential :map]]]
+     [:passed {:optional true} [:maybe [:or :int :double]]]
+     [:failed {:optional true} [:maybe [:or :int :double]]]]]
+
+   :a/transform-rows.get.res
+   [:maybe
+    [:map
+     [:transform {:optional true} [:maybe :keyword]]
+     [:as-of {:optional true} [:maybe :any]]
+     [:rows {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/trash-restore.post.req
+   [:maybe
+    [:map
+     [:kind {:optional true} [:maybe [:or :string :keyword]]]
+     [:name {:optional true} [:maybe [:or :string :keyword]]]]]
+
+   :a/trash-restore.post.res
+   [:maybe
+    [:map
+     [:schema
+      {:optional true}
+      [:maybe
+       [:map
+        [:projects {:optional true} [:maybe :map]]
+        [:datasets {:optional true} [:maybe :map]]
+        [:applications {:optional true} [:maybe :map]]
+        [:custom-applications {:optional true} [:maybe :map]]
+        [:transforms {:optional true} [:maybe :map]]
+        [:actions {:optional true} [:maybe :map]]
+        [:link-types {:optional true} [:maybe :map]]
+        [:pipelines {:optional true} [:maybe :map]]
+        [:object-types {:optional true} [:maybe :map]]
+        [:projections {:optional true} [:maybe :map]]
+        [:object-type-groups {:optional true} [:maybe :map]]]]]
+     [:restored
+      {:optional true}
+      [:maybe
+       [:map
+        [:kind {:optional true} [:maybe :any]]
+        [:name {:optional true} [:maybe :any]]
+        [:rid {:optional true} [:maybe :any]]
+        [:from-seq {:optional true} [:maybe :any]]
+        [:with {:optional true} [:maybe [:sequential :any]]]]]]]]
+
+   :a/trash.get.res
+   [:maybe
+    [:map
+     [:trash {:optional true} [:maybe [:sequential :map]]]
+     [:complete? {:optional true} [:maybe :boolean]]]]
+
+   :a/views.get.res
+   [:maybe [:map [:graphs {:optional true} [:maybe [:sequential :map]]]]]
+
+   :a/workspace-editable.get.res
+   [:maybe
+    [:map
+     [:workspaces {:optional true} [:maybe [:sequential :any]]]
+     [:projects {:optional true} [:maybe [:sequential :any]]]
+     [:can-create {:optional true} [:maybe :boolean]]]]
+
+   :a/workspace-file.get.res
+   [:maybe
+    [:map
+     [:name {:optional true} [:maybe :string]]
+     [:file {:optional true} [:maybe :any]]
+     [:rights
+      {:optional true}
+      [:maybe
+       [:map
+        [:view {:optional true} [:maybe :any]]
+        [:edit {:optional true} [:maybe :any]]
+        [:promote {:optional true} [:maybe :any]]]]]
+     [:projects {:optional true} [:maybe [:sequential :any]]]]]
+
+   :a/workspace-file.post.req
+   [:maybe [:map [:file {:optional true} [:maybe :map]]]]
+
+   :a/workspace-file.post.res
+   [:maybe
+    [:map
+     [:created {:optional true} [:maybe [:or :int :double]]]
+     [:updated {:optional true} [:maybe [:or :int :double]]]
+     [:skipped {:optional true} [:maybe [:or :int :double]]]]]
+
+   :a/writeback-confirm.post.req
+   [:maybe
+    [:map
+     [:object-type {:optional true} [:maybe [:or :keyword :string]]]
+     [:object-id {:optional true} [:maybe [:or :string :keyword]]]
+     [:seen {:optional true} [:maybe :map]]]]
+
+   :a/writeback-confirm.post.res
+   [:maybe
+    [:map
+     [:pushed
+      {:optional true}
+      [:maybe
+       [:map
+        [:table {:optional true} [:maybe :any]]
+        [:pk-value {:optional true} [:maybe :any]]
+        [:set {:optional true} [:maybe :map]]
+        [:expect {:optional true} [:maybe :map]]]]]
+     [:result {:optional true} [:maybe [:map [:rows {:optional true} [:maybe :any]]]]]
+     [:verdict
+      {:optional true}
+      [:maybe
+       [:map [:allow? {:optional true} [:maybe :any]] [:reason {:optional true} [:maybe :any]]]]]]]
+
+   :a/writeback-preview.post.req
+   [:maybe
+    [:map
+     [:object-type {:optional true} [:maybe [:or :keyword :string]]]
+     [:object-id {:optional true} [:maybe [:or :string :keyword]]]]]
+
+   :a/writeback-preview.post.res
+   [:maybe
+    [:map
+     [:write-spec
+      {:optional true}
+      [:maybe
+       [:map
+        [:table {:optional true} [:maybe :any]]
+        [:pk-value {:optional true} [:maybe :any]]
+        [:set {:optional true} [:maybe :map]]
+        [:expect {:optional true} [:maybe :map]]]]]
+     [:table {:optional true} [:maybe :string]]
+     [:pk-value {:optional true} [:maybe :string]]
+     [:object-id {:optional true} [:maybe :uuid]]
+     [:object-type {:optional true} [:maybe :keyword]]
+     [:edited {:optional true} [:maybe [:set :any]]]
+     [:strategy {:optional true} [:maybe :keyword]]
+     [:seen
+      {:optional true}
+      [:maybe
+       [:map [:muster {:optional true} [:maybe :any]] [:name {:optional true} [:maybe :any]]]]]
+     [:verdict
+      {:optional true}
+      [:maybe
+       [:map [:allow? {:optional true} [:maybe :any]] [:reason {:optional true} [:maybe :any]]]]]
+     [:live-present? {:optional true} [:maybe :boolean]]
+     [:changes
+      {:optional true}
+      [:maybe
+       [:map [:muster {:optional true} [:maybe :map]] [:name {:optional true} [:maybe :map]]]]]
+     [:source-id {:optional true} [:maybe :keyword]]]]}

@@ -1,0 +1,13 @@
+{:source-paths ["src"]
+ :dependencies []
+ :builds
+ {:driver
+  {:target     :node-script
+   :main       sutra-e2e.driver/main
+   :output-to  "out/driver.js"
+   :js-options {:js-provider :require}}
+  :walkthrough
+  {:target     :node-script
+   :main       sutra-e2e.walkthrough/main
+   :output-to  "out/walkthrough.js"
+   :js-options {:js-provider :require}}}}

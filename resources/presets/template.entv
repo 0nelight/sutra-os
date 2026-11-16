@@ -1,0 +1,59 @@
+;; ════════════════════════════════════════════════════════════════════════════
+;; template.entv — Vorlage für die Ansicht EINES Objekttyps (Werft: Arbeitsauftrag)
+;; ════════════════════════════════════════════════════════════════════════════
+;; Meist brauchst du diese Datei NICHT. Jeder Objekttyp hat seine Standard-
+;; Ansicht, erzeugt aus template.ent: Titel und Untertitel oben, die prominenten
+;; Attribute, jede Beziehung als Tabelle der Nachbarn (in deren `:row`), und jede
+;; Action mit `:on` diesem Typ. Schreib eine `.entv` erst, wenn du mehr sagen
+;; willst — eine andere Anordnung, eine hervorgehobene Handlung, die Historie.
+;;
+;; Sie liegt als `object-views/<typ>.entv` im Ontologie-Repo (nur dort wird sie
+;; gelesen), eine Datei je Objekttyp. Alle Schlüssel: grammar.entv.
+;;
+;; Drei Regeln (Sophia Prater, Object-Oriented UX):
+;;   · Verwandte Objekte kommen über ihre BEZIEHUNG: `{:from :rechnung}` ist hier
+;;     „die Rechnungen DIESES Arbeitsauftrags" — keine Abfrage, kein Filter von Hand.
+;;   · Handlungen stehen AM Objekt, neben den Daten, die sie ändern — nicht in
+;;     einem eigenen Reiter „Aktionen".
+;;   · Ein Objekt sieht überall gleich aus: der Betreiber erscheint hier als seine
+;;     eigene (kompakte) Ansicht, nicht als nachgebaute Karte.
+;; ════════════════════════════════════════════════════════════════════════════
+{:object-type :arbeitsauftrag                   ; WELCHER Typ — der Dateiname zählt nicht
+
+ ;; :full — die ganze Seite eines Arbeitsauftrags (/object/arbeitsauftrag/<id>).
+ :full
+ {:kind :columns                                ; links die Daten, rechts was man damit tut
+  :items
+  [{:kind :rows
+    :items
+    [;; der Arbeitsauftrag selbst: seine prominenten Attribute, so wie template.ent sie ordnet
+     {:widget :property-list :object {:from :arbeitsauftrag} :only-prominent? true :columns 2}
+
+     ;; der Betreiber — als SEINE Ansicht, dieselbe wie überall (nicht nachgebaut)
+     {:kind :section :title "Betreiber"
+      :body {:widget :object-view :object {:from :betreiber} :form-factor :panel}}
+
+     ;; die Rechnungen dieses Arbeitsauftrags, über die Beziehung. Keine :cols: eine
+     ;; Rechnung sieht als Zeile überall gleich aus — so, wie ihr `:row` sagt.
+     {:kind :section :title "Rechnungen"
+      :body {:widget :object-table :rows {:from :rechnung}}}
+
+     {:kind :section :title "Zeitbuchungen"
+      :body {:widget :object-table :rows {:from :zeitbuchung}}}]}
+
+   {:kind :rows
+    :items
+    [;; Handlungen am Objekt. Alle sind `:on :arbeitsauftrag` deklariert: der Arbeitsauftrag-
+     ;; Parameter IST dieser Arbeitsauftrag und wird nicht abgefragt. Der Lebenslauf
+     ;; (`:lifecycle`) lässt eine Handlung nur in ihren `:from`-Ständen zu und
+     ;; sagt sonst beim Absenden, warum nicht.
+     {:kind :section :title "Rechnung stellen"
+      :body {:widget :action-form :action :rechnung-stellen :label "Rechnung stellen"}}
+     {:kind :section :title "Stand"
+      :body {:kind :columns
+             :items [{:widget :action-form :action :arbeitsauftrag-beginnen :label "Beginnen"}
+                     {:widget :action-form :action :arbeitsauftrag-fertigmelden :label "Fertig melden"}]}}
+
+     ;; wer hat wann was an diesem Arbeitsauftrag geändert
+     {:kind :section :title "Verlauf"
+      :body {:widget :edit-history :object {:item :id} :limit 20}}]}]}}

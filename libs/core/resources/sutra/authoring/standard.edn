@@ -1,0 +1,112 @@
+{:supersedes
+ {:projections {:ontologie #{"8e804c2b5bc1dcdc77b1c635841dd413bdca3cc756982ff785ab9d886ec704f9"
+                             "ea0f370d4f72a264868ef65a9ffb15257a1f66643b5ffd5ee754911ad9245d92"
+                             "0b78568f7926cb95927a9b6955ce3cf9373624e3ef1353fe5320ec75eece2b60"
+                             "2edc5128b7e12b62ed0ffd138fa2a8e178a453e9cba4e8037ec7ebaa90ceaf76"
+                             "da25ca2a99c26f74bf91810aaf9bff3a0b3cae2d9506cbeb8f4320a93c69d2c6"
+                             "ddab696f8fbda847d7e8f71786fc56b8703e228b595d84721983335b0d0250c1"
+                             "f18d061dd42323f6ddbc82a810a5bd6e4f4bbd29a83117b3eedc7aac59e72a43"
+                             "ba340f4ce3f0e9ceeca6e9a872646bb100f2b433b56e98cdbebec526636bad0f"
+                             "af98b099489cb93bc75d23b36f144cbb94634a87ae2e6ec22cbb561172aee333"}
+                :code-repository
+                  #{"d4dc0fd6ac4a45502357cf4ce2d25c399058d116ac288d346c3595650db01160"}}}
+
+ :projections
+ {:ontologie
+  {:description "Die ganze Ontologie, wie sie geschrieben wurde: zentrale Texte, je Projekt seine Facetten objects, ingest und apps, Objekt-Ansichten."
+   :elements {:objects {:attributes :by-name} :interfaces {:attributes :by-name}}
+   :filename
+   {:zentral
+    {:language :edn :envelope [:schema] :name ["ontology.ent"] :home-for [:*] :order 0
+     :description "Was keinem Projekt gehört, und alles, was sonst keinen Ort hat."}
+
+    :transform
+    {:language :edn :envelope [:schema] :name ["transform.ent"]
+     :home-for [:sources :datasets :media-sets :exports] :order 0
+     :description "Quellen, Datasets und Exporte, die keinem einzelnen Projekt gehören."}
+
+    :sicherheit
+    {:language :edn :envelope [:schema] :name ["security.ent"]
+     :home-for [:organizations :spaces :roles :markings] :order 0
+     :description "Das Sicherheitsmodell als Text: Organisationen (wer überhaupt hinein darf), Spaces, Rollen und Markings mit den Gruppen, die für sie freigegeben sind."}
+
+    :objekte
+    {:language :edn :envelope [:schema] :name ["*.objects.ent"] :owner [:declared :facet]
+     :facet "objects" :order 1
+     :sections [:projects :objects :links :interfaces :shared-properties :object-type-groups
+                :actions]
+     :home-for [:projects :objects :links :interfaces :shared-properties :object-type-groups
+                :actions]
+     :description "Das Objektmodell eines Projekts, <projekt>.objects.ent: das Projekt selbst, Objekte, Beziehungen, Interfaces und die Actions auf ihnen."}
+
+    :ingest
+    {:language :edn :envelope [:schema] :name ["*.ingest.ent"] :owner [:declared :facet]
+     :facet "ingest" :order 2
+     :sections [:projects :sources :datasets :media-sets :exports]
+     :home-for [:sources :datasets :media-sets :exports]
+     :description "Woher die Daten eines Projekts kommen und was wieder hinausgeht, <projekt>.ingest.ent: Quellen, Datasets und Exporte."}
+
+    :apps
+    {:language :edn :envelope [:schema] :name ["*.apps.ent"] :owner [:declared :facet] :facet "apps"
+     :order 3
+     :sections [:projects :workspaces :collections :custom-applications :agents :object-sets]
+     :home-for [:workspaces :collections :custom-applications :agents :object-sets]
+     :description "Wo man mit den Objekten eines Projekts arbeitet, <projekt>.apps.ent: Workspaces, Anwendungen, Agenten, Objektmengen."}
+
+    :evals
+    {:language :edn :envelope [:schema] :name ["*.evals.ent"] :owner [:declared :facet]
+     :facet "evals" :order 4
+     :sections [:projects :eval-suites]
+     :home-for [:eval-suites]
+     :description "Woran ein Projekt misst, ob seine Technik richtig entscheidet, <projekt>.evals.ent: Eval-Suites — Ziel, Testfälle, Evaluatoren (Evals)."}
+
+    :ent-projekt
+    {:language :edn :envelope [:schema] :name ["*.ent"] :owner [:declared] :order 20
+     :description "Ein Projekt als Text; das Projekt steht unter :projects."}
+
+    :ent-dateiname
+    {:language :edn :envelope [:schema] :name ["*.ent"] :owner [:facet :file-name] :order 20
+     :description
+       "Ein Projekt als Text; der Name sagt das Projekt (<projekt>.ent, <projekt>.<facette>.ent)."}
+
+    :ent-kompakt
+    {:language :edn :name ["*.ent"] :owner [:declared :facet :file-name] :order 10
+     :description "Wie ent-dateiname, ohne :schema-Hülle: der Text IST der Schema-Körper."}
+
+    :yaml
+    {:language :yaml :name ["*.ent.yaml"] :owner [:declared :facet :file-name] :order 10
+     :description "Das Objektmodell in YAML."}
+
+    :objekt-ansichten
+    {:language :edn :name ["object-views/*.entv"] :kind :view :order 0
+     :description "Die Ansicht eines Object-Types: Panel und Vollansicht."}}}
+
+  :code-repository
+  {:description "Die Code-repositorys, wie git sie liest: je Repository sein Wurzeltext, dazu Apps, Pipelines, Dokumentvorlagen."
+   :select {:sections [:transforms :functions :applications :pipelines :templates]}
+   :filename
+   {:wurzel
+    {:language :edn :envelope [:schema] :name ["*.ent"] :owner [:repository] :order 0
+     :home-for [:transforms :functions]
+     :siblings ["transforms/*.py" "transforms/*.clj" "transforms/requirements"]
+     :description
+       "Der Wurzeltext eines Code-repositorys, <repository>.ent: seine Transforms und Functions."}
+
+    :ohne-repository
+    {:language :edn :envelope [:schema] :name ["ohne-repository.ent"]
+     :home-for [:transforms :functions] :order 0
+     :description "Transforms und Functions, die keinem Code-repository gehören."}
+
+    :apps
+    {:language :edn :name ["apps/*.enta"] :kind :app :order 0
+     :siblings ["apps/*.cljs" "exports/*"]
+     :description "Eine Data-App; ihr Quelltext und ihre Export-Vorlage liegen daneben."}
+
+    :pipelines
+    {:language :edn :name ["pipelines/*.entp"] :kind :pipeline :order 0
+     :description "Eine No-Code-Pipeline samt ihrer Transforms."}
+
+    :dokument-vorlagen
+    {:language :edn :name ["doc-templates/*.entt"] :kind :doc-template :order 0
+     :siblings ["doc-templates/*.j2"]
+     :description "Eine Dokumentvorlage; ihr Körper liegt daneben."}}}}}

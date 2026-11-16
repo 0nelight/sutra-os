@@ -1,0 +1,7 @@
+{:paths ["src" "resources"]
+ :deps  {sutra/dialect {:local/root "../dialect"}
+         sutra/world    {:local/root "../world"}}
+ :aliases
+ {:test {:extra-paths ["test"]
+         :extra-deps  {org.clojure/test.check {:mvn/version "1.1.1"}}
+         :main-opts   ["-m" "store.run-tests"]}}}

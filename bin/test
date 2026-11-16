@@ -1,0 +1,263 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+SHARDS=${SUTRA_TEST_SHARDS:-1}
+
+export SUTRA_PG_CONNECT_TIMEOUT_MS=${SUTRA_PG_CONNECT_TIMEOUT_MS:-5000}
+
+RECORD_TIMINGS=0
+TIMINGS_FILE=.test-timings.tsv
+args=()
+tier_meta=()
+want_shards=0
+for a in "$@"; do
+  if [ "$want_shards" = 1 ]; then SHARDS=$a; want_shards=0; continue; fi
+  case "$a" in
+    --shards) want_shards=1 ;;
+    --shards=*) SHARDS="${a#*=}" ;;
+    --record-timings) RECORD_TIMINGS=1 ;;
+    :unit|:integration|:api) tier_meta+=("${a#:}") ;;
+    :api-lake|:api-serving) tier_meta+=("api") ;;
+    *) args+=("$a") ;;
+  esac
+done
+meta_args=()
+for t in ${tier_meta[@]+"${tier_meta[@]}"}; do meta_args+=(--focus-meta ":$t"); done
+
+case "$SHARDS" in
+  ''|*[!0-9]*) echo "bin/test: --shards needs a number, got '$SHARDS'" >&2; exit 2 ;;
+esac
+
+LOCK_FILE="${SUTRA_TEST_LOCK:-${TMPDIR:-/tmp}/sutra-test.lock}"
+if [ "${SUTRA_TEST_NO_LOCK:-0}" != "1" ] && command -v flock >/dev/null 2>&1; then
+  exec 9>>"$LOCK_FILE"
+  if ! flock -n 9; then
+    holder=$(cat "$LOCK_FILE" 2>/dev/null || true)
+    echo "bin/test: another run holds the suite lock (${LOCK_FILE}${holder:+, pid $holder}) — waiting…" >&2
+    flock 9
+  fi
+  printf '%s\n' "$$" >"$LOCK_FILE"
+fi
+
+cleanup() {
+  command -v podman >/dev/null 2>&1 && podman volume prune -f >/dev/null 2>&1 || true
+}
+trap cleanup EXIT
+
+if command -v podman >/dev/null 2>&1; then
+  podman ps -q --filter 'name=^sutra-test-(imap|pg)-' \
+    | xargs -r podman rm -f -v >/dev/null 2>&1 || true
+fi
+
+# The UI tests load the app bundle, which no checkout carries (resources/public/js is
+# ignored): a fresh clone builds it once here.
+if [ ! -f resources/public/js/main.js ]; then
+  if [ -d clients/frontend/node_modules ]; then
+    echo "bin/test: no app bundle yet — building it (shadow-cljs compile app widget-frame)" >&2
+    ( cd clients/frontend && npx shadow-cljs compile app widget-frame ) 9>&- >&2
+  else
+    echo "bin/test: no app bundle and no clients/frontend/node_modules — the UI tests will fail;" \
+         "run: (cd clients/frontend && npm install)" >&2
+  fi
+fi
+
+runner=(clojure -M:dev:test -m kaocha.runner)
+
+record_args=()
+if [ "$RECORD_TIMINGS" = 1 ]; then
+  record_args=(--plugin support.timings/plugin)
+fi
+
+if [ "$SHARDS" -le 1 ]; then
+  [ "$RECORD_TIMINGS" = 1 ] && export SUTRA_TEST_TIMINGS="$PWD/$TIMINGS_FILE"
+  rc=0
+  "${runner[@]}" "${args[@]}" "${meta_args[@]}" "${record_args[@]}" || rc=$?
+  exit "$rc"
+fi
+
+
+tiers=(); passthru=()
+for a in "${args[@]}"; do
+  case "$a" in
+    :*) tiers+=("$a") ;;
+    *)  passthru+=("$a") ;;
+  esac
+done
+[ ${#tiers[@]} -eq 0 ] && tiers=(:grammar :store :ontology :platform :apps :scenario)
+
+for p in "${passthru[@]}"; do
+  case "$p" in
+    --focus|--focus=*|--focus-meta|--focus-meta=*|--watch)
+      echo "bin/test: $p runs unsharded (it already selects the work)" >&2
+      rc=0
+      "${runner[@]}" "${args[@]}" "${meta_args[@]}" "${record_args[@]}" || rc=$?
+      exit "$rc" ;;
+  esac
+done
+
+work=()
+for t in "${tiers[@]}"; do
+  id="${t#:}"
+  if [ "$id" = store ]; then
+    while IFS= read -r f; do
+      rel="${f#libs/store/test/}"; rel="${rel%.clj}"; ns="${rel//\//.}"; ns="${ns//_/-}"
+      [[ "$ns" =~ ^(store|blobs|coord|datasets|streams)\..*-test$ ]] && work+=("$ns")
+    done < <(find libs/store/test -name '*_test.clj' | sort)
+    continue
+  fi
+  dir="tests/${id//-/_}"
+  [ -d "$dir" ] || continue
+  for f in "$dir"/*.clj; do
+    [ -e "$f" ] || continue
+    base=$(basename "$f" .clj)
+    if [ ${#tier_meta[@]} -gt 0 ]; then
+      hit=0
+      for m in "${tier_meta[@]}"; do
+        grep -qE "^\(ns +\^:$m\b" "$f" && hit=1
+      done
+      [ "$hit" = 1 ] || continue
+    fi
+    work+=("$id.${base//_/-}")
+  done
+done
+[ ${#work[@]} -eq 0 ] && { echo "bin/test: no namespaces found for ${tiers[*]}" >&2; exit 2; }
+
+mapfile -t assignment < <(
+  LC_ALL=C awk -v shards="$SHARDS" -v timings="$TIMINGS_FILE" '
+    BEGIN {
+      for (s = 0; s < shards; s++) load[s] = 0
+      while ((getline line < timings) > 0) {
+        split(line, p, "\t"); if (p[1] != "") { secs[p[1]] = p[2] + 0; have++; total += p[2] + 0 }
+      }
+      mean = (have > 0) ? total / have : 1
+    }
+    { ns[NR] = $0; w[NR] = (ns[NR] in secs) ? secs[ns[NR]] : mean }
+    END {
+      for (i = 1; i <= NR; i++) order[i] = i
+      for (i = 2; i <= NR; i++) {
+        k = order[i]
+        for (j = i - 1; j >= 1 && w[order[j]] < w[k]; j--) order[j+1] = order[j]
+        order[j+1] = k
+      }
+      for (i = 1; i <= NR; i++) {
+        best = 0
+        for (s = 1; s < shards; s++) if (load[s] < load[best]) best = s
+        idx = order[i]
+        load[best] += w[idx]
+        out[best] = out[best] " " ns[idx]
+      }
+      for (s = 0; s < shards; s++) printf "%s\n", substr(out[s], 2)
+    }
+  ' < <(printf '%s\n' "${work[@]}")
+)
+
+: "${SUTRA_TEST_PROGRESS:=0}"
+
+echo "bin/test: ${#work[@]} namespaces across $SHARDS JVMs (${tiers[*]})"
+
+known=$(LC_ALL=C awk -F'\t' 'NR == FNR { t[$1]; next } $1 in t { n++ } END { print n + 0 }' \
+  "$TIMINGS_FILE" <(printf '%s\n' "${work[@]}") 2>/dev/null || echo 0)
+if [ $(( known * 2 )) -lt "${#work[@]}" ]; then
+  echo "bin/test: WARNING: $TIMINGS_FILE knows only $known of ${#work[@]} namespaces," \
+       "shards are split blind; refresh it with --record-timings" >&2
+fi
+
+PORT_BASE=${SUTRA_TEST_PORT_BASE:-21000}
+PORT_SPAN=${SUTRA_TEST_PORT_SPAN:-800}
+
+shard_log_dir=$(mktemp -d -t sutra-test-shards-XXXXXX)
+echo "bin/test: shard logs in $shard_log_dir"
+
+if [ -z "${SUTRA_TEST_PG_URL:-}" ] && command -v podman >/dev/null 2>&1; then
+  shared_pg_name="sutra-test-pg-shared-$$"
+  shared_pg_port=$(( 15432 + (RANDOM % 2000) ))
+  if podman run -d --rm --name "$shared_pg_name" 9>&- \
+       -e POSTGRES_USER=sutra -e POSTGRES_PASSWORD=sutra -e POSTGRES_DB=postgres \
+       -p "127.0.0.1:$shared_pg_port:5432" \
+       --tmpfs /var/lib/postgresql/data:rw,size=8g \
+       docker.io/library/postgres:16-alpine \
+       -c max_connections=500 -c fsync=off -c full_page_writes=off \
+       -c synchronous_commit=off >/dev/null 2>&1; then
+    trap 'podman rm -f -v "$shared_pg_name" >/dev/null 2>&1 || true' EXIT
+    for _ in $(seq 1 120); do
+      if podman exec "$shared_pg_name" pg_isready -U sutra -q >/dev/null 2>&1; then break; fi
+      sleep 0.5
+    done
+    export SUTRA_TEST_PG_URL="jdbc:postgresql://127.0.0.1:$shared_pg_port/"
+    export SUTRA_TEST_PG_USER=sutra
+    export SUTRA_TEST_PG_PASSWORD=sutra
+    echo "bin/test: one shared Postgres on :$shared_pg_port"
+  fi
+fi
+# The shards start at once; in a fresh checkout each would compute the classpath and
+# write .cpcache at the same time, and one of them then starts without clojure.main.
+"${runner[0]}" -P "${runner[1]}" 9>&- >/dev/null
+
+pids=(); rc=0
+for ((s = 0; s < SHARDS; s++)); do
+  focus=(); shard_tiers=()
+  for ns in ${assignment[$s]:-}; do
+    focus+=(--focus "$ns")
+    tier=":${ns%%.*}"
+    case "$tier" in :store|:blobs|:coord|:datasets|:streams) tier=":store" ;; esac
+    [[ " ${shard_tiers[*]-} " == *" $tier "* ]] || shard_tiers+=("$tier")
+  done
+  [ ${#focus[@]} -eq 0 ] && continue
+  band_base=$(( PORT_BASE + s * PORT_SPAN ))
+  egress_port=$(( band_base + PORT_SPAN - 1 ))
+  shard_env=(
+    "SUTRA_TEST_PROGRESS=$SUTRA_TEST_PROGRESS"
+    "SUTRA_TEST_PORT_BASE=$band_base"
+    "SUTRA_TEST_PORT_SPAN=$(( PORT_SPAN - 1 ))"
+    "SUTRA_EGRESS_PORT=$egress_port"
+    "SUTRA_EGRESS_URL=http://127.0.0.1:$egress_port"
+  )
+  [ "$RECORD_TIMINGS" = 1 ] && shard_env+=("SUTRA_TEST_TIMINGS=$shard_log_dir/timings-$s.tsv")
+  [ -n "${SUTRA_TEST_PG_URL:-}" ] && shard_env+=(
+    "SUTRA_TEST_PG_URL=$SUTRA_TEST_PG_URL"
+    "SUTRA_TEST_PG_USER=$SUTRA_TEST_PG_USER"
+    "SUTRA_TEST_PG_PASSWORD=$SUTRA_TEST_PG_PASSWORD")
+  env "${shard_env[@]}" \
+    "${runner[@]}" "${shard_tiers[@]}" "${passthru[@]}" "${meta_args[@]}" "${focus[@]}" "${record_args[@]}" \
+    > "$shard_log_dir/shard-$s.log" 2>&1 &
+  pids+=($!)
+done
+
+for p in "${pids[@]}"; do wait "$p" || rc=1; done
+
+for ((s = 0; s < SHARDS; s++)); do
+  [ -f "$shard_log_dir/shard-$s.log" ] || continue
+  echo "───────────────────────────── shard $s ─────────────────────────────"
+  cat "$shard_log_dir/shard-$s.log"
+done
+
+echo "═══════════════════════════════ totals ═══════════════════════════════"
+cat "$shard_log_dir"/shard-*.log 2>/dev/null \
+  | sed -e 's/\x1b\[[0-9;]*m//g' \
+  | LC_ALL=C awk '
+      /^[0-9]+ tests?, [0-9]+ assertions/ {
+        n++
+        for (i = 1; i <= NF; i++) {
+          if ($(i+1) ~ /^tests?,?$/)       t += $i
+          else if ($(i+1) ~ /^assertions?,?$/) a += $i
+          else if ($(i+1) ~ /^failures?[.,]?$/) f += $i
+          else if ($(i+1) ~ /^errors?[.,]?$/)   e += $i
+        }
+      }
+      END {
+        if (n == 0) { print "no shard summary found — read the shard output above"; exit }
+        printf "%d tests, %d assertions, %d failures, %d errors (across %d shards)\n", t, a, f, e, n
+      }' || true
+
+if [ "$RECORD_TIMINGS" = 1 ]; then
+  cat "$shard_log_dir"/timings-*.tsv 2>/dev/null | sort > "$TIMINGS_FILE" || true
+  echo "bin/test: wrote $TIMINGS_FILE"
+fi
+
+if [ -n "${SUTRA_TEST_KEEP_LOGS:-}" ]; then
+  echo "bin/test: shard logs kept in $shard_log_dir"
+else
+  rm -rf "$shard_log_dir"
+fi
+exit "$rc"

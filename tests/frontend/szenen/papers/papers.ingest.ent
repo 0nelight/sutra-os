@@ -1,0 +1,56 @@
+{:schema
+ {
+  :sources
+  {:bank
+   {:type :csv
+    :path "{{eingang}}/bank-october.csv"
+    :description "The bank's monthly CSV export, dropped into the inbox folder."}
+   :mailbox
+   {:type :imap
+    :host "127.0.0.1" :port 3143
+    :config {:tls false :folders "INBOX"}
+    :egress ["127.0.0.1:3143"]
+    :access :read-only
+    :description "The mailbox invoices arrive in."}
+   :llm
+   {:type :rest
+    :config {:base-url "http://127.0.0.1:8765/v1"}
+    :egress ["127.0.0.1:8765"]
+    :external-transform true
+    :access :read-only
+    :description "The language model that reads invoice PDFs. In the film: model_sim.py, a local stand-in."}}
+
+
+  :datasets
+  {:bank_rows
+   {:project :papers :kind :virtual :title "Bank export (raw)"
+    :description "Every row of the bank CSV, as it came."
+    :columns [{:attribute-name :transaction_id :attribute-type :string}
+              {:attribute-name :booked_on :attribute-type :string}
+              {:attribute-name :counterparty :attribute-type :string}
+              {:attribute-name :reference :attribute-type :string}
+              {:attribute-name :amount :attribute-type :string}]
+    :virtual {:source :bank :table "csv" :primary-key [:transaction_id]}}
+   :mail_messages
+   {:project :papers :kind :virtual :title "Mailbox: messages (raw)"
+    :columns [{:attribute-name :key :attribute-type :string}
+              {:attribute-name :message_id :attribute-type :string}
+              {:attribute-name :date :attribute-type :timestamp}
+              {:attribute-name :sender :attribute-type :string}
+              {:attribute-name :subject :attribute-type :string}]
+    :virtual {:source :mailbox :table "messages" :primary-key [:key] :detect {}}}
+   :mail_attachments
+   {:project :papers :kind :virtual :title "Mailbox: attachments (raw)"
+    :columns [{:attribute-name :key :attribute-type :string}
+              {:attribute-name :message_id :attribute-type :string}
+              {:attribute-name :filename :attribute-type :string}
+              {:attribute-name :mime_type :attribute-type :string}
+              {:attribute-name :content_b64 :attribute-type :string}]
+    :virtual {:source :mailbox :table "attachments" :primary-key [:key] :detect {}}}
+   :attachment_files
+   {:project :papers :kind :transform-output :title "Attachments, bytes landed"
+    :columns [{:attribute-name :attachment_id :attribute-type :string}
+              {:attribute-name :mail_id :attribute-type :string}
+              {:attribute-name :filename :attribute-type :string}
+              {:attribute-name :mime_type :attribute-type :string}
+              {:attribute-name :file :attribute-type :media-reference}]}}}}

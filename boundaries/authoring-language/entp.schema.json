@@ -1,0 +1,1371 @@
+{
+  "$comment": "Generated from the Malli grammar of sutra.parser.ent; do not edit. The texts are EDN; this schema describes them under the mapping: map \u2192 object, vector/list/set \u2192 array, keyword \u2192 string of its name with namespace (no colon). x-sutra-check marks a rule the parser checks in code. A $defs entry named h-<hash> is a subschema the grammar repeats.",
+  "$defs": {
+    "h-2b259590dc22": {
+      "additionalProperties": false,
+      "properties": {
+        "constraint": {
+          "type": "string"
+        },
+        "interface": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "allOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "x-sutra-check": "checked by the Sutra parser beyond this schema"
+                }
+              ]
+            },
+            {
+              "x-sutra-check": "should be a keyword or a string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "interface",
+        "constraint"
+      ],
+      "type": "object"
+    },
+    "h-3f485ca8ad09": {
+      "items": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "allOf": [
+              {
+                "type": "string"
+              },
+              {
+                "x-sutra-check": "checked by the Sutra parser beyond this schema"
+              }
+            ]
+          },
+          {
+            "x-sutra-check": "should be a keyword or a string"
+          }
+        ]
+      },
+      "type": "array"
+    },
+    "h-74a19932b27c": {
+      "items": {
+        "$ref": "#/$defs/h-2b259590dc22"
+      },
+      "type": "array"
+    },
+    "h-a689f159ac8d": {
+      "additionalProperties": false,
+      "properties": {
+        "as": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "forward-name": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "reverse": {
+          "type": "string"
+        },
+        "reverse-name": {
+          "type": "string"
+        },
+        "satisfies": {
+          "$ref": "#/$defs/h-74a19932b27c"
+        },
+        "strict": {
+          "type": "boolean"
+        },
+        "to": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "allOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "x-sutra-check": "checked by the Sutra parser beyond this schema"
+                }
+              ]
+            },
+            {
+              "x-sutra-check": "should be a keyword or a string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "to",
+        "as"
+      ],
+      "type": "object"
+    },
+    "h-b2378d7854c6": {
+      "additionalProperties": false,
+      "properties": {
+        "base-url": {
+          "type": "string"
+        },
+        "checks": {
+          "items": {
+            "properties": {},
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "dataset": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "allOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "x-sutra-check": "checked by the Sutra parser beyond this schema"
+                }
+              ]
+            },
+            {
+              "x-sutra-check": "should be a keyword or a string"
+            }
+          ]
+        },
+        "datasource": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "media-set": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "object-type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "allOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "x-sutra-check": "checked by the Sutra parser beyond this schema"
+                }
+              ]
+            },
+            {
+              "x-sutra-check": "should be a keyword or a string"
+            }
+          ]
+        },
+        "query": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "stop-propagating": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "stop-requiring": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "table": {
+          "type": "string"
+        },
+        "transform": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "allOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "x-sutra-check": "checked by the Sutra parser beyond this schema"
+                }
+              ]
+            },
+            {
+              "x-sutra-check": "should be a keyword or a string"
+            }
+          ]
+        },
+        "type": {
+          "$ref": "#/$defs/sutra.parser.spec~1vt"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    "h-b90820722894": {
+      "additionalProperties": {
+        "$ref": "#/$defs/h-b2378d7854c6"
+      },
+      "type": "object"
+    },
+    "sutra.parser.ent/t": {
+      "anyOf": [
+        {
+          "enum": [
+            "attachment",
+            "boolean",
+            "byte",
+            "cipher",
+            "date",
+            "decimal",
+            "double",
+            "float",
+            "geohash",
+            "geopoint",
+            "geoshape",
+            "instant",
+            "integer",
+            "keyword",
+            "long",
+            "marking",
+            "media-reference",
+            "short",
+            "string",
+            "text",
+            "timeseries",
+            "timestamp",
+            "uuid",
+            "vector"
+          ],
+          "type": "string"
+        },
+        {
+          "anyOf": [
+            {
+              "items": false,
+              "prefixItems": [
+                {
+                  "const": "decimal"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "items": false,
+              "prefixItems": [
+                {
+                  "const": "vector"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "items": false,
+              "prefixItems": [
+                {
+                  "const": "array"
+                },
+                {
+                  "$ref": "#/$defs/sutra.parser.ent~1t"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "items": false,
+              "prefixItems": [
+                {
+                  "const": "struct"
+                },
+                {
+                  "additionalProperties": {
+                    "$ref": "#/$defs/sutra.parser.ent~1t"
+                  },
+                  "type": "object"
+                }
+              ],
+              "type": "array"
+            },
+            {}
+          ]
+        },
+        {}
+      ]
+    },
+    "sutra.parser.spec/vt": {
+      "anyOf": [
+        {
+          "enum": [
+            "date",
+            "long",
+            "double",
+            "geoshape",
+            "short",
+            "instant",
+            "number",
+            "geohash",
+            "float",
+            "media-reference",
+            "timeseries",
+            "geopoint",
+            "string",
+            "integer",
+            "keyword",
+            "byte",
+            "decimal",
+            "uuid",
+            "timestamp",
+            "boolean",
+            "attachment",
+            "text"
+          ],
+          "type": "string"
+        },
+        {
+          "anyOf": [
+            {
+              "items": false,
+              "prefixItems": [
+                {
+                  "const": "decimal"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "items": false,
+              "prefixItems": [
+                {
+                  "const": "vector"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "items": false,
+              "prefixItems": [
+                {
+                  "const": "array"
+                },
+                {
+                  "$ref": "#/$defs/sutra.parser.spec~1vt"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "items": false,
+              "prefixItems": [
+                {
+                  "const": "struct"
+                },
+                {
+                  "additionalProperties": {
+                    "$ref": "#/$defs/sutra.parser.spec~1vt"
+                  },
+                  "type": "object"
+                }
+              ],
+              "type": "array"
+            },
+            {}
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "$id": "urn:sutra:interface:authoring-language:entp:1.0.0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "deprecation": {
+      "additionalProperties": false,
+      "properties": {
+        "deadline": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "replacement": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "description": {
+      "type": "string"
+    },
+    "ignore-inherited": {
+      "type": "boolean"
+    },
+    "imports": {
+      "$ref": "#/$defs/h-3f485ca8ad09"
+    },
+    "kind": {
+      "enum": [
+        "batch",
+        "streaming"
+      ],
+      "type": "string"
+    },
+    "name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "allOf": [
+            {
+              "type": "string"
+            },
+            {
+              "x-sutra-check": "checked by the Sutra parser beyond this schema"
+            }
+          ]
+        },
+        {
+          "x-sutra-check": "should be a keyword or a string"
+        }
+      ]
+    },
+    "outputs": {
+      "$ref": "#/$defs/h-3f485ca8ad09"
+    },
+    "project": {
+      "type": "string"
+    },
+    "repository": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "active",
+        "experimental",
+        "deprecated",
+        "example"
+      ],
+      "type": "string"
+    },
+    "sutra/grammar": {
+      "pattern": "^\\d+(\\.\\d+){0,2}$",
+      "type": "string"
+    },
+    "transforms": {
+      "additionalProperties": {
+        "allOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "allowed-run-seconds": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "board": {},
+              "code": {
+                "type": "string"
+              },
+              "code-file": {
+                "type": "string"
+              },
+              "code-path": {
+                "type": "string"
+              },
+              "column-map": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              "container": {
+                "properties": {
+                  "image": {
+                    "type": "string"
+                  },
+                  "tag": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "image",
+                  "tag"
+                ],
+                "type": "object"
+              },
+              "deprecation": {
+                "additionalProperties": false,
+                "properties": {
+                  "deadline": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string"
+                  },
+                  "replacement": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "description": {
+                "type": "string"
+              },
+              "doc": {
+                "additionalProperties": {},
+                "type": "object"
+              },
+              "done-key": {
+                "additionalProperties": false,
+                "properties": {
+                  "input": {
+                    "type": "string"
+                  },
+                  "key": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "input",
+                  "key"
+                ],
+                "type": "object"
+              },
+              "entry-point": {
+                "type": "string"
+              },
+              "external-systems": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "fk-attribute": {
+                "type": "string"
+              },
+              "from-key-column": {
+                "type": "string"
+              },
+              "ignore-inherited": {
+                "type": "boolean"
+              },
+              "incremental": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "allow-retention": {
+                        "type": "boolean"
+                      },
+                      "read-mode": {
+                        "enum": [
+                          "added",
+                          "current",
+                          "previous"
+                        ],
+                        "type": "string"
+                      },
+                      "require-incremental": {
+                        "type": "boolean"
+                      },
+                      "static-inputs": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "strict-append": {
+                        "type": "boolean"
+                      },
+                      "write-mode": {
+                        "enum": [
+                          "modify",
+                          "replace"
+                        ],
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  {
+                    "x-sutra-check": "should be a boolean or a map"
+                  }
+                ]
+              },
+              "input": {
+                "$ref": "#/$defs/h-b2378d7854c6"
+              },
+              "inputs": {
+                "$ref": "#/$defs/h-b90820722894"
+              },
+              "language": {
+                "type": "string"
+              },
+              "match-column": {
+                "type": "string"
+              },
+              "max-per-run": {
+                "type": "integer"
+              },
+              "media-outputs": {
+                "additionalProperties": {
+                  "properties": {
+                    "media-set": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "media-set"
+                  ],
+                  "type": "object"
+                },
+                "type": "object"
+              },
+              "modules": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              "ops": {
+                "items": {
+                  "properties": {
+                    "op": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "op"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "output": {},
+              "output-columns": {
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "items": false,
+                      "prefixItems": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "anyOf": [
+                            {
+                              "$ref": "#/$defs/sutra.parser.ent~1t"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      ],
+                      "type": "array"
+                    },
+                    {
+                      "items": false,
+                      "prefixItems": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "anyOf": [
+                            {
+                              "$ref": "#/$defs/sutra.parser.ent~1t"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "conditional-format": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "align": {
+                                    "type": "string"
+                                  },
+                                  "background": {
+                                    "type": "string"
+                                  },
+                                  "color": {
+                                    "type": "string"
+                                  },
+                                  "icon": {
+                                    "type": "string"
+                                  },
+                                  "when": {}
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "constraints": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "case-sensitive": {
+                                  "type": "boolean"
+                                },
+                                "display-names": {
+                                  "additionalProperties": {
+                                    "type": "string"
+                                  },
+                                  "type": "object"
+                                },
+                                "exclusive-max": {},
+                                "exclusive-min": {},
+                                "format": {
+                                  "type": "string"
+                                },
+                                "max": {},
+                                "max-length": {
+                                  "type": "integer"
+                                },
+                                "max-size": {
+                                  "type": "integer"
+                                },
+                                "min": {},
+                                "min-length": {
+                                  "type": "integer"
+                                },
+                                "min-size": {
+                                  "type": "integer"
+                                },
+                                "one-of": {
+                                  "items": {},
+                                  "type": "array"
+                                },
+                                "regex": {
+                                  "type": "string"
+                                },
+                                "unique": {
+                                  "type": "boolean"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "deprecation": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "deadline": {
+                                  "type": "string"
+                                },
+                                "reason": {
+                                  "type": "string"
+                                },
+                                "replacement": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "derived": {
+                              "allOf": [
+                                {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "code": {
+                                      "type": "string"
+                                    },
+                                    "code-file": {
+                                      "type": "string"
+                                    },
+                                    "expression": {
+                                      "anyOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "items": {},
+                                          "type": "array"
+                                        },
+                                        {
+                                          "x-sutra-check": "should be a string or a vector"
+                                        }
+                                      ]
+                                    },
+                                    "inputs": {
+                                      "items": {
+                                        "type": "string"
+                                      },
+                                      "type": "array"
+                                    },
+                                    "language": {
+                                      "type": "string"
+                                    },
+                                    "materialize": {},
+                                    "rollup": {
+                                      "allOf": [
+                                        {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "agg": {
+                                              "enum": [
+                                                "arg-max",
+                                                "avg",
+                                                "count",
+                                                "max",
+                                                "min",
+                                                "one",
+                                                "sum"
+                                              ],
+                                              "type": "string"
+                                            },
+                                            "by": {
+                                              "type": "string"
+                                            },
+                                            "of": {
+                                              "type": "string"
+                                            },
+                                            "over": {
+                                              "type": "string"
+                                            },
+                                            "pick": {
+                                              "type": "string"
+                                            },
+                                            "where": {
+                                              "x-sutra-check": ":where is a sutra.types.query predicate-IR node over the LINKED object \u2014 [:= :code \"A03\"], [:> :betrag 0], [:nil? :erledigt-am true] (unset; false = set), [:and \u2026], [:or \u2026]"
+                                            }
+                                          },
+                                          "required": [
+                                            "over",
+                                            "agg"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        {
+                                          "x-sutra-check": ":sum/:max/:min/:avg need :of; :arg-max needs :by + :pick; :one needs :pick only and takes no :where; :count needs none"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                {
+                                  "x-sutra-check": ":materialize is retired \u2014 a derived property is calculated at runtime, always. The reader that needed a column no longer does: a transform's :object-type input now carries the derived properties. If this value genuinely belongs in a column, compute it in a transform and drop :derived \u2014 it is then an ordinary backed property, not a derived one."
+                                }
+                              ]
+                            },
+                            "description": {
+                              "type": "string"
+                            },
+                            "doc": {
+                              "additionalProperties": {},
+                              "type": "object"
+                            },
+                            "edit-only": {
+                              "type": "boolean"
+                            },
+                            "fk": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "allOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "x-sutra-check": "checked by the Sutra parser beyond this schema"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "x-sutra-check": "should be a keyword or a string"
+                                }
+                              ]
+                            },
+                            "format": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "currency": {
+                                  "type": "string"
+                                },
+                                "decimals": {
+                                  "type": "integer"
+                                },
+                                "grouping": {
+                                  "type": "boolean"
+                                },
+                                "kind": {
+                                  "enum": [
+                                    "currency",
+                                    "unit",
+                                    "percentage",
+                                    "date",
+                                    "datetime",
+                                    "datetime-long",
+                                    "datetime-short",
+                                    "iso-instant",
+                                    "relative",
+                                    "time",
+                                    "duration",
+                                    "id",
+                                    "rid"
+                                  ],
+                                  "type": "string"
+                                },
+                                "notation": {
+                                  "enum": [
+                                    "compact",
+                                    "scientific",
+                                    "engineering"
+                                  ],
+                                  "type": "string"
+                                },
+                                "prefix": {
+                                  "type": "string"
+                                },
+                                "suffix": {
+                                  "type": "string"
+                                },
+                                "timezone": {
+                                  "type": "string"
+                                },
+                                "unit": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "link": {
+                              "anyOf": [
+                                {
+                                  "$ref": "#/$defs/h-a689f159ac8d"
+                                },
+                                {
+                                  "items": {
+                                    "$ref": "#/$defs/h-a689f159ac8d"
+                                  },
+                                  "type": "array"
+                                },
+                                {
+                                  "x-sutra-check": "should be a map or a vector"
+                                }
+                              ]
+                            },
+                            "markings": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "media-set": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "project": {
+                              "type": "string"
+                            },
+                            "rationale": {
+                              "type": "string"
+                            },
+                            "render-hints": {
+                              "items": {
+                                "enum": [
+                                  "searchable",
+                                  "sortable",
+                                  "selectable",
+                                  "low-cardinality",
+                                  "keywords",
+                                  "long-text",
+                                  "identifier",
+                                  "disable-formatting"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "required": {
+                              "type": "boolean"
+                            },
+                            "series": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "rollup": {
+                                  "type": "string"
+                                },
+                                "sync": {
+                                  "type": "string"
+                                },
+                                "unit": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "sync"
+                              ],
+                              "type": "object"
+                            },
+                            "status": {
+                              "enum": [
+                                "active",
+                                "experimental",
+                                "deprecated",
+                                "example"
+                              ],
+                              "type": "string"
+                            },
+                            "type-classes": {
+                              "additionalProperties": {},
+                              "type": "object"
+                            },
+                            "value-type": {
+                              "type": "string"
+                            },
+                            "visibility": {
+                              "enum": [
+                                "prominent",
+                                "normal",
+                                "hidden"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      ],
+                      "type": "array"
+                    },
+                    {
+                      "x-sutra-check": "a column is `[name type]` or `[name type opts]`"
+                    }
+                  ]
+                },
+                "type": "array"
+              },
+              "outputs": {
+                "items": {},
+                "type": "array"
+              },
+              "parameters": {
+                "additionalProperties": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "default": {},
+                    "description": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "enum": [
+                        "string",
+                        "number",
+                        "boolean"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ],
+                  "type": "object"
+                },
+                "type": "object"
+              },
+              "pipeline": {
+                "type": "string"
+              },
+              "primary-key": {
+                "type": "string"
+              },
+              "profile": {
+                "type": "string"
+              },
+              "project": {
+                "type": "string"
+              },
+              "prompt-key": {
+                "additionalProperties": false,
+                "properties": {
+                  "column": {
+                    "type": "string"
+                  },
+                  "columns": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "input": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "input",
+                  "columns"
+                ],
+                "type": "object"
+              },
+              "query": {
+                "type": "string"
+              },
+              "rationale": {
+                "type": "string"
+              },
+              "releases": {
+                "additionalProperties": {},
+                "type": "object"
+              },
+              "repository": {
+                "type": "string"
+              },
+              "resources": {
+                "additionalProperties": false,
+                "properties": {
+                  "cpu-cores": {
+                    "maximum": 8,
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "memory-gb": {
+                    "maximum": 64,
+                    "minimum": 1,
+                    "type": "integer"
+                  }
+                },
+                "type": "object"
+              },
+              "returns": {
+                "additionalProperties": {},
+                "type": "object"
+              },
+              "semantic-version": {
+                "type": "integer"
+              },
+              "shared-property": {
+                "type": "string"
+              },
+              "sources": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "code-file": {
+                      "type": "string"
+                    },
+                    "datasource": {
+                      "type": "string"
+                    },
+                    "from-key-column": {
+                      "type": "string"
+                    },
+                    "from-type": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "allOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "x-sutra-check": "checked by the Sutra parser beyond this schema"
+                            }
+                          ]
+                        },
+                        {
+                          "x-sutra-check": "should be a keyword or a string"
+                        }
+                      ]
+                    },
+                    "inputs": {
+                      "$ref": "#/$defs/h-b90820722894"
+                    },
+                    "language": {
+                      "type": "string"
+                    },
+                    "match-column": {
+                      "type": "string"
+                    },
+                    "query": {
+                      "type": "string"
+                    },
+                    "shared-property": {
+                      "type": "string"
+                    },
+                    "table": {
+                      "type": "string"
+                    },
+                    "to-key-column": {
+                      "type": "string"
+                    },
+                    "to-type": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "allOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "x-sutra-check": "checked by the Sutra parser beyond this schema"
+                            }
+                          ]
+                        },
+                        {
+                          "x-sutra-check": "should be a keyword or a string"
+                        }
+                      ]
+                    },
+                    "transforms": {
+                      "items": {},
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "from-type"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "status": {
+                "enum": [
+                  "active",
+                  "experimental",
+                  "deprecated",
+                  "example"
+                ],
+                "type": "string"
+              },
+              "strategy": {
+                "type": "string"
+              },
+              "tests": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "description": {
+                      "type": "string"
+                    },
+                    "expect": {
+                      "items": {
+                        "properties": {},
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "inputs": {
+                      "additionalProperties": {
+                        "items": {
+                          "properties": {},
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "type": "object"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "output": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "expect"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "timeout-ms": {
+                "maximum": 600000,
+                "minimum": 1000,
+                "type": "integer"
+              },
+              "to-key-column": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          {
+            "x-sutra-check": "a pipeline member is no-code: give it a `:board`, or a `:query` with the `:language` of its SQL dialect (`:pg-sql`, `:sqlite-sql`, `:mssql-sql`), never `:code`/`:code-file` \u2014 a python/clojure transform is a Source Repository resource and belongs in an `.ent`, not in a pipeline"
+          },
+          {
+            "x-sutra-check": "`:pipeline`/`:project`/`:repository` are stated ONCE, at the file level \u2014 remove them from the member"
+          }
+        ]
+      },
+      "type": "object"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "title": "Sutra .entp grammar 1.0.0",
+  "type": "object",
+  "x-sutra-grammar-version": "1.0.0"
+}

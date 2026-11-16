@@ -1,0 +1,59 @@
+;; Konten — "Ich sehe meine Konten und was darauf gebucht wurde."
+;;
+{:name         :konten
+ :display-name "Konten und Buchungen"
+ :description  "Konten, Salden und Buchungen."
+ :icon         "🏦"
+ :promoted     true
+ :collection   :alltag
+ :project      :anwendungen
+ :repository   :startanwendungen
+ :object-types [:bankkonto :bankbuchung]
+ :actions      [{:action :bankkonto-anlegen}
+                {:action :buchung-erfassen}]
+ :layout
+ {:kind  :rows
+  :title "Konten"
+  :vars  {:konten     {:source :bankkonto}
+          :gesamt     {:agg [:sum :saldo] :of :konten}
+          :konto      {:default nil}
+          ;; "Konto" ist in der Action der Parameter des aktuellen Objekts und
+          ;; darum im Formular verborgen -- sein Wert kommt von der gewaehlten Zeile.
+          :konto-id   {:object-property :id :of :konto :type :string}
+          :konto-key  {:object-property :bankkonto-id :of :konto :type :string}
+          :konto-name {:object-property :bezeichnung :of :konto :type :string}
+          :buchungen  {:from :bankbuchung :where [[:bankkonto-id := {:val :konto-key}]]}
+          :n          {:agg [:count :buchung-id] :of :buchungen}}
+  :items
+  [{:widget :kpi-row
+    :items  [{:label "Saldo aller Konten" :value {:val :gesamt} :fmt :eur}]}
+   {:kind   :columns
+    :detail {:var :konto}
+    :items
+    [{:kind  :section
+      :title "Konten"
+      :body  {:widget :object-table
+              :rows   {:val :konten}
+              :cols   [{:prop :bezeichnung} {:prop :iban} {:prop :saldo}]
+              :active {:var :konto}}}
+     {:kind :rows
+      :items
+      [{:widget :kpi-row
+        :items  [{:label "Konto" :value {:val :konto-name}}
+                 {:label "Buchungen" :value {:val :n} :fmt :int}]}
+       {:kind  :section
+        :title "Buchungen"
+        :body  {:widget :object-table
+                :rows   {:val :buchungen}
+                :cols   [{:prop :buchungsdatum} {:prop :verwendungszweck}
+                         {:prop :gegenpartei} {:prop :betrag}]
+                :sort   [[:buchungsdatum :desc]]}}
+       {:kind  :section
+        :title "Barbuchung erfassen"
+        :body  {:widget   :action-form
+                :action   :buchung-erfassen
+                :label    "Erfassen"
+                :defaults {:konto {:val :konto-id}}}}]}]}
+   {:kind  :section
+    :title "Konto anlegen"
+    :body  {:widget :action-form :action :bankkonto-anlegen :label "Anlegen"}}]}}

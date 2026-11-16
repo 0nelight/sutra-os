@@ -1,0 +1,365 @@
+# ontology
+
+The **type layer** of this instance: every `.ent` at the root of this
+repository, read together as one graph. `{{ontology-ent}}` (types, links,
+actions) and `{{transform-ent}}` (sources, datasets) hold what no single project
+owns; a project may have texts of its own beside them.
+This checkout is for READING. A `.ent` text changes through the CLI —
+`sutra projection pull` → edit → `projection push --preview` → `push` →
+`commit` — never through `git push`; `AGENTS.md` has the exact commands and
+`AUTHORING.md` how to work without stumbling. git carries only Python, in the
+code repositories.
+
+This README is a crash course. It is seeded once and then yours — edit it.
+
+---
+
+## 1. What a push does
+
+`projection push <text>` sends exactly the checkout one `pull` wrote, merged
+element by element over the base of that pull: what only others changed since
+stays, what both changed differently is a conflict (HTTP 409, named per
+element — decide with `--mine` or `--theirs`). A node the projection showed and
+you left out is removed; a node it never showed is never touched.
+
+`--preview` plans the push and stages nothing — use it every time. A refused
+push stages nothing either, and names each problem. A green push stages on the
+branch you named; `sutra --branch <b> commit` lands it there, and a proposal
+carries it to `main`.
+
+---
+
+## 2. This tree is AUTHORITATIVE
+
+The authored files TOGETHER are the WHOLE layer. A type you leave out of all
+of them is a type you are asking to remove.
+
+Which files are authored, in which language, and who owns them is itself
+declared — by the projection `:ontologie` in the `:projections` section (here
+in `{{ontology-ent}}`); its `:filename` lists the kinds of text it consists of:
+
+```clojure
+:projections
+{:ontologie
+ {:filename
+  {:zentral   {:language :edn :envelope [:schema] :name ["ontology.ent"] :home-for [:*]}
+   :transform {:language :edn :envelope [:schema] :name ["transform.ent"] :home-for [:sources :datasets]}
+   :objekte   {:language :edn :envelope [:schema] :name ["*.objects.ent"] :owner [:declared :facet] :facet "objects"
+               :sections [:projects :objects :links :interfaces :shared-properties :object-type-groups :actions]
+               :home-for [:projects :objects :links :interfaces :shared-properties :object-type-groups :actions]}
+   :ingest    {:language :edn :envelope [:schema] :name ["*.ingest.ent"] :owner [:declared :facet] :facet "ingest"
+               :sections [:projects :sources :datasets] :home-for [:sources :datasets]}
+   :apps      {:language :edn :envelope [:schema] :name ["*.apps.ent"] :owner [:declared :facet] :facet "apps"
+               :sections [:projects :workspaces :collections :custom-applications :agents :object-sets]
+               :home-for [:workspaces :collections :custom-applications :agents :object-sets]}
+   ;; …and the generic *.ent / *.ent.yaml kinds: a project as one text of its own
+   }}}
+```
+
+A project is written as up to three texts beside `{{ontology-ent}}`:
+`<project>.objects.ent` (the project itself, its types, links and the actions on them),
+`<project>.ingest.ent` (its sources and datasets), `<project>.apps.ent` (its
+workspaces, applications, agents, object sets). What no project owns — value types, and
+resources without a `:project` — stays in `{{ontology-ent}}`.
+
+- `:name` — patterns over paths. When several match a path, only the most
+  specific one reads it (`*.apps.ent` before `*.ent`): a text's NAME decides its
+  kind, never its content. `:envelope` — where the schema body sits (`[:schema]`,
+  or nothing: the file IS the body).
+- `:owner` — how a text's project is found: `:declared` (it names one under
+  `:projects`), `:file-name` (`werkzeug.ent`), `:facet` (`werkzeug.apps.ent`). An
+  owning text's resources need no `:project`; a type that exists elsewhere is
+  imported, not declared again, and an attribute a project adds to it is that
+  project's.
+- `:sections` — what such a text may hold; anything else in it is refused.
+- `:home-for` — where a NEW resource of a section goes. On a central kind it is
+  that literal file; on a project kind (one with `:owner`) it is the kind's
+  pattern with the project in the wildcard — a new action of `werkzeug` goes to
+  `werkzeug.objects.ent`. A resource already written somewhere stays there as long
+  as its kind still takes it.
+- The kinds are checked as a whole: a home outside its `:sections`, two project
+  homes for one section, a project kind holding what no project owns, or two
+  kinds on one pattern that disagree are refused before anything is read.
+- A push is read with the kinds IT declares — change `:filename` and use it in
+  the same push.
+- One type may be split across texts of one project, as long as no two texts
+  say different things about the same field or attribute. A file no kind of text
+  reads is refused by name. Each check reads ALL files as one graph: a link may
+  cross files and projects.
+- This tree is a rendered READ copy. Where each resource, field and attribute
+  lives is the projection's own placement on the branch, not this tree and not
+  the schema: move a resource by cutting it from one text and pasting it into
+  another — both texts pulled in one `sutra projection pull` — and pushing; the
+  move needs no branch and takes effect at once — a placement is not the schema. `projection pull … --rehome` puts every resource at its home.
+
+So: **pull again after every commit.** A stale base turns others' changes
+into conflicts and shows errors that have nothing to do with your edit.
+
+---
+
+## 3. The kinds of type, and when to reach for each
+
+| kind | it is | reach for it when |
+|---|---|---|
+| **object type** | a business noun with identity (a primary key) | you can point at one and say *this order*, *this invoice* |
+| **link type** | an edge between two object types | two nouns relate and you want to traverse it |
+| **interface** | a CONTRACT several object types implement | see below — the one people over-use |
+| **shared property** | one property DEFINITION reused across types | the same real column means the same thing everywhere (`:created-at`) |
+| **value type** | a constrained scalar (format, regex, range) | the CONSTRAINT is the point, not the column (`:iban`, `:percent`) |
+| **object-type group** | a label for grouping types | purely for navigation |
+| **dataset** | a versioned table BELOW the ontology | the curated layer your object types are built on — §4.1 |
+| **source** | a connector to a system outside | you need rows from an ERP, an inbox, an API |
+| **action** | an authored write into the ontology | a user or a rule must be able to change data |
+
+### When is it an interface?
+
+An interface is a **contract**, not code reuse. Use one when several object
+types genuinely answer the same question and something needs to ask that
+question WITHOUT knowing which type it got:
+
+- a polymorphic link (`:to-interface`) — one edge pointing at `:document`,
+  satisfied by invoices, delivery notes and orders alike;
+- a search or a view over the shape rather than over the type;
+- a property set several types must all carry, enforced rather than hoped for.
+
+It gives you two things: inherited **properties** (`:property-list`) and **link
+obligations** (`:link-constraints`, which a concrete link fulfils via
+`:satisfies`).
+
+It is the WRONG tool when the types merely happen to share a column. Two types
+that both have a `created-at` do not have an interface — they have a **shared
+property**. The test: does anything need to treat these types as
+interchangeable? If not, an interface is indirection nobody reads.
+
+### Value type or shared property?
+
+- **Value type** — the CONSTRAINT travels. `:iban` is a `:string` that must look
+  like an IBAN, wherever it turns up. Pure authoring sugar: it is resolved and
+  spliced away at read time, so the live schema sees the base type plus the
+  constraints.
+- **Shared property** — the COLUMN travels. `:created-at` is one property with
+  one meaning, referenced by name from any number of types.
+
+---
+
+## 4. What a good ontology looks like
+
+### 4.1 The layer rule — the one that matters most
+
+    source → raw dataset → clean dataset → SHAPING hop → object type
+
+Never bind a source straight to an object type. Land it as a dataset, curate it
+into a second dataset, and shape THAT into the type with a cheap deterministic
+transform (`:sql`, no egress, no model).
+
+Why the extra hop earns its keep: the shaping hop is free to re-run when the
+ontology's shape changes, without touching the expensive extract. Bind the ERP
+to the type directly and every ontology edit re-pays the ingest.
+
+Consequence: **the object type carries business vocabulary, not ETL columns.**
+`_ingested_at`, batch ids and raw un-normalised strings stay in the dataset,
+where they remain available for debugging and are simply not selected.
+
+### 4.2 A type is a noun, not a table
+
+If your object type has the same name and the same 47 columns as an ERP table,
+you have imported a table, not modelled a domain. Ask what the business calls
+it, what identifies one of them, and what somebody would want to traverse to.
+
+### 4.3 Identity is a decision
+
+An object type's PRIMARY KEY lives on the producing transform, not on the type.
+How a key is minted is the most consequential thing you will decide here,
+because changing it later does not overwrite the old rows — it mints NEW ones
+beside them. See §7.
+
+### 4.4 Consumers join, they do not group
+
+Model the edge as a link and let readers traverse it. Filtering a child set by
+*the parent resolves* makes an unreferenced row invisible instead of plausible.
+Skipping this once left 661 of 1415 invoice lines orphaned for months, surfacing
+as one invoice line shown four times with a fourfold sum.
+
+### 4.5 Say who it is for
+
+`:symbol`, `:name`, `:plural`, `:title` (the property that names an INSTANCE),
+`:description`, `:groups`. Not decoration — this is what every application,
+search box and object view shows a human. A type with none of them is a type
+nobody can find.
+
+### 4.6 Status from day one
+
+Everything starts `:experimental`. Promote to `:active` when an application
+depends on it; that promotion is what turns on the protection in §6.
+
+---
+
+## 5. Anti-patterns, and what each one costs
+
+| anti-pattern | the cost |
+|---|---|
+| **Kitchen sink** — ETL columns exposed as properties | every consumer sees plumbing, and the type stops being a domain concept |
+| **Source bound to an object type** | raw rows land in the ontology with no curated layer; every reshape re-pays the ingest |
+| **Renaming an `:active` type** | the RID survives, so nothing looks broken from inside — while every consumer holding the NAME breaks. Refused; see §6 |
+| **Grouping instead of joining** | orphans become invisible rather than wrong (§4.4) |
+| **Changing key derivation without a version bump** | the old rows stay and consumers see both (§7) |
+| **Declaring nothing** | an `.ent` with no types is a request to delete everything. Refused, with its own message |
+| **Pushing from a stale checkout** | conflicts and phantom errors that have nothing to do with your edit |
+| **Umlauts that do not round-trip** | `:anhänge` becomes the column `anhaenge` — `sutra.parser.spec/attr->col` folds ä→ae, ö→oe, ü→ue, ß→ss and `-`→`_`. Emit `anhänge` from a transform while the schema expects `anhaenge` and you get nil rows, silently |
+
+---
+
+## 6. Lifecycle and retirement
+
+There is **no** `:retire` section. Retirement is a STATE on the resource, and
+the removal is that resource's ABSENCE from this tree.
+
+The rule applies identically at every door — `projection push`, the CLI
+`delete` verb, the HTTP API:
+
+> An `:active` or `:endorsed` resource cannot be deleted, and its NAME cannot be
+> changed. It has to be `:experimental` or `:deprecated` first.
+
+So retiring something is two ordinary edits to this file:
+
+```clojure
+;; 1. announce it ON the thing, where a consumer can see it
+:ereignis-partner {…
+  :status      :deprecated
+  :deprecation {:reason      "superseded by :ereignis-geschaeftspartner"
+                :deadline    "2026-09-01"
+                :replacement :ereignis-geschaeftspartner}}
+
+;; 2. later: leave it out. That is the removal.
+```
+
+**Renaming is the same act in disguise** — a drop plus an add — so it obeys the
+same rule. To rename something live: stand the new name up beside it, deprecate
+the old one with `:replacement` pointing at the new, move the consumers over,
+then drop the old. Three commits, each green on its own.
+
+An unpromoted type needs none of this: omit it and it goes, and the push reports
+what it retired.
+
+**The rule is the same for every kind a tree declares.** Here: object and link
+types, interfaces, actions, object-type groups, object sets, agents, sources,
+declared (`:kind :standalone`) datasets and the object views in `object-views/`.
+In a code repository: its own transforms, functions, pipelines and apps. Each
+carries `:status`/`:deprecation` (an unmarked one counts as `:experimental`),
+and leaving it out removes it — refused, with nothing written, while it is
+`:active`/`:endorsed` or something that stays still points at it. Apps and
+document templates carry `:draft`/`:published` instead, which is no lifecycle:
+leaving one out removes it.
+
+**Taking an object type apart: the ontology first, the code after** (as in
+links go before the type; a link you keep that still names it is refused. Only
+USERS block the drop: actions, apps and views, links of other types, `:derived`
+properties of other types, and transforms that READ the type. A transform that
+only FEEDS it (its `:output`, primary or `:supplement`) is no blocker: it stays
+orphaned — every build skips it with a notice — until its code repository
+leaves it out. The layer rule avoids even that coupling: a transform writes a
+dataset and the type names it via `:backing`.
+
+**See it before you push.** `projection push <text> --preview` plans exactly
+like the push and lists every removal with its status, and every refusal. Not removed by omission, because no tree is authoritative for them:
+value types, shared properties, collections, workspaces and minted datasets (a
+transform's output). Delete those with the verb.
+
+---
+
+## 7. Changing how a primary key is derived
+
+**`:match-keys` is not the key.** On a plain object type the ids are minted from
+the PRIMARY PRODUCER's `:primary-key` column — `:match-keys` reaches the
+derivation only on a `:resolve-entity true` type, where entity resolution reads
+it strongest-first. The two sit side by side in `describe`, which is exactly how
+a type comes to declare one grain and be keyed by another: every row sharing the
+minted column collapses onto ONE id, last write winning, and the rest are simply
+absent. A push that would leave a type in that state is now REFUSED
+(`identity-inert`) — with the three ways out named.
+
+A new key-minting rule does not overwrite the rows minted under the old one — it
+mints NEW rows beside them, and on an append-only output nothing ever retracts
+the strays.
+
+Ship it as a pair, in the producing transform:
+
+- bump `:semantic-version` (forces one full, non-incremental run), **and**
+- set `:write-mode :replace` (makes that run authoritative, so the reconcile
+  retires what it omits).
+
+Guard the empty case: an empty authority under a replace write deletes
+everything. Raise instead.
+
+Without the pair the push is refused too (`identity-unretractable`); a
+non-incremental producer needs neither, since every run of one is authoritative.
+
+- an **`:active`/`:endorsed`** type will not let its key move at all. Demote it
+  to `:experimental`/`:deprecated` in its own push first, the same lifecycle gate
+  a delete or a rename goes through.
+- a key change that DOES go through is **reported, not silent**. The push output
+  carries what it costs: the type reindexes and is briefly unavailable, and every
+  user EDIT is attached to the primary-key value it was made for — those values
+  no longer occur, so the edits are stranded *and* they exempt their old rows
+  from the deletion sweep, keeping precisely those strays alive. Clear them with
+  `sutra object drop-edits <type>` after the build, then hold the two halves
+  against each other: `sutra describe <type> --fields match-keys,primary-key,count`.
+
+---
+
+## 8. Order across the two repositories
+
+Types live here. Transforms, functions and applications live in a CODE
+repository (§9). Every push is validated against
+`live ∪ this commit`, and a code repository may not declare a type. The order is
+therefore forced:
+
+- **adding** → the ontology first, then the code that names the type;
+- **removing** → the code first, then the type.
+
+Get it wrong and the push is refused by name, with the order in the message.
+
+The deeper rule: there is no transaction across two repositories, so **every
+intermediate state must be installable on its own.** That is why a rename is
+three commits rather than one.
+
+---
+
+## 9. What is NOT here
+
+- **Code.** Transforms, functions and apps are declared by the code repository
+  that owns them; a text here declaring one is refused. Its `.ent`/`.enta` come
+  through `sutra projection pull code-repository …`; its Python through
+  `sutra clone <project>/<repo>`, a real git clone — the only thing git carries.
+
+- **Credentials.** Sources ARE declared here: the connector (type, endpoint,
+  `:egress`, `:access`, cleartext `:config`) is reviewable like any other
+  declaration. What a tree may never carry is the secret that opens it — a
+  commit with `:secrets` or `:secret-cipher` FAILS `scope`. Set it in-platform,
+  once, with `sutra source secret <name>`; that also rotates it without a commit,
+  and an install never disarms a source it does not mention.
+
+---
+
+## 10. Branches
+
+`sutra branch <name>` forks one; name it on EVERY call (`sutra --branch <name>
+…`) — without it the CLI answers from `main`, silently. A branch reaches `main`
+through `propose` → `merge-proposal`; `sutra protect main` says whether `main`
+also takes a direct commit. Projects and sources belong to the instance, not a
+branch: creating one lands at once.
+
+---
+
+## 11. Going deeper
+
+- `templates/template.*` are the SCAFFOLDS to copy from: short, one
+  example world, ordered the way a model is designed (objects, relationships,
+  actions, attributes — and only then where the data comes from).
+- `templates/grammar.*` beside them are THE annotated grammar reference — every
+  section and every key, with prose. A test asserts they stay complete, so they
+  cannot quietly fall behind the grammar. Both families, `AGENTS.md` and
+  `AUTHORING.md` come from the instance; a local edit to them has no effect.
+- `sutra guide` lists every CLI verb; `sutra explain <verb|concept>` renders one
+  in full; `sutra describe <type>` shows a live type INCLUDING its primary key
+  and how each link is backed.

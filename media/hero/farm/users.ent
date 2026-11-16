@@ -1,0 +1,11 @@
+;; Logins for the README story: the platform's :user type and an action that makes
+;; one, so Tom sells under his own name. bin/readme-media.clj merges this into farm.ent.
+{:schema
+ {:objects {:user {:symbol "👤" :plural "Users" :primary-key :user-id
+                   :attributes [[:user-id :string {:name "User"}]
+                                [:rolle :string {:name "Role"}]]}}
+  :actions {:add-user {:params {:id    {:type :string :required true :name "User"}
+                                :rolle {:type :string :required true :name "Role"}}
+                       :rules  [{:op :create :object-type :user :id :id
+                                 :values {:user-id [:get :id] :rolle [:get :rolle]}}]
+                       :edits  [{:object-type :user}]}}}}

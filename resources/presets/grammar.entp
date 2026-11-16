@@ -1,0 +1,82 @@
+;; ════════════════════════════════════════════════════════════════════════════
+;; grammar.entp — THE authoritative `.entp` grammar, in one annotated file.
+;;
+;; An `.entp` is ONE pipeline editor PIPELINE: the data-integration resource the
+;; builder app opens, and the third lean authoring form beside `.entv` (one type's
+;; object views) and `.enta` (one standalone app). Where those two lower into
+;; `:applications`, this one lowers into a `:pipelines` entry PLUS the
+;; `:transforms` the pipeline owns. The single door `parser.ent/parse-entp`
+;; validates it against the closed `PipelineFile` grammar and lowers it (via
+;; `entp->schema`), so nothing downstream knows a transform came from an `.entp`
+;; rather than from the `:transforms` monolith.
+;;
+;; ── Why the members live INSIDE the file ────────────────────────────────────
+;; Membership is EXCLUSIVE: a transform belongs to at most one pipeline. Declaring
+;; the members here makes that true by construction — two files claiming one
+;; transform collide in the strict tree merge instead of racing — and it is what
+;; makes the builder app's scope decidable: the canvas draws THIS pipeline's
+;; members, and nothing else. There is no `:members` list; membership is the
+;; `:pipeline` back-ref `entp->schema` stamps onto each member, so the fact is
+;; stored once and no writer can leave the two halves disagreeing.
+;;
+;; ── Where it lives ──────────────────────────────────────────────────────────
+;; One file per pipeline: `pipelines/<name>.entp`, in a SOURCE REPOSITORY's tree
+;; (its boards are authored logic, so they belong where code is reviewed — the
+;; same call `:applications` makes). `pipelines/` is entity plane, so a member's
+;; sibling `.sql`/code file publishes back through this file, and the tree is
+;; DERIVED: `emit-pipeline-file` writes it back byte-stably, and a file the schema
+;; no longer produces is dropped from the next projection.
+;;
+
+{;; IDENTITY — rename-safe: the name is a field, not the file name's meaning.
+ :name        :invoice-shaping
+
+ :kind        :batch
+
+ :description "Shape the raw invoice landing tables into the invoice type."
+
+ :project     :procurement
+ :repository  :ingest
+
+ :imports     [:raw_invoices :supplier]
+
+ ;; OUTPUTS — what this pipeline delivers. A dataset output must name a declared
+ ;; dataset; an object-type / link-type output BINDS an existing ontology
+ ;; construct, because a type is authored in the ontology, not minted as a side
+ ;; effect of a pipeline.
+ :outputs     [:invoice]
+
+ ;; THE MEMBERS. Each is an ordinary transform entry minus the three keys the file
+ ;; states for it (`:pipeline`, `:project`, `:repository`) — so a member reads
+ ;; exactly like a `:transforms` entry, and moving one in or out of a pipeline is
+ ;; moving text between two files.
+ :transforms
+ {;; A hand-written SQL member: named `:inputs` become the table names the query
+  ;; runs against (the alias IS the table name), and `:output` names what it
+  ;; writes. `:primary-key` is the key it mints.
+  :clean-invoices
+  {:language    :pg-sql
+   :query       "SELECT doc_number AS id, netto FROM raw WHERE netto IS NOT NULL"
+   :inputs      {:raw {:kind :dataset :dataset :raw_invoices}}
+   :output      {:kind :dataset :name :clean_invoices :dataset :clean_invoices}
+   :primary-key :id}
+
+  ;; A NO-CODE BOARD member — what the builder's board editor writes. The `:board`
+  ;; is the engine-neutral op list (`parser.board`); `:query` is COMPILED from it
+  ;; and recompiled canonically at install, so the two cannot drift. Author either
+  ;; form; a board round-trips back into the board editor, a bare `:query` into
+  ;; the SQL form.
+  :invoice-facts
+  {:board  {:inputs {:c {:kind :dataset :dataset :clean_invoices}
+                     :s {:kind :object-type :object-type :supplier}}
+            :ops    [{:op :from   :input :c}
+                     {:op :filter :where [:> :netto 0]}
+                     {:op :join   :input :s :on [[:supplier_id :id]] :type :inner}
+                     {:op :derive :name :brutto :expr [:* :netto 1.2]}
+                     {:op :select :columns [:id :netto :brutto]}]}
+   :output {:kind :object-type :object-type :invoice}
+   :primary-key :id
+   ;; The reprocessing pair, exactly as on any transform: bump the version to force
+   ;; one full non-incremental run, and make that run authoritative.
+   :semantic-version 1
+   :incremental      {:read-mode :current :write-mode :replace}}}}

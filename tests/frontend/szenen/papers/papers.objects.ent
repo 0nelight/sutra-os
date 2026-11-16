@@ -1,0 +1,137 @@
+{:schema
+ {:projects {:papers {:description "A freelancer's paperwork: the bank, the mailbox, the invoices in it, and which of them are paid."}}
+
+  :objects
+  {:bank-transaction
+   {:project :papers
+    :name "Bank transaction" :plural "Bank transactions" :symbol "🏦"
+    :description "One line of the bank statement. Comes from the import, never typed in."
+    :title :counterparty
+    :subtitle :reference
+    :row [:booked-on :counterparty :reference :amount :invoice-number]
+    :attributes
+    [[:transaction-id :string {:visibility :hidden}]
+     [:booked-on :date {:name "Booked on" :visibility :prominent}]
+     [:counterparty :string {:name "Counterparty" :visibility :prominent}]
+     [:reference :string {:name "Reference"}]
+     [:amount :decimal {:name "Amount" :visibility :prominent
+                        :format {:prefix "$" :decimals 2 :grouping true}
+                        :conditional-format [{:when [:> [:get :amount] 0] :color "#2e7d32"}]}]
+     [:outflow :decimal {:visibility :hidden}]
+     [:invoice-number :string {:name "Pays invoice"}]]}
+
+   :mail
+   {:project :papers
+    :name "Mail" :plural "Mails" :symbol "✉️"
+    :title :subject
+    :subtitle :sender
+    :row [:received-at :sender :subject]
+    :attributes
+    [[:mail-id :string {:visibility :hidden}]
+     [:subject :string {:name "Subject" :visibility :prominent}]
+     [:sender :string {:name "From" :visibility :prominent}]
+     [:received-at :timestamp {:name "Received" :visibility :prominent}]]}
+
+   :document
+   {:project :papers
+    :name "Attachment" :plural "Attachments" :symbol "📎"
+    :title :filename
+    :row [:filename :mime-type :invoices-read]
+    :attributes
+    [[:attachment-id :string {:visibility :hidden}]
+     [:mail-id :string {:visibility :hidden}]
+     [:filename :string {:name "File" :visibility :prominent}]
+     [:mime-type :string {:name "Type"}]
+     [:file :media-reference {:name "PDF"}]
+     [:invoices-read :integer {:name "Invoices read" :derived {:expression [:connected-count :invoices]}}]]}
+
+   :invoice
+   {:project :papers
+    :name "Invoice" :plural "Invoices" :symbol "🧾"
+    :description "An invoice someone sent us. Read from its PDF by a model; paid is what the bank says, open is what is left."
+    :match-keys [:invoice-number]
+    :title :vendor
+    :subtitle :invoice-number
+    :row [:vendor :invoice-number :invoice-date :due-date :total :paid :open]
+    :attributes
+    [[:invoice-number :string {:name "Invoice no." :visibility :prominent}]
+     [:vendor :string {:name "Vendor" :visibility :prominent}]
+     [:invoice-date :date {:name "Invoice date"}]
+     [:due-date :date {:name "Due" :visibility :prominent}]
+     [:total :decimal {:name "Total" :visibility :prominent :format {:prefix "$" :decimals 2 :grouping true}}]
+     [:paid :decimal {:name "Paid"
+                      :format {:prefix "$" :decimals 2 :grouping true}
+                      :derived {:rollup {:over :payments :agg :sum :of :outflow}}}]
+     [:open :decimal {:name "Open" :visibility :prominent
+                      :format {:prefix "$" :decimals 2 :grouping true}
+                      :conditional-format [{:when [:> [:get :open] 0] :color "#fff" :background "#c62828"}
+                                           {:when [:<= [:get :open] 0] :color "#2e7d32" :icon "✓"}]
+                      :derived {:language :clojure
+                                :expression [:- [:get :total] [:coalesce [:get :paid] 0]]
+                                :inputs [:total :paid]}}]
+     [:read-from :string {:visibility :hidden}]]}}
+
+  :links
+  [[:attachment-mail :document :mail :many-to-one
+    {:forward-api-name :mail :forward-name "Mail"
+     :reverse-api-name :attachments :reverse-name "Attachments"
+     :fk {:attribute :mail-id :on-null :skip :on-unresolved :skip}}]
+   [:invoice-attachment :invoice :document :many-to-one
+    {:forward-api-name :original :forward-name "Original PDF"
+     :reverse-api-name :invoices :reverse-name "Invoices"
+     :fk {:attribute :read-from :on-null :skip :on-unresolved :skip}}]
+   [:payment-invoice :bank-transaction :invoice :many-to-one
+    {:forward-api-name :invoice :forward-name "Pays"
+     :reverse-api-name :payments :reverse-name "Payments"
+     :fk {:attribute :invoice-number :on-null :skip :on-unresolved :skip}}]]
+
+  :actions
+  {:read-invoice
+   {:display-name "Read invoice"
+    :description "Shows the PDF to a language model and files what it reads as an invoice."
+    :on :document
+    :params {:document {:type :document :name "Attachment" :required true}}
+    :rules
+    [{:op :use-llm :model "invoice-reader" :source :llm
+      :prompt "This PDF ({{document.filename}}) is an invoice. Read it. Dates as YYYY-MM-DD, total as a number without currency sign."
+      :media ["{{document.file}}"]
+      :media-as :auto
+      :output {:struct {:vendor :string :invoice-number :string :invoice-date :string
+                        :due-date :string :total :number}}
+      :as :read}
+     {:op :create :object-type :invoice :id [:get :read :invoice-number]
+      :values {:invoice-number [:get :read :invoice-number]
+               :vendor         [:get :read :vendor]
+               :invoice-date   [:get :read :invoice-date]
+               :due-date       [:get :read :due-date]
+               :total          [:get :read :total]
+               :read-from      [:get :document :attachment-id]}}]}
+
+   :discard-invoice
+   {:display-name "Discard invoice"
+    :description "Throws away an invoice that was read wrongly; the automation reads its PDF again."
+    :on :invoice
+    :params {:invoice {:type :invoice :name "Invoice" :required true}}
+    :rules [{:op :delete-object :object-type :invoice :target [:get :invoice :id]}]}
+
+   :unmatch-payment
+   {:display-name "Unmatch"
+    :on :bank-transaction
+    :params {:payment {:type :bank-transaction :name "Bank line" :required true}}
+    :rules [{:op :update :object-type :bank-transaction :target [:get :payment :id]
+             :values {:invoice-number nil}}]}
+
+   :match-payment
+   {:display-name "Match to invoice"
+    :description "Says which invoice a bank line pays, when its reference does not."
+    :on :bank-transaction
+    :params {:payment {:type :bank-transaction :name "Bank line" :required true}
+             :invoice {:type :invoice :name "Invoice" :required true}}
+    :submission-criteria
+    [{:test {:o [:get :payment :outflow]} :pred [:> :o 0]
+      :message "Money that came in does not pay an invoice."}
+     {:test {:o [:get :payment :outflow] :r [:get :invoice :open]} :pred [:<= :o :r]
+      :message "This would pay more than is still open on the invoice."}]
+    :rules
+    [{:op :update :object-type :bank-transaction :target [:get :payment :id]
+      :values {:invoice-number [:get :invoice :invoice-number]}}]}}}}

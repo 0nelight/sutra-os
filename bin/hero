@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Renders each media/hero/<name>.html to media/<name>.png at 1.6x its viewport:
+# 2000x1225 (3200x1960 px), or <meta name="hero-size" content="WxH"> in the page.
+# Usage: bin/hero [name ...]   (default: every page in media/hero)
+set -euo pipefail
+cd "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+CHROMIUM=${CHROMIUM:-$(command -v chromium || command -v chromium-browser || command -v google-chrome || true)}
+[ -n "$CHROMIUM" ] || { echo "bin/hero: no chromium found; set CHROMIUM" >&2; exit 2; }
+
+if [ $# -eq 0 ]; then
+  set -- $(for f in media/hero/*.html; do basename "$f" .html; done)
+fi
+
+profile=$(mktemp -d)
+trap 'rm -rf "$profile"' EXIT
+
+for name in "$@"; do
+  src="media/hero/$name.html"
+  out="media/$name.png"
+  [ -f "$src" ] || { echo "bin/hero: no $src" >&2; exit 2; }
+  size=$(sed -n 's/.*name="hero-size" content="\([0-9]*\)x\([0-9]*\)".*/\1,\2/p' "$src" | head -1)
+  # Fixed viewport, scale and font rendering; a fresh profile and no network, so
+  # the same source and the same fonts give the same pixels.
+  TZ=UTC LANG=C.UTF-8 "$CHROMIUM" --headless=new --no-sandbox --disable-gpu \
+    --user-data-dir="$profile" --no-first-run --disable-extensions \
+    --hide-scrollbars --force-device-scale-factor=1.6 --window-size="${size:-2000,1225}" \
+    --font-render-hinting=none --disable-lcd-text --force-color-profile=srgb \
+    --proxy-server="127.0.0.1:9" --proxy-bypass-list="<-loopback>" \
+    --virtual-time-budget=2000 \
+    --screenshot="$PWD/$out" "file://$PWD/$src" 2>/dev/null
+  echo "$out ($(sha256sum "$out" | cut -c1-12))"
+done

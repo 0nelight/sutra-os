@@ -1,0 +1,4 @@
+{:schema
+ {:actions
+  {:angebot-anlegen {:params {:kunde {:type :partner}}
+                     :rules  [{:op :create :object-type :angebot :set [:bezeichnung :rabatt]}]}}}}

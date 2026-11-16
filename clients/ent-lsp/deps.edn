@@ -1,0 +1,6 @@
+{:paths ["src" "resources" "../sutra-change/src"]
+ :deps  {sutra/core        {:local/root "../../libs/core"}
+         babashka/fs       {:mvn/version "0.5.22"}
+         babashka/process  {:mvn/version "0.5.22"}
+         cheshire/cheshire {:mvn/version "5.13.0"}}
+ :aliases {:test {:extra-paths ["test"]}}}

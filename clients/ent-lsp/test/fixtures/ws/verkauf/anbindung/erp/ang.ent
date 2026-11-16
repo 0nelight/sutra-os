@@ -1,0 +1,4 @@
+{:schema
+ {:datasets
+  {:ang_raw {:project         :verkauf
+             :external-source {:datasource :erp :table "ANG" :primary-key :ang_id}}}}}

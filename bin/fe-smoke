@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+OUT="$REPO/.run/fe-smoke.js"
+
+mkdir -p "$REPO/.run"
+
+cd "$REPO/clients/frontend"
+echo "[fe-smoke] compiling :test build…"
+if ! npx shadow-cljs compile test > "$REPO/.run/fe-smoke-compile.log" 2>&1; then
+  echo "[fe-smoke] compile FAILED:"
+  cat "$REPO/.run/fe-smoke-compile.log"
+  exit 1
+fi
+
+echo "[fe-smoke] running…"
+# a request a test fired and never awaited fails after that test; node would end the whole run
+# on it, so whether the suite finished depended on which test happened to run next
+NODE_PATH="$REPO/clients/frontend/node_modules" node --unhandled-rejections=warn "$OUT"

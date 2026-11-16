@@ -1,0 +1,127 @@
+{:name     "household"
+ :viewport [1440 900]
+ :beat     700
+ :travel   26
+ :type-delay 85
+ :css      ".fab, [class*='ask-fab'], [class*='note-fab'] { display: none !important; }"
+
+ :setup
+ {:project     :home
+  :description "Our household budget"
+  :model       "haushalt.ent"
+  :seed
+  [[:add-household {:name "The Johnson household" :take-home-pay 3350 :household-id "johnson"}]
+   [:add-commitment
+    {:household "johnson" :commitment-id "rent" :name "Rent" :provider "Maple Court Apartments"
+     :kind "housing" :monthly-cost 1650.00 :renews-on "2026-11-01" :locked true
+     :locked-until "2027-06-30"}]
+   [:add-commitment
+    {:household "johnson" :commitment-id "car" :name "Car payment" :provider "Summit Auto Finance"
+     :kind "loan" :monthly-cost 389.00 :renews-on "2026-11-15" :locked true
+     :locked-until "2029-03-15"}]
+   [:add-commitment
+    {:household "johnson" :commitment-id "carins" :name "Car insurance"
+     :provider "Keystone Auto Insurance"
+     :kind "insurance" :monthly-cost 148.00 :renews-on "2026-11-09" :locked false}]
+   [:add-commitment
+    {:household "johnson" :commitment-id "phone" :name "Phone plan, 3 lines"
+     :provider "Northline Wireless"
+     :kind "phone" :monthly-cost 135.00 :renews-on "2026-11-21" :locked true
+     :locked-until "2027-08-21"}]
+   [:add-commitment
+    {:household "johnson" :commitment-id "streammax" :name "StreamMax Premium" :provider "StreamMax"
+     :kind "streaming" :monthly-cost 22.99 :renews-on "2026-11-03" :locked false}]
+   [:add-commitment
+    {:household "johnson" :commitment-id "tunebox" :name "TuneBox Family" :provider "TuneBox"
+     :kind "streaming" :monthly-cost 16.99 :renews-on "2026-11-12" :locked false}]
+   [:add-commitment
+    {:household "johnson" :commitment-id "reelhouse" :name "Reelhouse+" :provider "Reelhouse"
+     :kind "streaming" :monthly-cost 15.49 :renews-on "2026-11-18" :locked false}]
+   [:add-commitment
+    {:household "johnson" :commitment-id "gym" :name "FitNation membership" :provider "FitNation"
+     :kind "fitness" :monthly-cost 49.99 :renews-on "2026-12-01" :locked true
+     :locked-until "2027-02-01"}]
+   [:add-commitment
+    {:household "johnson" :commitment-id "mealkit" :name "FreshCrate meal kit"
+     :provider "FreshCrate"
+     :kind "food" :monthly-cost 79.96 :renews-on "2026-11-05" :locked false}]
+   [:add-commitment
+    {:household "johnson" :commitment-id "cloud" :name "CloudVault 2 TB" :provider "CloudVault"
+     :kind "software" :monthly-cost 9.99 :renews-on "2026-11-20" :locked false}]
+   [:add-commitment
+    {:household "johnson" :commitment-id "tv" :name "Living-room TV (pay in 12)"
+     :provider "SplitPay"
+     :kind "pay-later" :monthly-cost 58.25 :renews-on "2026-11-10" :locked true
+     :locked-until "2027-04-10"}]
+   [:add-commitment
+    {:household "johnson" :commitment-id "sneakers" :name "Sneakers (pay in 4)" :provider "SplitPay"
+     :kind "pay-later" :monthly-cost 37.50 :renews-on "2026-11-07" :locked true
+     :locked-until "2026-12-07"}]
+   [:log-payment {:commitment "streammax" :paid-on "2026-06-03" :amount 22.99 :payment-id "sm-06"}]
+   [:log-payment {:commitment "streammax" :paid-on "2026-07-03" :amount 22.99 :payment-id "sm-07"}]
+   [:log-payment {:commitment "streammax" :paid-on "2026-08-03" :amount 22.99 :payment-id "sm-08"}]
+   [:log-payment {:commitment "streammax" :paid-on "2026-09-03" :amount 22.99 :payment-id "sm-09"}]
+   [:log-payment {:commitment "streammax" :paid-on "2026-10-03" :amount 22.99 :payment-id "sm-10"}]
+   [:log-payment {:commitment "gym" :paid-on "2026-09-01" :amount 49.99 :payment-id "gy-09"}]
+   [:log-payment {:commitment "gym" :paid-on "2026-10-01" :amount 49.99 :payment-id "gy-10"}]]}
+
+ :steps
+ [[:card {:title "Most families don't fall into debt all at once."
+          :sub   "It happens $15 at a time." :ms 3200}]
+
+  [:goto "/object/household/johnson?lang=en-US"]
+  [:caption "The Johnson household brings home $3,350 a month."]
+  [:highlight {:text "Take-home pay / month" :exact true} {:ms 1600}]
+  [:caption "Twelve monthly commitments already claim most of it."]
+  [:highlight {:text "Committed every month" :exact true} {:ms 1600}]
+  [:caption "What's actually left over is computed live — never typed in by hand."]
+  [:highlight {:text "Left over" :exact true} {:ms 2000}]
+
+  [:caption "Then comes one more “easy” payment: a laptop, pay in 4."]
+  [:click "Actions"]
+  [:click "Add commitment" {:settle 800}]
+  [:type {:field "Name"} "Laptop (pay in 4)"]
+  [:type {:field "Provider"} "SplitPay"]
+  [:type {:field "Kind"} "pay-later"]
+  [:type {:field "Monthly cost"} "187.50"]
+  [:wait 500]
+  [:click {:css ".bp-button" :has "Run"} {:settle 2500}]
+  [:caption "Left over drops under $600 — and turns red."]
+  [:highlight {:text "Left over" :exact true} {:ms 2600 :color "#ef4444"}]
+
+  [:caption "So, what can go? The gym membership?"]
+  [:click {:text "FitNation membership" :exact true} {:settle 2000}]
+  [:click "Actions"]
+  [:click "Stop paying" {:settle 800}]
+  [:click {:css ".bp-button" :has "Preview"} {:settle 1800}]
+  [:caption "Locked in. The model knows the contract — not just the price."]
+  [:wait 3000]
+  [:click {:css ".bp-button" :has "Cancel"}]
+
+  [:caption "But three streaming and food subscriptions aren't locked in."]
+  [:goto "/object/commitment/streammax"]
+  [:click "Actions"]
+  [:click "Stop paying" {:settle 800}]
+  [:click {:css ".bp-button" :has "Run"} {:settle 2000}]
+  [:goto "/object/commitment/reelhouse"]
+  [:click "Actions"]
+  [:click "Stop paying" {:settle 800}]
+  [:click {:css ".bp-button" :has "Run"} {:settle 2000}]
+  [:goto "/object/commitment/mealkit"]
+  [:click "Actions"]
+  [:click "Stop paying" {:settle 800}]
+  [:click {:css ".bp-button" :has "Run"} {:settle 2000}]
+
+  [:goto "/object/household/johnson"]
+  [:caption "$118.44 a month back — out of the red."]
+  [:highlight {:text "Left over" :exact true} {:ms 2800 :color "#22c55e"}]
+  [:caption nil]
+
+  [:card
+   {:title "Your household, modeled."
+    :sub   "The rule that just protected the Johnsons is four lines:"
+    :code  ":submission-criteria\n[{:test    {:l [:get :commitment :locked]}\n  :pred    [:not= :l true]\n  :message \"Locked in — stopping now would trigger\n            an early-termination fee.\"}]"
+    :ms 5500}]
+  [:card
+   {:title "Sutra-OS" :sub "Open source · runs on your own computer · your data stays home"
+    :ms 3500}]]}

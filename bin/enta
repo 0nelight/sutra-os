@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+export SUTRA_HOME="$ROOT"
+exec bb --config "$ROOT/clients/sutra-enta/bb.edn" -m enta.main "$@"

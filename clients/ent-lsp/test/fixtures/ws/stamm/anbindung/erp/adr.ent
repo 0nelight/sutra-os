@@ -1,0 +1,8 @@
+{:schema
+ {:datasets
+  {:adr_raw {:project         :stamm
+             :external-source {:datasource :erp :table "ADR" :primary-key :adr_id}}}
+  :sources
+  {:erp {:writeback {"ADR" {:object-type      :partner
+                            :pk               "ADR_ID"
+                            :writable-columns ["NAME"]}}}}}}

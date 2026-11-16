@@ -1,0 +1,162 @@
+{:duties
+ [{:id      :duty/clock
+   :text    "-next-rev hands out an integer above every revision handed out before: the store's one clock."
+   :methods [-next-rev]
+   :checks  [[:guard :duty/clock] [:certify :certify/concurrency]]}
+
+  {:id      :duty/lock
+   :text    "-lock! holds exclusive locks on the keys until the handle ends; waits are bounded."
+   :methods [-lock!]
+   :checks  [[:certify :certify/concurrency]]}
+
+  {:id      :duty/begin
+   :text    "-begin hands a :read or :write handle on the lane it is asked for."
+   :methods [-begin]
+   :checks  [[:certify :certify/store]]}
+
+  {:id      :duty/read-stable
+   :text    "A :read handle sees one consistent state for its whole life."
+   :methods [-begin -rows -links -kv-read -kv-scan]
+   :checks  [[:guard :duty/read-stable] [:certify :certify/concurrency]]}
+
+  {:id      :duty/write-own
+   :text    "A :write handle reads its own writes."
+   :methods [-write-rows! -delete-rows!]
+   :checks  [[:guard :duty/write-own] [:certify :certify/model]]}
+
+  {:id      :duty/atomic
+   :text    "-commit! makes every change of the handle visible at once; -rollback! leaves none."
+   :methods [-commit! -rollback!]
+   :checks  [[:certify :certify/concurrency]]}
+
+  {:id      :duty/kv-read
+   :text    "-kv-read answers {[space part k] v} for exactly the asked keys that hold a value."
+   :methods [-kv-read]
+   :checks  [[:guard :duty/kv-read] [:certify :certify/model]]}
+
+  {:id      :duty/kv-write
+   :text    "-kv-write! writes a commit's kv as one value; nil deletes."
+   :methods [-kv-write!]
+   :checks  [[:certify :certify/model]]}
+
+  {:id      :duty/kv-scan
+   :text    "-kv-scan answers keys > :after and <= :upto in code-point order (descending with :reverse?), at most :limit, [k] with :keys-only?."
+   :methods [-kv-scan]
+   :checks  [[:guard :duty/kv-scan] [:certify :certify/model]]}
+
+  {:id      :duty/kv-parts
+   :text    "-kv-parts answers the parts of a space that hold a key, in code-point order, each once."
+   :methods [-kv-parts]
+   :checks  [[:guard :duty/kv-parts] [:certify :certify/model]]}
+
+  {:id      :duty/ns
+   :text    "-ns-exists? says whether a namespace exists; -ns-drop! removes it with all it stores."
+   :methods [-ns-exists? -ns-drop!]
+   :checks  [[:certify :certify/model]]}
+
+  {:id      :duty/fork
+   :text    "-ns-fork! begins a namespace that reads its root live under what it writes itself."
+   :methods [-ns-fork!]
+   :checks  [[:certify :certify/model]]}
+
+  {:id      :duty/history
+   :text    "With :history?, rows and links answer as of any revision: the namespace as the last commit at or below it left it, a detach included only from its revision on."
+   :methods [-rows -links]
+   :checks  [[:certify :certify/model]]}
+
+  {:id      :duty/rows
+   :text    "-rows answers the rows of T the namespace reads, only asked ids, each once, their values only of the attributes the read signature names for T; -write-rows! upserts whole rows, -delete-rows! removes them."
+   :methods [-rows -write-rows! -delete-rows!]
+   :checks  [[:guard :duty/rows] [:certify :certify/model]]}
+
+  {:id      :duty/links
+   :text    "-links answers the stored links of L inside :where, each once; -write-links! upserts, -delete-links! removes."
+   :methods [-links -write-links! -delete-links!]
+   :checks  [[:guard :duty/links] [:certify :certify/model]]}
+
+  {:id      :duty/layout
+   :text    "-layout! carries out migration steps on what the namespace stores; attribute steps arrive only for types it holds itself. -inspect reports the physical state."
+   :methods [-layout! -inspect]
+   :checks  [[:certify :certify/model] [:certify :certify/store] [:shape :driver/layout]]}
+
+  {:id      :duty/shapes
+   :text    "Everything an engine hands back has its :driver shape; rows hold no system column."
+   :methods [-rows -links -inspect -scan -execute]
+   :checks  [[:shape :driver/row] [:shape :driver/link] [:shape :driver/answer]
+             [:shape :driver/fragment-answer] [:certify :certify/store]]}
+
+  {:id      :duty/profile
+   :text    "-profile says, as data, what the engine does beyond storing; it overrides no semantics and claims only what its certificate proves."
+   :methods [-profile]
+   :checks  [[:shape :driver/profile] [:core sutra.store.core.engine/check-profile!]
+             [:certify :certify/store]]}
+
+  {:id      :duty/pushdown
+   :text    "A pushed scan, fragment or explanation answers exactly what the core's reference answers."
+   :methods [-scan -execute -explain]
+   :checks  [[:core sutra.store.core.engine/*verify*] [:certify :certify/store]]}
+
+  {:id      :duty/snapshot
+   :text    "-storage-snapshot names the storage snapshot that holds a basis, or nil."
+   :methods [-storage-snapshot]
+   :checks  [[:certify :certify/store]]}
+
+  {:id      :duty/records
+   :text    "Records hand back what they were given: get, put in order (nil deletes), scan, copy between branches."
+   :methods [-rec-colls -rec-get -rec-put! -rec-scan -rec-copy!]
+   :checks  [[:certify :certify/records]]}
+
+  {:id      :duty/record-auto
+   :text    "A key the engine assigns is an integer above every key it assigned in the collection before, a rolled back one included."
+   :methods [-rec-put!]
+   :checks  [[:guard :duty/record-auto] [:certify :certify/records]]}
+
+  {:id      :duty/no-ambient
+   :text    "An engine reads no ambient state: two engines over two storages share nothing."
+   :methods []
+   :checks  [[:certify :certify/concurrency]]}
+
+  {:id      :duty/failures
+   :text    "An engine throws only on infrastructure failure; a valid call never throws."
+   :methods []
+   :checks  [[:certify :certify/model]]}
+
+  {:id      :duty/store
+   :text    "The Db over the engine keeps the whole store contract (sutra.store.conformance)."
+   :methods []
+   :checks  [[:certify :certify/store]]}
+
+  {:id      :duty/blobs
+   :port    :blobs
+   :text    "-put! stores bytes under their SHA-256 address and answers {:hash :size}; -open, -exists?, -size-of and -stored-at answer what was put and nothing for an absent blob; -hashes names every address held; -delete! removes a blob landed before its cut-off."
+   :methods [-put! -open -exists? -size-of -stored-at -hashes -delete!]
+   :checks  [[:port :blobs :certify/program] [:port :blobs :certify/suite]
+             [:core sutra.port/answered!]]}
+
+  {:id      :duty/coord
+   :port    :coord
+   :text    "-acquire! grants a free name or one held by the same owner, -renew! extends a lease still held, -release! gives up a held name, -holder names the live lease, -revoke! takes a name from whoever holds it."
+   :methods [-acquire! -renew! -release! -holder -revoke!]
+   :checks  [[:port :coord :certify/program] [:port :coord :certify/suite]
+             [:core sutra.port/answered!]]}
+
+  {:id      :duty/coord-epoch
+   :port    :coord
+   :text    "Every new grant of a name and every revoke hands out an epoch above every epoch of that name before: a fenced writer can tell it lost the name."
+   :methods [-acquire! -revoke!]
+   :checks  [[:port :coord :certify/program]]}
+
+  {:id      :duty/streams
+   :port    :streams
+   :text    "-append! gives each record the next offset of its partition; -read answers records from a cursor in offset order, at most :limit; -ends the cursor past every record; -stats depth and last time; -trim! drops below a cursor or before a time; -reset! drops all and keeps offsets rising; -drop! removes the stream."
+   :methods [-append! -read -ends -stats -trim! -reset! -drop!]
+   :checks  [[:port :streams :certify/program] [:port :streams :certify/suite]
+             [:core sutra.port/answered!]]}
+
+  {:id      :duty/datasets
+   :port    :datasets
+   :text    "A dataset keeps every committed write as a version: -write! commits, -read/-count/-delta/-history answer at a version above -horizon, -columns names what a dataset holds, -version is the watermark, -restore! and -retire-below!/-sweep! move history, -expire! drops current rows written at or below a version, -fork!/-drop! carry branches, -layout!/-inspect/-list the physical state, -query answers a plan only with the :query capability."
+   :methods [-profile -layout! -list -inspect -write! -read -columns -count -version -delta
+             -horizon -retire-below! -sweep! -expire! -history -query -restore! -fork! -drop!
+             -drop-dataset!]
+   :checks  [[:port :datasets :certify/suite] [:core sutra.port/answered!]]}]}

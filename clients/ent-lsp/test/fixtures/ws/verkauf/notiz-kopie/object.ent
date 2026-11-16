@@ -1,0 +1,3 @@
+{:schema
+ {:objects
+  {:notiz {:project :verkauf :title :text :attributes [[:text :string]]}}}}

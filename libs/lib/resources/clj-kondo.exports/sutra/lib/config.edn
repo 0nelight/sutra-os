@@ -1,0 +1,4 @@
+{:hooks {:macroexpand {sutra.lib.dsl/defobject sutra.lib.dsl-kondo/defobject
+                       sutra.lib.dsl/deflink   sutra.lib.dsl-kondo/deflink
+                       sutra.lib.dsl/defaction sutra.lib.dsl-kondo/defaction
+                       sutra.lib.dsl/defobjectset sutra.lib.dsl-kondo/defobjectset}}}

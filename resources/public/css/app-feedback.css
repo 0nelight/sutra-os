@@ -1,0 +1,121 @@
+
+.user-menu { position: relative; display: inline-flex; flex: 0 0 auto; }
+.user-menu > .shell-bar__account { border: 0; font: inherit; font-weight: 600; cursor: pointer; }
+.user-menu__panel {
+  min-width: 180px; padding: var(--sp-1); background: var(--c-surface); border: 1px solid var(--c-border);
+  border-radius: var(--radius-lg); box-shadow: 0 8px 24px rgba(17, 20, 24, .15);
+}
+
+:root { --feedback-breite: 380px; }
+html.feedback-zu { --feedback-breite: 36px; }
+html.mit-feedback #app {
+  position: fixed; top: 0; left: 0; bottom: 0; right: var(--feedback-breite);
+  min-height: 0; overflow: auto; transform: translateZ(0);
+}
+html.mit-feedback .shell { width: 100%; }
+html.mit-feedback .bp-portal :is(.bp-overlay-backdrop, .bp-overlay-scroll-container,
+  .capp-drawer, .capp-media-modal, .capp-qr) {
+  right: var(--feedback-breite);
+}
+
+#feedback-spalte {
+  position: fixed; top: 0; right: 0; bottom: 0; width: var(--feedback-breite);
+  border-left: 1px solid var(--c-border); background: var(--c-surface);
+  overflow-y: auto; overscroll-behavior: contain; z-index: 2000;
+}
+.feedback-streifen {
+  display: flex; flex-direction: column; align-items: center; gap: var(--sp-2);
+  width: 100%; height: 100%; padding: var(--sp-3) 0; border: 0; background: none;
+  color: var(--c-text-2); font: inherit; font-size: var(--fs-sm); cursor: pointer;
+  writing-mode: vertical-rl;
+}
+.feedback-streifen:hover { background: var(--c-hover); }
+@media (max-width: 700px) {
+  :root { --feedback-breite: 100vw; }
+  html.feedback-zu { --feedback-breite: 0px; }
+  html.feedback-zu #feedback-spalte {
+    top: auto; right: auto; left: 12px; width: auto;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    border: 1px solid var(--c-border); border-radius: 999px; overflow: visible;
+    box-shadow: 0 2px 8px rgba(17, 20, 24, .2);
+  }
+  html.feedback-zu .feedback-streifen {
+    flex-direction: row; writing-mode: horizontal-tb; min-height: 44px;
+    padding: 0 var(--sp-4); border-radius: 999px; font-size: var(--fs-md);
+  }
+}
+.feedback__punkt-laeuft {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex: none;
+  background: var(--c-danger); animation: feedback-puls 2s ease-in-out infinite;
+}
+@keyframes feedback-puls { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .feedback__punkt-laeuft { animation: none; } }
+
+.feedback { padding: var(--sp-3); font-size: var(--fs-md); color: var(--c-text); }
+.feedback h1 { display: flex; align-items: center; gap: var(--sp-2); flex: 1;
+  font-size: var(--fs-lg); margin: 0; }
+.feedback h2 { font-size: var(--fs-md); margin: 0 0 var(--sp-2); }
+.feedback__titel { display: flex; align-items: center; gap: var(--sp-2);
+  margin-bottom: var(--sp-3); }
+.feedback__kennung { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap;
+  font-size: var(--fs-sm); color: var(--c-text-2); margin: 0 0 var(--sp-3); }
+.feedback__kennung code { user-select: all; color: var(--c-text); word-break: break-all; }
+.feedback__hinweis { color: var(--c-text-2); font-size: var(--fs-sm); margin: 0 0 var(--sp-3); }
+.feedback__fehler { color: var(--c-danger-strong); background: var(--c-danger-bg);
+  padding: var(--sp-2); border-radius: var(--radius); }
+.feedback__frei { padding: var(--sp-3); margin-bottom: var(--sp-4);
+  background: var(--c-surface-soft); border-radius: var(--radius-lg); }
+.feedback__leer { color: var(--c-muted); }
+
+.feedback__schritte { list-style: none; margin: 0; padding: 0; }
+.feedback__schritt { padding: var(--sp-2) 0; border-bottom: 1px solid var(--c-border-soft); }
+.feedback__schritt.is-fehler .feedback__satz { color: var(--c-danger-strong); }
+.feedback__kopf { display: flex; align-items: center; gap: var(--sp-3); }
+.feedback__satz { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.feedback__zeit { color: var(--c-muted); font-variant-numeric: tabular-nums;
+  margin-right: var(--sp-2); }
+.feedback__karte {
+  position: relative; flex: none; width: 64px; height: 40px;
+  border: 1px solid var(--c-border); border-radius: var(--radius); background: var(--c-surface-soft);
+}
+.feedback__punkt {
+  position: absolute; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%; background: var(--c-primary);
+}
+.feedback__meldung { margin: var(--sp-1) 0 0 76px; padding: var(--sp-1) var(--sp-2);
+  border-left: 3px solid var(--c-primary); background: var(--c-primary-bg);
+  overflow-wrap: anywhere; }
+
+.feedback__eingabe { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2);
+  margin-top: var(--sp-2); }
+
+.feedback__stand { margin: var(--sp-1) 0 0; color: var(--c-muted); font-size: var(--fs-sm);
+  overflow-wrap: anywhere; }
+.feedback__schritt .feedback__stand { margin-left: 76px; }
+
+.feedback__knoepfe { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+.feedback__referenzen { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-1);
+  margin: 0; padding: 0; list-style: none; }
+.feedback__referenz {
+  display: flex; min-width: 0; align-items: center; gap: var(--sp-2); padding: var(--sp-0) var(--sp-2);
+  border: 1px solid var(--c-border); border-radius: var(--radius); font-size: var(--fs-sm);
+}
+.feedback__referenz > span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; }
+html.feedback-waehlt #app, html.feedback-waehlt #app * { cursor: crosshair !important; }
+html.feedback-waehlt .capp-pdf__mark,
+html.feedback-waehlt .capp-pdf__stamp { pointer-events: all !important; }
+.feedback-markierung {
+  position: fixed; pointer-events: none; box-sizing: border-box; z-index: 2001;
+  border: 2px solid var(--c-primary); background: color-mix(in srgb, var(--c-primary) 8%, transparent); border-radius: var(--radius-sm);
+}
+.feedback-markierung > span {
+  position: absolute; bottom: 100%; box-sizing: border-box; padding: 1px var(--sp-2);
+  background: var(--c-primary); color: var(--c-on-accent); font: var(--fs-sm)/1.4 ui-monospace, monospace;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.feedback-knopf { flex: 0 0 auto; }
+.feedback-knopf .feedback__punkt-laeuft { position: absolute; top: -3px; right: -3px; }
+.feedback-markierung > span.is-unten { bottom: auto; top: 100%; }
+.feedback-rec__input { max-width: 260px; }

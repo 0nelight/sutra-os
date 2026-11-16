@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+export SUTRA_CHANGE_BIN="$ROOT/bin/change"
+export SUTRA_HOME="$ROOT"
+exec bb --config "$ROOT/clients/sutra-change/bb.edn" -m sutra.change.main "$@"

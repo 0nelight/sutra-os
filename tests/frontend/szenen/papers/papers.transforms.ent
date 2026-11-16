@@ -1,0 +1,72 @@
+{:schema
+ {
+  :transforms
+  {:land-attachment-files
+   {:project :papers
+    :description "Moves each attachment's bytes from the mailbox into the blob store, so an action can show the PDF to a model."
+    :language :python
+    :inputs {:atts {:kind :dataset :dataset :mail_attachments}}
+    :output {:kind :dataset :dataset :attachment_files}
+    :primary-key :attachment_id
+    :semantic-version 1
+    :code "import base64
+from sutra_transforms import transform, Input, Output, put_media_item
+
+
+@transform(inputs={'atts': Input(kind='dataset', dataset='mail_attachments')},
+           output=Output(kind='dataset', dataset='attachment_files'))
+def land(atts):
+    out = []
+    for a in atts:
+        if not a.get('content_b64'):
+            continue
+        ref = put_media_item(base64.b64decode(a['content_b64']), mime=a.get('mime_type') or 'application/pdf')
+        out.append({'attachment_id': a['key'],
+                    'mail_id': (a.get('message_id') or '').strip('<> '),
+                    'filename': a.get('filename'),
+                    'mime_type': a.get('mime_type'),
+                    'file': ref})
+    return out
+"}
+
+   :shape-bank-transactions
+   {:project :papers
+    :description "bank_rows -> Bank transaction. A reference that looks like an invoice number becomes the link to that invoice."
+    :language :pg-sql
+    :inputs {:rows {:kind :dataset :dataset :bank_rows}}
+    :output {:kind :object-type :object-type :bank-transaction}
+    :primary-key :transaction-id
+    :semantic-version 1
+    :query
+    "SELECT r.transaction_id                          AS transaction_id,
+       CAST(r.booked_on AS DATE)                      AS booked_on,
+       r.counterparty                                 AS counterparty,
+       r.reference                                    AS reference,
+       CAST(r.amount AS DECIMAL(12,2))                AS amount,
+       CASE WHEN CAST(r.amount AS DECIMAL(12,2)) < 0
+            THEN -CAST(r.amount AS DECIMAL(12,2)) ELSE 0 END AS outflow,
+       CASE WHEN r.reference ~ '^[A-Z]{2,}-[A-Z0-9-]+$' THEN r.reference END AS invoice_number
+  FROM rows r"}
+
+   :shape-mail
+   {:project :papers
+    :description "mail_messages -> Mail."
+    :language :pg-sql
+    :inputs {:m {:kind :dataset :dataset :mail_messages}}
+    :output {:kind :object-type :object-type :mail}
+    :primary-key :mail-id
+    :semantic-version 1
+    :query
+    "SELECT DISTINCT ON (mid) mid AS mail_id, subject, sender, date AS received_at
+  FROM (SELECT COALESCE(NULLIF(TRIM(BOTH '<>' FROM TRIM(m.message_id)), ''), m.key) AS mid, m.* FROM m) x
+ ORDER BY mid"}
+
+   :shape-attachments
+   {:project :papers
+    :description "attachment_files -> Attachment."
+    :language :pg-sql
+    :inputs {:f {:kind :dataset :dataset :attachment_files}}
+    :output {:kind :object-type :object-type :document}
+    :primary-key :attachment-id
+    :semantic-version 1
+    :query "SELECT attachment_id, mail_id, filename, mime_type, file FROM f"}}}}
